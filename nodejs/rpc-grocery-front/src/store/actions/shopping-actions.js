@@ -36,8 +36,6 @@ export const onGetProducts = (payload) => async(dispatch) => {
   /* ------------------- Wishlist --------------------- */
 
   export const onAddToWishlist = (_id) => async(dispatch) => {
-    
-
     try {
 
         const response = await PutData('/wishlist', {

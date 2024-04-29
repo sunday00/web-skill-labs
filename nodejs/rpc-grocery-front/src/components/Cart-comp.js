@@ -12,14 +12,14 @@ export const CartItem = (props) => {
     useEffect(() => {
         if(Array.isArray(cart) && cart.length){   
             if(item !== undefined){
-                const exist = cart.filter(({ product }, unit) => product._id == _id);
+                const exist = cart.filter(({ product }, unit) => product._id === _id);
                 if(exist.length){
                     setCurrentUnit(exist[0].unit)
                 }
             }
         }
 
-    },[cart])
+    },[cart, _id, item])
      
     const addCart = () => {
 
@@ -57,7 +57,7 @@ export const CartItem = (props) => {
             return (
                 <div className="row mb-2 p-1 border rounded">
                     <div className="col-2">
-                        <img variant="top" style={{ width: '6rem'}} src={banner} />
+                        <img variant="top" style={{ width: '6rem'}} src={banner} alt="top img" />
                     </div>
                     <div className="col p-2">
                         <span className="font-weight-bold">{name}</span>

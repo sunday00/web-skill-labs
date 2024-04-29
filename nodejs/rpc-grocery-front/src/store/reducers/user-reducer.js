@@ -59,7 +59,7 @@ export const UserReducer  = (state = initialState, action) => {
 
             if(existingCart.length){
 
-                const existItem = existingCart.filter(({ product }) => product._id == action.payload.product._id)
+                const existItem = existingCart.filter(({ product }) => product._id === action.payload.product._id)
                 
                 if(existItem.length){
                     const index = existingCart.indexOf(existItem[0]);

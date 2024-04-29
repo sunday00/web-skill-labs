@@ -19,17 +19,17 @@ const ProductDetails = (props) => {
   
     useEffect(() => {
         dispatch(onGetProductDetails(id))
-      },[id]);
+      },[id, dispatch]);
 
     useEffect(() => {
       if(Array.isArray(cart) && cart.length){    
-        const exist = cart.filter(({ product }, unit) => product._id == _id);
+        const exist = cart.filter(({ product }, unit) => product._id === _id);
         if(exist.length){
            setCurrentUnit(exist[0].unit)
         }
       }
 
-    },[currentProduct])
+    },[currentProduct, _id, cart])
     
      
 
@@ -71,7 +71,7 @@ const ProductDetails = (props) => {
 
         if(Array.isArray(wishlist) && wishlist.length){
 
-           const exist = wishlist.filter(item => item._id == _id);
+           const exist = wishlist.filter(item => item._id === _id);
 
           if(exist.length > 0){
             return <button className="btn btn-lg" style={{ backgroundColor: '#A7A7A7', color: 'white'}}
@@ -95,7 +95,7 @@ const ProductDetails = (props) => {
 
       if(Array.isArray(cart) && cart.length){
           
-          const exist = cart.filter(({ product }) => product._id == _id);
+          const exist = cart.filter(({ product }) => product._id === _id);
 
           if(exist.length > 0){
 
@@ -136,7 +136,7 @@ const ProductDetails = (props) => {
                 
                <div className="row bg-white rounded">
                   <div className="col-sm col-md-5 col-lg-5">
-                      <img variant="top" src={setImage()} style={{ width: '100%'}} />
+                      <img variant="top" src={setImage()} style={{ width: '100%'}} alt="top img" />
                   </div>       
                   <div className="col-sm col-md-7 col-lg-7">
                       <div className="row p-3">

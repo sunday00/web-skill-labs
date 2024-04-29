@@ -23,7 +23,7 @@ const Login = () => {
         if(token){
             dispatch(onViewProfile())
         }
-    },[token])
+    },[token, dispatch])
  
     const userSignup = () => {
         //call Signup
@@ -37,11 +37,11 @@ const Login = () => {
         return (<div className="row bg-secondary" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' ,height: '30rem'}}>
                 <div className="col col-sm-5 col-md-4 col-lg-3 col-xl-2">
                     <form>
-                        <div className="from-group" controlId="formBasicEmail">
+                        <div className="from-group" control-id="formBasicEmail">
                             <label>Email address</label>
                             <input className="form-control" type="email" placeholder="Enter email" onChange={(e) => setEmail(e.target.value)} />
                         </div>
-                        <div className="from-group" controlId="formBasicPassword">
+                        <div className="from-group" control-id="formBasicPassword">
                             <label>Password</label>
                             <input className="form-control" type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
                         </div>

@@ -7,7 +7,7 @@ export const WishItem = ({ item, onTapRemove }) => {
     return (
         <div className="row mb-2 p-1 border rounded">
             <div className="col-2">
-                <img variant="top" style={{ width: '6rem'}} src={banner} />
+                <img variant="top" style={{ width: '6rem'}} src={banner} alt="top img" />
             </div>
             <div className="col p-2">
                 <span className="font-weight-bold">{name}</span>

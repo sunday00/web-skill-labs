@@ -12,7 +12,7 @@ const Home = () => {
 
     useEffect(() => {
       dispatch(onGetProducts())      
-    },[]);
+    },[dispatch]);
 
     const listOfcategories = () => {
        return <div className="row" aria-label="Basic example">
@@ -27,17 +27,17 @@ const Home = () => {
     const listOfProducts = () => {
 
      return products.map((item) => {
-        return <ProductCard item={item}/>
+        return <ProductCard item={item} key={item._id} />
       })
       
     }
 
     return (
         
-        <div class="container-fluid p-0">
-           <img src="bg.jpg" class="card-img" alt="..."></img>
+        <div className="container-fluid p-0">
+           <img src="bg.jpg" className="card-img" alt="..."></img>
             <div className="container-flud mb-4" style={{height:80, justifyContent: 'center', display: 'flex', flexDirection: 'column', backgroundColor: '#61AB4F'}}>
-                <div class="row justify-content-center">
+                <div className="row justify-content-center">
                   {categories && listOfcategories()}
                 </div>
             </div> 

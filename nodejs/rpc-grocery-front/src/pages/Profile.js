@@ -1,4 +1,4 @@
-import React, { useReducer, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { onRemoveFromWishlist, onViewProfile, onAddToCart, onRemoveFromCart, onCreateAddress, onPlaceOrder  } from '../store/actions'
 import { AddressComponent } from "../components/Address-comp";
@@ -15,18 +15,19 @@ const Profile = () => {
 
     const [ street, setStreet] = useState();
     const [ city, setCity] = useState();
+    // eslint-disable-next-line
     const [ state, setState] = useState();
     const [ postalCode, setPostalCode] = useState();
     const [ country, setCountry] = useState();
 
-
+    // eslint-disable-next-line
     const { id, token } = user;
  
     useEffect(() => {
         if(token){
             dispatch(onViewProfile())
         }
-    },[token])
+    },[token, dispatch])
 
    
     
@@ -52,7 +53,7 @@ const Profile = () => {
                     {cart.map(item => {
                         if(item){
                             return  <CartItem cart={cart} item={item} onAdd={onAdd} onRemove={onRemove} />
-                        }
+                        } else return null
                     })}
             </div>
         }else{
@@ -106,7 +107,7 @@ const Profile = () => {
 
             let totalAmount = 0;
 
-            cart.map(({unit, product}) => {
+            cart.forEach(({unit, product}) => {
                totalAmount += (unit * product.price);
             })
            
@@ -155,45 +156,45 @@ const Profile = () => {
                     
                     <form className="m-2 bg-white p-2 mt-3 ml-3 rounded">
                      
-                        <div class="form-row">
-                            <div class="form-group col-md-6">
-                                <label for="inputAddress">Street</label>
+                        <div className="form-row">
+                            <div className="form-group col-md-6">
+                                <label htmlFor="inputAddress">Street</label>
                                 <input type="text"
                                 onChange={(e) => setStreet(e.target.value)}
-                                class="form-control" id="inputAddress" placeholder="1234 Main St" />
+                                className="form-control" id="inputAddress" placeholder="1234 Main St" />
                             </div>
-                            <div class="form-group col-md-4">
-                                    <label for="inputCity">City</label>
+                            <div className="form-group col-md-4">
+                                    <label htmlFor="inputCity">City</label>
                                     <input type="text" 
                                        onChange={(e) => setCity(e.target.value)}
-                                        class="form-control" id="inputCity"/>
+                                        className="form-control" id="inputCity"/>
                                 </div>
                         </div>
                         
-                        <div class="form-row">
+                        <div className="form-row">
                            
-                            <div class="form-group col-md-3">
-                                <label for="inputCity">State</label>
+                            <div className="form-group col-md-3">
+                                <label htmlFor="inputCity">State</label>
                                 <input type="text" 
                                 onChange={(e) => setState(e.target.value)}
-                                class="form-control" id="inputCity"/>
+                                className="form-control" id="inputCity"/>
                             </div>
-                            <div class="form-group col-md-2">
-                                <label for="inputZip">Postal Code</label>
+                            <div className="form-group col-md-2">
+                                <label htmlFor="inputZip">Postal Code</label>
                                 <input type="text" 
                                 onChange={(e) => setPostalCode(e.target.value)}
-                                class="form-control" id="inputZip" />
+                                className="form-control" id="inputZip" />
                             </div>
-                            <div class="form-group col-md-2">
-                                <label for="inputZip">Country</label>
+                            <div className="form-group col-md-2">
+                                <label htmlFor="inputZip">Country</label>
                                 <input type="text"
                                     onChange={(e) => setCountry(e.target.value)}
-                                 class="form-control" id="inputZip"/>
+                                 className="form-control" id="inputZip"/>
                             </div>
                         </div>
                         <div className="row">
                            
-                            <button class="btn btn-warning ml-auto mr-4"
+                            <button className="btn btn-warning ml-auto mr-4"
                                 onClick={() => addNewAddress()} type="button"
                             >Save Address</button>
                         </div>
