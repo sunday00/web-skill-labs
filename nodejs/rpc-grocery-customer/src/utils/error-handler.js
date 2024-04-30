@@ -55,7 +55,12 @@ const ErrorHandler = async(err,req,res,next) => {
     // console.log(err.name, '-------> NAME')
     if(err){
         await errorLogger.logError(err);
+
         if(errorLogger.isTrustError(err)){
+            // console.log("======================")
+            // console.log({code: err.statusCode})
+            // console.log("======================")
+
             if(err.errorStack){
                 const errorDescription = err.errorStack;
                 return res.status(err.statusCode).json({'message': errorDescription})
@@ -63,6 +68,7 @@ const ErrorHandler = async(err,req,res,next) => {
             return res.status(err.statusCode).json({'message': err.message })
         }else{
             //process exit // terriablly wrong with flow need restart
+            // return res.status(500).json({'message': `uncaughtException: ${err.message}` })
         }
         return res.status(err.statusCode).json({'message': err.message})
     }

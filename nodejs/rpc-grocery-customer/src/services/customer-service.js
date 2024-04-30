@@ -61,7 +61,7 @@ class CustomerService {
 
     async AddNewAddress(_id,userInputs){
         
-        const { street, postalCode, city,country} = userInputs;
+        const { street, postalCode, city, country} = userInputs;
         
         try {
             const addressResult = await this.repository.CreateAddress({ _id, street, postalCode, city,country})
@@ -158,6 +158,9 @@ class CustomerService {
             case 'CREATE_ORDER':
                 this.ManageOrder(userId,order);
                 break;
+            case 'TEST':
+                console.log('now working... subscriber')
+                break
             default:
                 break;
         }
