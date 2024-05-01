@@ -74,7 +74,33 @@ class ProductService {
             throw new APIError('Data Not found')
         }
     }
-     
+
+    async SubscribeEvents(payload){
+
+        const { event, data } =  payload;
+
+        const { userId, product, order, qty } = data;
+
+        switch(event){
+            case 'TEST':
+                console.log('now working... subscriber')
+                break
+            default:
+                break;
+        }
+
+    }
+
+    async GetProductPayload (userId, { productId, qty }, event) {
+        const product = await this.repository.FindById(productId)
+
+        if(product) {
+            const payload = { event, data: { userId, product, qty }}
+            return FormateData(payload)
+        } else {
+            return FormateData({ error: 'No product available'})
+        }
+    }
 }
 
 module.exports = ProductService;

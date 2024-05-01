@@ -1,13 +1,13 @@
-const CustomerService = require('../services/customer-service');
+const ProductService = require('../services/product-service');
 
 module.exports = (app) => {
-  const service = new CustomerService()
+  const service = new ProductService()
 
   app.use('/app-events', async (req, res, next) => {
     const { payload } = req.body
     service.SubscribeEvents(payload)
 
-    console.log("============ Customer service received Events ============")
+    console.log("============ Product service received Events ============")
     return res.status(200).json(payload)
   })
 }
