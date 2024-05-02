@@ -28,6 +28,22 @@ class ShoppingService {
       throw new APIError("Data Not found", err);
     }
   }
+
+  async SubscribeEvents(payload){
+
+    const { event, data } =  payload;
+
+    const { userId, product, order, qty } = data;
+
+    switch(event){
+      case 'TEST':
+        console.log('now working... subscriber')
+        break
+      default:
+        break;
+    }
+
+  }
 }
 
 module.exports = ShoppingService;

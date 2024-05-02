@@ -34,6 +34,7 @@ class APIError extends AppError {
     description = "Internal Server Error",
     isOperational = true
   ) {
+    if(isNaN(parseInt(statusCode))) statusCode = 500
     super(name, statusCode, description, isOperational);
   }
 }
