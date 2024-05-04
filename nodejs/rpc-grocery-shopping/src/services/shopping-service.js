@@ -1,10 +1,21 @@
 const { ShoppingRepository } = require("../database");
 const { FormateData } = require("../utils");
+const {APIError} = require('../utils/app-errors')
 
 // All Business logic will be here
 class ShoppingService {
   constructor() {
     this.repository = new ShoppingRepository();
+  }
+
+  async GetCart({_id}){
+    try {
+      const cartItems = await this.repository.Cart(_id)
+
+      return FormateData(cartItems)
+    } catch (e) {
+      throw e
+    }
   }
 
   async PlaceOrder(userInput) {
@@ -29,20 +40,44 @@ class ShoppingService {
     }
   }
 
+  async ManageCart(customerId, item, qty, isRemove) {
+    try {
+      const cartResult = await this.repository.AddCartItem(customerId, item, qty, isRemove)
+
+      return FormateData(cartResult)
+    } catch (e) {
+      throw e
+    }
+  }
+
   async SubscribeEvents(payload){
 
     const { event, data } =  payload;
 
-    const { userId, product, order, qty } = data;
+    const { userId, product, qty } = data;
 
     switch(event){
+      case 'ADD_TO_CART':
+        this.ManageCart(userId, product, qty, false);
+        break;
+      case 'REMOVE_FROM_CART':
+        this.ManageCart(userId, product,qty, true);
+        break;
       case 'TEST':
         console.log('now working... subscriber')
         break
       default:
         break;
     }
+  }
 
+  async GetOrderPayload (userId, order, event) {
+    if(order) {
+      const payload = { event, data: { userId, order }}
+      return payload
+    } else {
+      return FormateData({ error: 'No order available'})
+    }
   }
 }
 

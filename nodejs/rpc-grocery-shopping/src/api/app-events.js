@@ -7,7 +7,7 @@ module.exports = (app) => {
     const { payload } = req.body
     service.SubscribeEvents(payload)
 
-    console.log("============ Customer service received Events ============")
+    console.log("============ Shopping service received Events ============")
     return res.status(200).json(payload)
   })
 }
