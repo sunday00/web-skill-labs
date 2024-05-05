@@ -11,4 +11,9 @@ module.exports = {
   PORT: process.env.PORT,
   DB_URL: process.env.MONGODB_URI,
   APP_SECRET: process.env.APP_SECRET,
+  MESSAGE_BROKER_URL: process.env.MESSAGE_BROKER_URL,
+  MESSAGE_BROKER_USER: process.env.MESSAGE_BROKER_USER,
+  MESSAGE_BROKER_PASS: process.env.MESSAGE_BROKER_PASS,
+  EXCHANGE_NAME: process.env.EXCHANGE_NAME,
+  QUEUE_NAME: 'PRODUCT_QUEUE'
 };

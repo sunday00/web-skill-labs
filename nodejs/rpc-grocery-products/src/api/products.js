@@ -1,8 +1,8 @@
 const ProductService = require('../services/product-service');
 const UserAuth = require('./middlewares/auth')
-const {PublishCustomerEvent, PublishShoppingEvent} = require('../utils')
+const {PublishMessage} = require('../utils')
 
-module.exports = (app) => {
+module.exports = (app, channel) => {
     
     const service = new ProductService();
 
@@ -71,11 +71,13 @@ module.exports = (app) => {
               {productId: req.body._id},
               'ADD_TO_WISHLIST'
             )
-            PublishCustomerEvent(data)
+
+            // PublishCustomerEvent(data)
+            PublishMessage(channel, 'CUSTOMER', JSON.stringify(data))
 
             return res.status(200).json(data.data.product);
         } catch (err) {
-            
+            throw err
         }
     });
     
@@ -90,7 +92,9 @@ module.exports = (app) => {
               { productId },
               'REMOVE_FROM_WISHLIST'
             )
-            PublishCustomerEvent(data)
+
+            // PublishCustomerEvent(data)
+            PublishMessage(channel, 'CUSTOMER', JSON.stringify(data))
 
             return res.status(200).json(data.data.product);
         } catch (err) {
@@ -110,8 +114,11 @@ module.exports = (app) => {
               'ADD_TO_CART'
             )
 
-            PublishCustomerEvent(data)
-            PublishShoppingEvent(data)
+            // PublishCustomerEvent(data)
+            PublishMessage(channel, 'CUSTOMER', JSON.stringify(data))
+
+            // PublishShoppingEvent(data)
+            PublishMessage(channel, 'SHOPPING', JSON.stringify(data))
 
             const response = {
                 product: data.data.product,
@@ -137,8 +144,11 @@ module.exports = (app) => {
               'REMOVE_FROM_CART'
             )
 
-            PublishCustomerEvent(data)
-            PublishShoppingEvent(data)
+            // PublishCustomerEvent(data)
+            PublishMessage(channel, 'CUSTOMER', JSON.stringify(data))
+
+            // PublishShoppingEvent(data)
+            PublishMessage(channel, 'SHOPPING', JSON.stringify(data))
 
             const response = {
                 product: data.data.product,
