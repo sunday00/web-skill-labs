@@ -1,6 +1,7 @@
 const grpc = require('@grpc/grpc-js')
 const serviceImpl =  require('./service_impl')
 const { GreetServiceService } =require('../greet/proto/greet_grpc_pb')
+const { CalculatorService } =require('../calculator/proto/calculator_grpc_pb')
 
 const addr = 'localhost:50051'
 
@@ -20,6 +21,8 @@ const main = () => {
   })
 
   server.addService(GreetServiceService, serviceImpl)
+  server.addService(CalculatorService, serviceImpl)
+
   server.bindAsync(addr, creds, (err, _) => {
     if (err) {
       return cleanup(server)
