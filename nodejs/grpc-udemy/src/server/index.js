@@ -1,14 +1,15 @@
 const grpc = require('@grpc/grpc-js')
-const serviceImpl =  require('./service_impl')
-const { GreetServiceService } =require('../greet/proto/greet_grpc_pb')
-const { CalculatorService } =require('../calculator/proto/calculator_grpc_pb')
+const greetServiceImpl = require('../greet/greet.service_impl')
+const calculatorServiceImpl = require('../calculator/calculator.service_impl')
+const { GreetServiceService } = require('../greet/proto/greet_grpc_pb')
+const { CalculatorService } = require('../calculator/proto/calculator_grpc_pb')
 
 const addr = 'localhost:50051'
 
 const cleanup = (server) => {
   console.log('clean up')
 
-  if(server) server.forceShutdown()
+  if (server) server.forceShutdown()
 }
 
 const main = () => {
@@ -20,8 +21,8 @@ const main = () => {
     cleanup(server)
   })
 
-  server.addService(GreetServiceService, serviceImpl)
-  server.addService(CalculatorService, serviceImpl)
+  server.addService(GreetServiceService, greetServiceImpl)
+  server.addService(CalculatorService, calculatorServiceImpl)
 
   server.bindAsync(addr, creds, (err, _) => {
     if (err) {

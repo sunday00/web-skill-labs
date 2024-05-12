@@ -21,5 +21,9 @@ var global = (function() {
   return Function('return this')();
 }.call(null));
 
+var simple_pb = require('./simple_pb.js');
+goog.object.extend(proto, simple_pb);
 var sum_pb = require('./sum_pb.js');
 goog.object.extend(proto, sum_pb);
+var prime_pb = require('./prime_pb.js');
+goog.object.extend(proto, prime_pb);
