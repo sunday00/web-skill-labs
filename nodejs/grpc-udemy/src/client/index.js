@@ -5,6 +5,7 @@ const { GreetRequest } = require('../greet/proto/greet_pb')
 const { SimpleRequest } = require('../calculator/proto/simple_pb')
 const { SumRequest } = require('../calculator/proto/sum_pb')
 const { PrimeRequest } = require('../calculator/proto/prime_pb')
+const { AvgRequest } = require('../calculator/proto/avg_pb')
 
 const doGreet = (client) => {
   console.log('doGreet was invoked')
@@ -32,6 +33,27 @@ const doGreetMany = (client) => {
   })
 }
 
+const doLongGreet = (client) => {
+  console.log('doLongGreet was invoked')
+
+  const names = ['Clement', 'Maria', 'Tom']
+
+  const call = client.longGreet((err, res) => {
+    if (err) return console.error(err)
+
+    console.log(`LongGreet: ${res.getResult()}`)
+  })
+
+  names
+    .map((name) => {
+      return new GreetRequest().setFirstName(name)
+    })
+    .forEach((req) => {
+      call.write(req)
+    })
+  call.end()
+}
+
 const doStreamSimple = (client) => {
   const req = new SimpleRequest().setNumber(1)
 
@@ -43,7 +65,7 @@ const doStreamSimple = (client) => {
 }
 
 const doSum = (client) => {
-  console.log('doCalculator was invoked')
+  console.log('doSum was invoked')
 
   const req = new SumRequest().setFirstNumber(1).setSecondNumber(2)
 
@@ -68,6 +90,30 @@ const doPrime = (client) => {
   })
 }
 
+const doAvg = (client) => {
+  console.log('doAvg was invoked')
+
+  const numbers = [...Array(11).keys()].slice(1)
+
+  const call = client.avg((err, res) => {
+    if (err) {
+      return console.error(err)
+    }
+
+    console.log(`Avg: ${res.getResult()}`)
+  })
+
+  numbers
+    .map((number) => {
+      return new AvgRequest().setNumber(number)
+    })
+    .forEach((req) => {
+      call.write(req)
+    })
+
+  call.end()
+}
+
 const main = () => {
   const creds = grpc.ChannelCredentials.createInsecure()
   const client = new GreetServiceClient('127.0.0.1:50051', creds)
@@ -77,9 +123,11 @@ const main = () => {
 
   doGreet(client)
   doGreetMany(client)
+  doLongGreet(client)
 
   doSum(client2)
   doPrime(client2)
+  doAvg(client2)
 
   client.close()
   client2.close()

@@ -13,17 +13,26 @@ exports.greet = (call, callback) => {
 exports.greetMany = (call, _) => {
   console.log('greetMany was invoked')
 
-  const res = new pb.GreetResponse()
-
-  let i = 0
-  const intv = setInterval(() => {
+  for (let i = 0; i < 10; i++) {
+    const res = new pb.GreetResponse()
     res.setResult(`Hello ${call.request.getFirstName()} - no ${i}`)
     call.write(res)
-    i++
+  }
 
-    if (i > 10) {
-      call.end()
-      clearInterval(intv)
-    }
-  }, 1000)
+  call.end()
+}
+
+exports.longGreet = (call, callback) => {
+  console.log('longGreet was invoked')
+
+  let greet = ''
+
+  call.on('data', (req) => {
+    greet += `Hello ${req.getFirstName()}\n`
+  })
+
+  call.on('end', () => {
+    const res = new pb.GreetResponse().setResult(greet)
+    callback(null, res)
+  })
 }
