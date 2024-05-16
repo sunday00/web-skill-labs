@@ -6,6 +6,8 @@ const { SimpleRequest } = require('../calculator/proto/simple_pb')
 const { SumRequest } = require('../calculator/proto/sum_pb')
 const { PrimeRequest } = require('../calculator/proto/prime_pb')
 const { AvgRequest } = require('../calculator/proto/avg_pb')
+const { MaxRequest } = require('../calculator/proto/max_pb')
+const { SqrtRequest } = require('../calculator/proto/sqrt_pb')
 
 const doGreet = (client) => {
   console.log('doGreet was invoked')
@@ -42,6 +44,29 @@ const doLongGreet = (client) => {
     if (err) return console.error(err)
 
     console.log(`LongGreet: ${res.getResult()}`)
+  })
+
+  names
+    .map((name) => {
+      return new GreetRequest().setFirstName(name)
+    })
+    .forEach((req) => {
+      call.write(req)
+    })
+  call.end()
+}
+
+const doGreetEveryone = (client) => {
+  console.log('doGreetEveryone was invoked')
+
+  const names = ['Clement', 'Maria', 'Tom']
+
+  const call = client.greetEveryone()
+
+  call.on('data', (res, err) => {
+    if (err) return console.error(err)
+
+    console.log(`GreetEveryone: ${res.getResult()}`)
   })
 
   names
@@ -114,20 +139,56 @@ const doAvg = (client) => {
   call.end()
 }
 
+const doMax = (client) => {
+  console.log('doMax was invoked')
+
+  const numbers = [4, 7, 2, 19, 4, 6, 32]
+  const call = client.max()
+
+  numbers.forEach((number) => {
+    const req = new MaxRequest().setNumber(number)
+    call.write(req)
+  })
+
+  call.on('data', (res) => {
+    console.log(`Max num: ${res.getResult()}`)
+  })
+
+  call.end()
+}
+
+const doSqrt = (client, n) => {
+  console.log('doSqrt was invoked')
+
+  const req = new SqrtRequest().setNumber(n)
+
+  client.sqrt(req, (err, res) => {
+    if (err) {
+      return console.error(err)
+    }
+
+    console.log(`sqrt: ${res.getResult()}`)
+  })
+}
+
 const main = () => {
   const creds = grpc.ChannelCredentials.createInsecure()
   const client = new GreetServiceClient('127.0.0.1:50051', creds)
   const client2 = new CalculatorClient('127.0.0.1:50051', creds)
 
-  doStreamSimple(client2)
-
-  doGreet(client)
-  doGreetMany(client)
-  doLongGreet(client)
-
-  doSum(client2)
-  doPrime(client2)
-  doAvg(client2)
+  // doStreamSimple(client2)
+  //
+  // doGreet(client)
+  // doGreetMany(client)
+  // doLongGreet(client)
+  // doGreetEveryone(client)
+  //
+  // doSum(client2)
+  // doPrime(client2)
+  // doAvg(client2)
+  // doMax(client2)
+  // doSqrt(client2, -1)
+  doSqrt(client2, 9)
 
   client.close()
   client2.close()

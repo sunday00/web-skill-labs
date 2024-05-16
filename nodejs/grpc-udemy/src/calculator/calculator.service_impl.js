@@ -2,8 +2,11 @@ const { SimpleResponse } = require('../calculator/proto/simple_pb')
 const { SumResponse } = require('../calculator/proto/sum_pb')
 const { PrimeResponse } = require('../calculator/proto/prime_pb')
 const { AvgResponse } = require('../calculator/proto/avg_pb')
+const { MaxResponse } = require('../calculator/proto/max_pb')
+const { SqrtResponse } = require('../calculator/proto/sqrt_pb')
+const grpc = require('@grpc/grpc-js')
 
-exports.simple = (call, _) => {
+exports.simple = (call) => {
   let res = new SimpleResponse()
   res.setResult(1)
   call.write(res)
@@ -37,7 +40,7 @@ exports.sum = (call, callback) => {
   callback(null, res)
 }
 
-exports.prime = (call, _) => {
+exports.prime = (call) => {
   console.log('prime was invoked')
 
   let number = call.request.getNumber()
@@ -75,4 +78,36 @@ exports.avg = (call, callback) => {
 
     callback(null, res)
   })
+}
+
+exports.max = (call) => {
+  console.log('max was invoked')
+
+  let max = 0
+
+  call.on('data', (req) => {
+    max = Math.max(max, req.getNumber())
+    const res = new MaxResponse().setResult(max)
+    call.write(res)
+  })
+
+  call.on('end', () => {
+    call.end()
+  })
+}
+
+exports.sqrt = (call, callback) => {
+  console.log('sqrt was invoked')
+
+  const number = call.request.getNumber()
+
+  if (number < 0) {
+    callback({
+      code: grpc.status.INVALID_ARGUMENT,
+      message: `Bad request number: ${number}. Try bigger than 0.`,
+    })
+  }
+
+  const res = new SqrtResponse().setResult(Math.sqrt(number))
+  callback(null, res)
 }
