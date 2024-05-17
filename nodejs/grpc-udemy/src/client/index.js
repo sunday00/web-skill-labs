@@ -1,3 +1,4 @@
+const fs = require('fs')
 const grpc = require('@grpc/grpc-js')
 const { GreetServiceClient } = require('../greet/proto/greet_grpc_pb')
 const { CalculatorClient } = require('../calculator/proto/calculator_grpc_pb')
@@ -188,25 +189,33 @@ const doSqrt = (client, n) => {
 }
 
 const main = () => {
-  const creds = grpc.ChannelCredentials.createInsecure()
+  let creds = grpc.ChannelCredentials.createInsecure()
+
+  const tls = false
+  if (tls) {
+    const rootCert = fs.readFileSync('./ssl/ca.crt')
+
+    creds = grpc.ChannelCredentials.createSsl(rootCert)
+  }
+
   const client = new GreetServiceClient('127.0.0.1:50051', creds)
   const client2 = new CalculatorClient('127.0.0.1:50051', creds)
 
   // doStreamSimple(client2)
   //
-  // doGreet(client)
+  doGreet(client)
   // doGreetMany(client)
   // doLongGreet(client)
   // doGreetEveryone(client)
-  doGreetWithDeadLine(client, 5000)
-  doGreetWithDeadLine(client, 1000)
+  // doGreetWithDeadLine(client, 5000)
+  // doGreetWithDeadLine(client, 1000)
   //
   // doSum(client2)
   // doPrime(client2)
   // doAvg(client2)
   // doMax(client2)
   // doSqrt(client2, -1)
-  doSqrt(client2, 9)
+  // doSqrt(client2, 9)
 
   client.close()
   client2.close()
