@@ -1,4 +1,5 @@
 const pb = require('../greet/proto/greet_pb')
+const { sleep } = require('../utils/time')
 
 exports.greet = (call, callback) => {
   console.log('greet was invoked')
@@ -52,4 +53,21 @@ exports.greetEveryone = (call) => {
   call.on('end', () => {
     call.end()
   })
+}
+
+exports.greetWithDeadline = async (call, callback) => {
+  console.log('greetWithDeadLine was invoked')
+
+  for (let i = 0; i < 3; i++) {
+    if (call.cancelled) {
+      return console.log('The client cancelled the request')
+    }
+
+    await sleep(3000)
+  }
+
+  const res = new pb.GreetResponse().setResult(
+    `Hello ${call.request.getFirstName()}`,
+  )
+  callback(null, res)
 }

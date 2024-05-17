@@ -79,6 +79,22 @@ const doGreetEveryone = (client) => {
   call.end()
 }
 
+const doGreetWithDeadLine = (client, ms) => {
+  console.log('doGreetWithDeadLine was invoked')
+
+  const req = new GreetRequest().setFirstName('Clement')
+
+  client.greetWithDeadline(
+    req,
+    { deadline: new Date(Date.now() + ms) },
+    (err, res) => {
+      if (err) return console.error(err)
+
+      console.log(`GreetWithDeadline: ${res.getResult()}`)
+    },
+  )
+}
+
 const doStreamSimple = (client) => {
   const req = new SimpleRequest().setNumber(1)
 
@@ -182,6 +198,8 @@ const main = () => {
   // doGreetMany(client)
   // doLongGreet(client)
   // doGreetEveryone(client)
+  doGreetWithDeadLine(client, 5000)
+  doGreetWithDeadLine(client, 1000)
   //
   // doSum(client2)
   // doPrime(client2)
