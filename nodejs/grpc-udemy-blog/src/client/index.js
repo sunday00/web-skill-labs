@@ -1,101 +1,71 @@
 const fs = require('fs')
 const grpc = require('@grpc/grpc-js')
-const { BlogServiceClient } = require('../blog/proto/blog_grpc_pb')
-const { BlogRequest } = require('../blog/proto/blog_pb')
+const { BlogClient } = require('../blog/proto/blog_grpc_pb')
+const { BlogData, BlogId } = require('../blog/proto/blog_pb')
 
-// const doGreet = (client) => {
-//   console.log('doGreet was invoked')
-//
-//   const req = new GreetRequest().setFirstName('Clement')
-//
-//   client.greet(req, (err, res) => {
-//     if (err) {
-//       return console.error(err)
-//     }
-//
-//     console.log(`Greet: ${res.getResult()}`)
-//   })
-// }
-//
-// const doGreetMany = (client) => {
-//   console.log('doGreetMany was invoked')
-//
-//   const req = new GreetRequest().setFirstName('Clement')
-//
-//   const call = client.greetMany(req)
-//
-//   call.on('data', (res) => {
-//     console.log(`GreetMany: ${res.getResult()}`)
-//   })
-// }
-//
-// const doLongGreet = (client) => {
-//   console.log('doLongGreet was invoked')
-//
-//   const names = ['Clement', 'Maria', 'Tom']
-//
-//   const call = client.longGreet((err, res) => {
-//     if (err) return console.error(err)
-//
-//     console.log(`LongGreet: ${res.getResult()}`)
-//   })
-//
-//   names
-//     .map((name) => {
-//       return new GreetRequest().setFirstName(name)
-//     })
-//     .forEach((req) => {
-//       call.write(req)
-//     })
-//   call.end()
-// }
-//
-// const doGreetEveryone = (client) => {
-//   console.log('doGreetEveryone was invoked')
-//
-//   const names = ['Clement', 'Maria', 'Tom']
-//
-//   const call = client.greetEveryone()
-//
-//   call.on('data', (res, err) => {
-//     if (err) return console.error(err)
-//
-//     console.log(`GreetEveryone: ${res.getResult()}`)
-//   })
-//
-//   names
-//     .map((name) => {
-//       return new GreetRequest().setFirstName(name)
-//     })
-//     .forEach((req) => {
-//       call.write(req)
-//     })
-//   call.end()
-// }
-//
-// const doGreetWithDeadLine = (client, ms) => {
-//   console.log('doGreetWithDeadLine was invoked')
-//
-//   const req = new GreetRequest().setFirstName('Clement')
-//
-//   client.greetWithDeadline(
-//     req,
-//     { deadline: new Date(Date.now() + ms) },
-//     (err, res) => {
-//       if (err) return console.error(err)
-//
-//       console.log(`GreetWithDeadline: ${res.getResult()}`)
-//     },
-//   )
-// }
+const createBlog = async (client) => {
+  console.log('====---- Creating blog method invoked ----====')
 
-const main = () => {
+  return await new Promise((resolve, reject) => {
+    const req = new BlogData()
+      .setAuthorId('Clement')
+      .setTitle(`this is article witten at ${Date.now()}`)
+      .setContent(`the lorem witten at ${Date.now()} ... wow...`)
+
+    client.createBlog(req, (err, res) => {
+      if (err) reject(err)
+
+      console.log(`Created. ${res}`)
+      resolve(res.getId())
+    })
+  })
+}
+
+const readBlog = async (client, id) => {
+  console.log('====---- Read blog method invoked ----====')
+
+  return new Promise((resolve, reject) => {
+    const req = new BlogId().setId(id)
+    client.readBlog(req, (err, res) => {
+      if (err) reject(err)
+
+      console.log(`Read blog ${res}`)
+      resolve()
+    })
+  })
+}
+
+const updateBlog = async (client, id) => {
+  console.log('====---- Update blog method invoked ----====')
+
+  return new Promise((resolve, reject) => {
+    const req = new BlogData()
+      .setId(id)
+      .setAuthorId('Clement2')
+      .setTitle(`this is article witten at ${Date.now()} updated`)
+      .setContent(`the lorem witten at ${Date.now()} on update content`)
+
+    client.updateBlog(req, (err, res) => {
+      if (err) reject(err)
+
+      console.log(`Updated blog id: ${res}`)
+      resolve()
+    })
+  })
+}
+
+const main = async () => {
   let creds = grpc.ChannelCredentials.createInsecure()
 
-  const client = new BlogServiceClient('127.0.0.1:50051', creds)
+  const client = new BlogClient('127.0.0.1:50051', creds)
 
-  // doGreet(client)
+  // const id = await createBlog(client)
+  // console.log({ id })
 
+  // await readBlog(client, id)
+  // await readBlog(client, '6649f919bb392b54a04193ff')
+
+  await updateBlog(client, '6649f919bb392b54a04193fe')
 
   client.close()
 }

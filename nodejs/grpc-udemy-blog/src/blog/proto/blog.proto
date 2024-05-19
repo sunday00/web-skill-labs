@@ -4,7 +4,7 @@ package blog;
 
 import "google/protobuf/empty.proto";
 
-message Blog {
+message BlogData {
   string id = 1;
   string author_id =  2;
   string title = 3;
@@ -15,12 +15,12 @@ message BlogId {
   string id = 1;
 }
 
-service BlogService {
+service Blog {
 //  rpc Blog (BlogRequest) returns (BlogResponse);
-  rpc CreateBlog (Blog) returns (BlogId);
-  rpc ReadBlog (BlogId) returns (Blog);
-  rpc UpdateBlog (Blog) returns (google.protobuf.Empty);
+  rpc CreateBlog (BlogData) returns (BlogId);
+  rpc ReadBlog (BlogId) returns (BlogData);
+  rpc UpdateBlog (BlogData) returns (google.protobuf.Empty);
   rpc DeleteBlog (BlogId) returns (google.protobuf.Empty);
-  rpc ListBlogs (google.protobuf.Empty) returns (stream Blog);
+  rpc ListBlogs (google.protobuf.Empty) returns (stream BlogData);
 }
 

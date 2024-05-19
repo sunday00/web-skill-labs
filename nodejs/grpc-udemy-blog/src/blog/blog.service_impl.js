@@ -1,6 +1,8 @@
 const grpc = require('@grpc/grpc-js')
 const pb = require('../blog/proto/blog_pb')
 const { sleep } = require('../utils/time')
+const { ObjectId } = require('mongodb')
+const { Empty } = require('google-protobuf/google/protobuf/empty_pb')
 
 const blogToDocument = (blog) => {
   return {
@@ -8,6 +10,14 @@ const blogToDocument = (blog) => {
     title: blog.getTitle(),
     content: blog.getContent(),
   }
+}
+
+const documentToBlog = (doc) => {
+  return new pb.BlogData()
+    .setId(doc._id.toString())
+    .setAuthorId(doc.author_id)
+    .setTitle(doc.title)
+    .setContent(doc.content)
 }
 
 const internal = (err, callback) => {
@@ -26,6 +36,26 @@ const checkNotAcknowledged = (res, callback) => {
   }
 }
 
+const checkOid = (id, callback) => {
+  try {
+    return new ObjectId(id)
+  } catch (err) {
+    callback({
+      code: grpc.status.INTERNAL,
+      message: err.toString(),
+    })
+  }
+}
+
+const checkNotFound = (res, callback) => {
+  if (!res || res.matchedCount === 0) {
+    callback({
+      code: grpc.status.NOT_FOUND,
+      message: 'Not found',
+    })
+  }
+}
+
 exports.createBlog = async (call, callback) => {
   const data = blogToDocument(call.request)
 
@@ -34,7 +64,7 @@ exports.createBlog = async (call, callback) => {
     .then((res) => {
       checkNotAcknowledged(res, callback)
 
-      const id = res.insertId.toString()
+      const id = res.insertedId.toString()
       const blogId = new pb.BlogId().setId(id)
 
       callback(null, blogId)
@@ -42,63 +72,29 @@ exports.createBlog = async (call, callback) => {
     .catch((err) => internal(err, callback))
 }
 
-// exports.greetMany = (call) => {
-//   console.log('greetMany was invoked')
-//
-//   for (let i = 0; i < 10; i++) {
-//     const res = new pb.GreetResponse()
-//     res.setResult(`Hello ${call.request.getFirstName()} - no ${i}`)
-//     call.write(res)
-//   }
-//
-//   call.end()
-// }
-//
-// exports.longGreet = (call, callback) => {
-//   console.log('longGreet was invoked')
-//
-//   let greet = ''
-//
-//   call.on('data', (req) => {
-//     greet += `Hello ${req.getFirstName()}\n`
-//   })
-//
-//   call.on('end', () => {
-//     const res = new pb.GreetResponse().setResult(greet)
-//     callback(null, res)
-//   })
-// }
-//
-// exports.greetEveryone = (call) => {
-//   console.log('greetEveryone is invoked')
-//
-//   call.on('data', (req) => {
-//     console.log(`received ${req}`)
-//
-//     const res = new pb.GreetResponse().setResult(`Hello ${req.getFirstName()}`)
-//
-//     console.log(`sending response ${res}`)
-//     call.write(res)
-//   })
-//
-//   call.on('end', () => {
-//     call.end()
-//   })
-// }
-//
-// exports.greetWithDeadline = async (call, callback) => {
-//   console.log('greetWithDeadLine was invoked')
-//
-//   for (let i = 0; i < 3; i++) {
-//     if (call.cancelled) {
-//       return console.log('The client cancelled the request')
-//     }
-//
-//     await sleep(3000)
-//   }
-//
-//   const res = new pb.GreetResponse().setResult(
-//     `Hello ${call.request.getFirstName()}`,
-//   )
-//   callback(null, res)
-// }
+exports.readBlog = async (call, callback) => {
+  const oid = checkOid(call.request.getId(), callback)
+
+  await collection
+    .findOne({ _id: oid })
+    .then((res) => {
+      checkNotFound(res, callback)
+
+      callback(null, documentToBlog(res))
+    })
+    .catch((err) => internal(err, callback))
+}
+
+exports.updateBlog = async (call, callback) => {
+  const oid = checkOid(call.request.getId(), callback)
+
+  await collection
+    .updateOne({ _id: oid }, { $set: blogToDocument(call.request) })
+    .then((res) => {
+      checkNotFound(res, callback)
+      checkNotAcknowledged(res, callback)
+
+      callback(null, new Empty())
+    })
+    .catch((err) => internal(err, callback))
+}
