@@ -48,7 +48,7 @@ const checkOid = (id, callback) => {
 }
 
 const checkNotFound = (res, callback) => {
-  if (!res || res.matchedCount === 0) {
+  if (!res || res.matchedCount === 0 || res.deletedCount === 0) {
     callback({
       code: grpc.status.NOT_FOUND,
       message: 'Not found',
@@ -90,6 +90,33 @@ exports.updateBlog = async (call, callback) => {
 
   await collection
     .updateOne({ _id: oid }, { $set: blogToDocument(call.request) })
+    .then((res) => {
+      checkNotFound(res, callback)
+      checkNotAcknowledged(res, callback)
+
+      callback(null, new Empty())
+    })
+    .catch((err) => internal(err, callback))
+}
+
+exports.listBlogs = async (call, callback) => {
+  await collection
+    .find()
+    .forEach((doc) => call.write(documentToBlog(doc)))
+    .then(() => call.end())
+    .catch((err) =>
+      call.destroy({
+        code: grpc.status.INTERNAL,
+        message: err.toString(),
+      }),
+    )
+}
+
+exports.deleteBlog = async (call, callback) => {
+  const oid = checkOid(call.request.getId(), callback)
+
+  await collection
+    .deleteOne({ _id: oid })
     .then((res) => {
       checkNotFound(res, callback)
       checkNotAcknowledged(res, callback)
