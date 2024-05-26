@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "pb:gen": "npx proto-loader-gen-types --grpcLib=@grpc/grpc-js --outDir=src/domain/ src/resources/grpc/domain/**/*.proto"
+    "pb:gen": "npx proto-loader-gen-types --grpcLib=@grpc/grpc-js --outDir=src/domain/ resources/grpc/domain/**/*.proto"
   },
   "keywords": [],
   "author": "",

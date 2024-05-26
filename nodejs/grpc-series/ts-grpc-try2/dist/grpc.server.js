@@ -37,10 +37,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var grpc = require("@grpc/grpc-js");
-var protoLoader = require("@grpc/proto-loader");
 var hero_service_impl_1 = require("./domain/hero/hero.service.impl");
-var packageDefinition = protoLoader.loadSync('./dist/resources/grpc/domain/hero/hero.proto');
-var proto = grpc.loadPackageDefinition(packageDefinition);
+var hero_service_impl_2 = require("./domain/hero2/hero.service.impl");
 var addr = '0.0.0.0:50052';
 var cleanup = function (server) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
@@ -58,7 +56,8 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
             console.log('Caught interrupt signal');
             cleanup(server);
         });
-        server.addService(proto.hero.HeroesService.service, hero_service_impl_1.heroService);
+        server.addService(hero_service_impl_1.heroProto.hero.HeroesService.service, hero_service_impl_1.heroService);
+        server.addService(hero_service_impl_2.heroProto2.hero2.HeroesService.service, hero_service_impl_2.heroService2);
         server.bindAsync(addr, creds, function (err, _) {
             if (err) {
                 console.log(err);

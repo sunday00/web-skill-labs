@@ -1,4 +1,4 @@
-// Original file: src/resources/grpc/domain/hero/hero.proto
+// Original file: resources/grpc/domain/hero/hero.proto
 
 import type * as grpc from '@grpc/grpc-js'
 import type { MethodDefinition } from '@grpc/proto-loader'

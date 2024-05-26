@@ -1,13 +1,6 @@
 import * as grpc from '@grpc/grpc-js'
-import * as protoLoader from '@grpc/proto-loader'
-import { ProtoGrpcType } from './domain/hero'
-import { heroService } from './domain/hero/hero.service.impl'
-const packageDefinition = protoLoader.loadSync(
-  './dist/resources/grpc/domain/hero/hero.proto',
-)
-const proto = grpc.loadPackageDefinition(
-  packageDefinition,
-) as unknown as ProtoGrpcType
+import { heroProto, heroService } from './domain/hero/hero.service.impl'
+import { heroProto2, heroService2 } from './domain/hero2/hero.service.impl'
 
 const addr = '0.0.0.0:50052'
 
@@ -25,7 +18,8 @@ const main = async () => {
     cleanup(server)
   })
 
-  server.addService(proto.hero.HeroesService.service, heroService)
+  server.addService(heroProto.hero.HeroesService.service, heroService)
+  server.addService(heroProto2.hero2.HeroesService.service, heroService2)
 
   server.bindAsync(addr, creds, (err, _) => {
     if (err) {

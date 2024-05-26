@@ -11,19 +11,20 @@ import * as grpc from '@grpc/grpc-js'
 import { ProtoGrpcType } from '../hero'
 
 const packageDefinition = protoLoader.loadSync(
-  './resources/grpc/domain/hero/hero.proto',
+  './resources/grpc/domain/hero2/hero.proto',
 )
-export const heroProto = grpc.loadPackageDefinition(
+
+export const heroProto2 = grpc.loadPackageDefinition(
   packageDefinition,
 ) as unknown as ProtoGrpcType
 
-export const heroService: HeroesServiceHandlers = {
+export const heroService2: HeroesServiceHandlers = {
   FindMany(call: ServerDuplexStream<HeroById__Output, Hero>): void {},
   FindOne(
     call: ServerUnaryCall<HeroById__Output, Hero>,
     callback: sendUnaryData<Hero>,
   ): void {
-    console.log('hey')
+    console.log('hey2')
     callback(null, { id: 1, name: 'batman' })
   },
   // server handlers implementation...

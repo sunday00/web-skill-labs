@@ -1,4 +1,4 @@
-// Original file: resources/grpc/domain/hero/hero.proto
+// Original file: resources/grpc/domain/hero2/hero.proto
 
 
 export interface Hero {

@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package hero;
+package hero2;
 
 service HeroesService {
   rpc FindOne (HeroById) returns (Hero);
