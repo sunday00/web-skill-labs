@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package blog;
+
+import "google/protobuf/empty.proto";
+
+message BlogData {
+  string id = 1;
+  string author_id =  2;
+  string title = 3;
+  string content = 4;
+}
+
+message BlogId {
+  string id = 1;
+}
+
+service Blog {
+//  rpc Blog (BlogRequest) returns (BlogResponse);
+  rpc CreateBlog (BlogData) returns (BlogId);
+  rpc ReadBlog (BlogId) returns (BlogData);
+  rpc UpdateBlog (BlogData) returns (google.protobuf.Empty);
+  rpc DeleteBlog (BlogId) returns (google.protobuf.Empty);
+  rpc ListBlogs (google.protobuf.Empty) returns (stream BlogData);
+}
+
