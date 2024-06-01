@@ -1,19 +1,20 @@
-import { HeroesServiceHandlers } from './HeroesService'
+import * as protoLoader from '@grpc/proto-loader'
 import {
   sendUnaryData,
   ServerDuplexStream,
   ServerUnaryCall,
+  loadPackageDefinition,
 } from '@grpc/grpc-js'
-import { HeroById__Output } from './HeroById'
-import { Hero } from './Hero'
-import * as protoLoader from '@grpc/proto-loader'
-import * as grpc from '@grpc/grpc-js'
+
+import { HeroById__Output } from './HeroById' //req
+import { Hero } from './Hero' // res
+import { HeroesServiceHandlers } from './HeroesService'
 import { ProtoGrpcType } from '../hero'
 
 const packageDefinition = protoLoader.loadSync(
   './resources/grpc/domain/hero/hero.proto',
 )
-export const heroProto = grpc.loadPackageDefinition(
+export const heroProto = loadPackageDefinition(
   packageDefinition,
 ) as unknown as ProtoGrpcType
 
