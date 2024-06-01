@@ -12,12 +12,12 @@ export default class KafkaConfig {
     this.consumer = this.kafka.consumer({ groupId: ENV.kafka.consumerGroup })
   }
 
-  async produce(topic, message) {
+  async produce(topic, messages) {
     try {
       await this.producer.connect()
       await this.producer.send({
         topic,
-        message,
+        messages,
       })
     } catch (e) {
       console.error(e)
@@ -40,8 +40,6 @@ export default class KafkaConfig {
       })
     } catch (e) {
       console.error(e)
-    } finally {
-      await this.consumer.disconnect()
     }
   }
 }
