@@ -5,7 +5,7 @@ const sendMessage = async (req, res) => {
     const { message } = req.body
     const kafkaConfig = new KafkaConfig()
 
-    const messages = [{ key: 'key1', value: message }]
+    const messages = [{ value: message }]
 
     await kafkaConfig.produce('my-topic', messages)
 
