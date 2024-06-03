@@ -29,7 +29,7 @@ services:
       ZOOKEEPER_SERVERS: zookeeper-1:2888:3888;zoozookeeper-2:2888:3888;zookeeper-3:2888:3888
 
   kafka-1:
-    image: confluentinc/cp-kafka:latest
+    image: confluentinc/cp-kafka:7.6.1
     ports:
       - "9092:9092"
       - "29092:29092"
@@ -44,7 +44,9 @@ services:
       - zookeeper-1
       - zookeeper-2
       - zookeeper-3
-
+    volumes:
+      - ./data:/var/lib/kafka/data
+      - ./config/:/etc/kafka/
 #  kafka-2:
 #    image: confluentinc/cp-kafka:latest
 #    ports:

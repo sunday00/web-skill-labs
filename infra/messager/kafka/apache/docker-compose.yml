@@ -1,0 +1,12 @@
+services:
+  kafka:
+    container_name: kafka
+    hostname: kafka
+    image: apache/kafka:3.7.0
+    ports:
+      - "9092:9092"
+    volumes:
+      - ./data:/var/lib/kafka/data
+      - ./config/server.properties:/etc/kafka/docker/server.properties
+      - ./config/log4j.properties:/etc/kafka/docker/log4j.properties
+      - ./config/tools-log4j.properties:/etc/kafka/docker/tools-log4j.properties
