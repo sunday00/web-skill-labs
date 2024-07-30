@@ -1,0 +1,15 @@
+extend type Query {
+    scores: [Score]
+    myScore: Score
+    average: Average
+}
+
+type Score {
+    name: String
+    score: Int
+}
+
+type Average {
+    count: Int
+    score: Int
+}

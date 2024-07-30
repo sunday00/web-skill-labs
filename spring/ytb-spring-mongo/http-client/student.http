@@ -1,0 +1,31 @@
+### create student
+POST localhost:8081/student
+Content-Type: application/json
+
+{
+  "rno": 3,
+  "name": "IronMan",
+  "address": "NewYork"
+}
+
+### create student
+POST localhost:8081/v2/student
+Content-Type: application/json
+
+{
+  "firstName": "Cho",
+  "lastName": "YP",
+  "email": "superstar2@dd.kk",
+  "gender": "MALE",
+  "address": {
+    "country": "KOR",
+    "city": "Seoul",
+    "prostCode": "123"
+  }
+}
+
+### get student by id
+GET localhost:8081/v2/student/668a56c9655c8571c8e4e4bf
+
+### get student by email
+GET localhost:8081/v2/student/email/superstar2@dd.kk

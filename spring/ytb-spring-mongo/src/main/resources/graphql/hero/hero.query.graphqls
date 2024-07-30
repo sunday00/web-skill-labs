@@ -1,0 +1,64 @@
+extend type Query {
+    heroesList: [Hero]
+    hero(name: String!): Hero
+#    pagingHeroList: PageHero
+    pagingHeroList(first: Int,last: Int, before: String, after: String): HeroConnection
+}
+
+#type PageHero {
+#    items(first: Int,last: Int, before: String, after: String): HeroConnection
+#}
+
+#type HeroConnection {
+#    edges: [HeroEdge]
+#    pageInfo: HeroInfo
+#}
+#
+#type HeroEdge {
+#    cursor: String
+#    node: Hero
+#}
+#
+#type HeroInfo {
+#    startCursor: String
+#    endCursor: String
+#    hasNextPage: Boolean!
+#    hasPreviousPage: Boolean!
+#}
+
+type Hero {
+    name: String!
+    ability: HeroSkill
+    mind: HeroSide!
+    sideKick: Hero
+}
+
+enum HeroSkill {
+    Fly
+    Swim
+    Burn
+    Speed
+}
+
+enum HeroSide {
+    Good
+    Evil
+    Natural
+}
+
+#type HeroConnection {
+#    edges: [HeroEdge]
+#    pageInfo: HeroInfo!
+#}
+#
+#type HeroEdge {
+#    cursor: String
+#    node: Hero!
+#}
+#
+#type HeroInfo {
+#    startCursor: Int
+#    endCursor: Int
+#    hasNextPage: Boolean!
+#    hasPreviousPage: Boolean!
+#}

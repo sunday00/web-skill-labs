@@ -1,0 +1,23 @@
+extend type Query {
+    bankAccount(id: ID): BankAccount
+    fetchOneClient(id: Int): Client
+}
+
+enum Currency {
+    CHF
+    USD
+    KRW
+}
+
+type Client {
+    id: ID!
+    firstName: String!
+    middleName: [String]
+    lastName: String!
+}
+
+type BankAccount {
+    id: ID!
+    client: Client!
+    currency: Currency!
+}

@@ -1,0 +1,14 @@
+extend type Mutation {
+    createBankAccount(input: CreateBankAccountInputs): BankAccount!
+}
+
+input CreateBankAccountInputs {
+    client: ClientInputs!
+    currency: Currency!
+}
+
+input ClientInputs {
+    firstName: String!
+    middleName: [String]
+    lastName: String!
+}
