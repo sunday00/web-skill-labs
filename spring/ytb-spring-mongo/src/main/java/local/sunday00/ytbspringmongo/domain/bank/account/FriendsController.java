@@ -2,6 +2,7 @@ package local.sunday00.ytbspringmongo.domain.bank.account;
 
 import graphql.GraphQLContext;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 @Controller
 @Slf4j
 public class FriendsController {
+    @Cacheable(cacheNames = {"bank.friends.user"})
     @QueryMapping
     public User getUser(@Argument int id, GraphQLContext context) {
         log.info(context.get("AUTH"));
