@@ -31,15 +31,16 @@ public class GraphqlConfig {
 
     @Bean
     GraphQlSourceBuilderCustomizer inspectionCustomizer() {
-        PreparsedDocumentProvider provider =
-                new ApolloPersistedQuerySupport(
-                        new InMemoryPersistedQueryCache(Collections.emptyMap())
-                );
+//        PreparsedDocumentProvider provider =
+//                new ApolloPersistedQuerySupport(
+//                        new InMemoryPersistedQueryCache(Collections.emptyMap())
+//                );
 
         return source ->
                 source.inspectSchemaMappings(report -> log.info(report.toString()))
-                        .configureGraphQl(builder ->
-                            builder.preparsedDocumentProvider(provider)
-                        );
+//                        .configureGraphQl(builder ->
+//                            builder.preparsedDocumentProvider(provider)
+//                        )
+                ;
     }
 }
