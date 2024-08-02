@@ -32,8 +32,6 @@ public class GlobalExceptionHandler {
         log.info("path: {}", ev.getExecutionStepInfo().getPath());
         log.info("locations: {}", ev.getField().getSourceLocation());
 
-
-
         if(className.equals(AuthorizationDeniedException.class.getName())) {
             return GraphQLError.newError()
                     .message("unauthorized")
