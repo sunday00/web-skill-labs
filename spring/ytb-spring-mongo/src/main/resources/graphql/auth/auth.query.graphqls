@@ -1,0 +1,7 @@
+extend type Query {
+    login(id: Int, password: String): Auth
+}
+
+type Auth {
+    accessToken: String
+}

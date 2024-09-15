@@ -1,0 +1,8 @@
+query ($name: String!) {
+    fruit(name: $name) {
+        name
+        color
+        price
+        sugar
+    }
+}

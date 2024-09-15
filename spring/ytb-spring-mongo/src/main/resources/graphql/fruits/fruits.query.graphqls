@@ -1,0 +1,11 @@
+extend type Query {
+    fruit(name: String!, color: String): Fruit
+    fruits: [Fruit]
+}
+
+type Fruit {
+    name: String
+    color: String
+    price: Int
+    sugar: Float
+}

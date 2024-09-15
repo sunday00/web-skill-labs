@@ -1,0 +1,10 @@
+type User {
+    id: Int!
+    name: String!
+    friends: [User]
+}
+
+extend type Query {
+    getUser(id: Int): User
+}
+
