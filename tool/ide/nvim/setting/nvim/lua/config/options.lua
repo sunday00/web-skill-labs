@@ -22,6 +22,7 @@ O.scrolloff = 10
 
 O.mouse:append("a")
 
+O.guicursor = "i:ver75"
 
 
 

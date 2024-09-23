@@ -17,3 +17,9 @@
 - https://velog.io/@mythos/Linux-neovim-%EC%84%A4%EC%A0%95-CoC-Vim-Plug-treesitter-NERDTree
 - https://www.youtube.com/watch?v=M8YrfquecWc
 
+
+# update
+- coc: autocomplete lsp
+    - https://github.com/neoclide/coc.nvim/wiki/Using-coc-extensions
+
+- lsp: https://github.com/williamboman/mason-lspconfig.nvim
