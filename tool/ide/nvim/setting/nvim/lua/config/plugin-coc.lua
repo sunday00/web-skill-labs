@@ -20,12 +20,12 @@ keyset("i", "<c-space>", "coc#refresh()", {silent = true, expr = true})
 
 
 -- prettier
-vim.api.nvim_create_user_command(
-  'Prettier',
-  function()
-    vim.fn.CocAction('runCommand', 'prettier.formatFile')
-  end,
-  {}
-)
+----vim.api.nvim_create_user_command(
+----  'Prettier',
+----  function()
+----    vim.fn.CocAction('runCommand', 'prettier.formatFile')
+----  end,
+----  {}
+----)
 
 

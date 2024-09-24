@@ -14,6 +14,8 @@ Plug 'preservim/nerdtree'
 
 Plug 'navarasu/onedark.nvim'
 
+Plug 'goolord/alpha-nvim'
+
 Plug 'nvim-lua/plenary.nvim'
 Plug ('nvim-telescope/telescope.nvim', { ['tag'] = '0.1.8' })
     Plug('nvim-telescope/telescope-ui-select.nvim')
@@ -34,6 +36,11 @@ Plug 'williamboman/mason.nvim'
 Plug ('m4xshen/autoclose.nvim')
 
 Plug ('neoclide/coc.nvim', {['branch'] = 'release'})
+
+Plug ('kevinhwang91/nvim-ufo')
+    Plug ('kevinhwang91/promise-async')
+
+Plug 'stevearc/conform.nvim'
 
 vim.call('plug#end')
 
