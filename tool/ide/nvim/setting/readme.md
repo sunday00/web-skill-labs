@@ -40,8 +40,7 @@
 - <C r> 
 
 ## comment
-- gcc: line comment
-- gc: comment visual mode
+- <C g><C g>
 
 ## tab
 - :tabnew
