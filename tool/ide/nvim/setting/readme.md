@@ -23,3 +23,35 @@
     - https://github.com/neoclide/coc.nvim/wiki/Using-coc-extensions
 
 - lsp: https://github.com/williamboman/mason-lspconfig.nvim
+
+# prequently keymap / command
+- <leader> : space
+- <C > : ctrl
+- <Sft >: shift
+  - officially document not imply Sht. 
+  - usually say just capitalized.
+
+## file search
+- <leader e>: open tree
+- <leader ff>: open file search
+
+## undo/redo
+- u
+- <C r> 
+
+## comment
+- <C g><C g>
+
+## tab
+- :tabnew
+- gt: next tab
+- gT: prev tab
+
+## split
+- :vert new
+- :split new
+- <C w> + <Sht H|J|K|L>: flip split screen
+
+## terminal
+- <C j> :ToggleTerminal
+- <C \><C n> : terminal to normal
