@@ -53,5 +53,5 @@
 - <C w> + <Sht H|J|K|L>: flip split screen
 
 ## terminal
-- :ToggleTerminal
+- <C j> :ToggleTerminal
 - <C \><C n> : terminal to normal

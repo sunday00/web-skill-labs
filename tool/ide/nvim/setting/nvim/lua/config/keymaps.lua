@@ -16,3 +16,5 @@ mapKey("<leader>h", ":nohlsearch<CR>")
 -- indent
 mapKey("<", "<gv", "v")
 mapKey(">", ">gv", "v")
+
+mapKey("<C-j>", ":ToggleTerm<CR>")
