@@ -18,3 +18,5 @@ mapKey("<", "<gv", "v")
 mapKey(">", ">gv", "v")
 
 mapKey("<C-t>", ":ToggleTerm<CR>")
+
+mapKey("<C-i>", ":CocCommand tsserver.executeAutofix<CR>")
