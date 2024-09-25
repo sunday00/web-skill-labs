@@ -17,4 +17,4 @@ mapKey("<leader>h", ":nohlsearch<CR>")
 mapKey("<", "<gv", "v")
 mapKey(">", ">gv", "v")
 
-mapKey("<C-j>", ":ToggleTerm<CR>")
+mapKey("<C-t>", ":ToggleTerm<CR>")
