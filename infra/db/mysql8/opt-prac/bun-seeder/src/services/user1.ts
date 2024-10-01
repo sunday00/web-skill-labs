@@ -2,6 +2,7 @@ import { randFullName, randNumber } from "@ngneat/falso";
 import { IService } from ".";
 import { RunOption } from "../share/types";
 import { DBClient } from "../utils/mysql";
+import {nanoid} from 'nanoid'
 
 export class User1 implements IService {
   public db?: DBClient;
@@ -14,7 +15,7 @@ export class User1 implements IService {
 
   async createMany(options: RunOption) {
     const sql = `
-        INSERT INTO users (name, age) VALUES ?;
+        INSERT INTO users (name, accessCode, age) VALUES ?;
     `;
     const values = [];
 
@@ -23,6 +24,7 @@ export class User1 implements IService {
     for (let i = 0; i < (options.size ?? 10); i++) {
       values.push([
         randFullName(),
+        nanoid(),
         isAgeIn2030
           ? randNumber({ min: 20, max: 30 })
           : randNumber({ min: 18, max: 110 }),

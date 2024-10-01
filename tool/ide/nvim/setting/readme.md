@@ -55,3 +55,9 @@
 ## terminal
 - <C j> :ToggleTerminal
 - <C \><C n> : terminal to normal
+
+## hide select
+<leader h>
+
+## copy to external
+- "*Y
