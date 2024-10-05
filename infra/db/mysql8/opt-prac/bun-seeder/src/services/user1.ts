@@ -1,4 +1,4 @@
-import { randFullName, randNumber } from "@ngneat/falso";
+import {randDepartment, randFullName, randNumber, randPastDate} from "@ngneat/falso"
 import { IService } from ".";
 import { RunOption } from "../share/types";
 import { DBClient } from "../utils/mysql";
@@ -15,7 +15,7 @@ export class User1 implements IService {
 
   async createMany(options: RunOption) {
     const sql = `
-        INSERT INTO users (name, accessCode, age) VALUES ?;
+        INSERT INTO users (name, accessCode, department, age, createdAt) VALUES ?;
     `;
     const values = [];
 
@@ -25,9 +25,11 @@ export class User1 implements IService {
       values.push([
         randFullName(),
         nanoid(),
+        randDepartment(),
         isAgeIn2030
           ? randNumber({ min: 20, max: 30 })
           : randNumber({ min: 18, max: 110 }),
+        randPastDate({ years: 10 }).toISOString().replace('T', ' ').replace('Z', '')
       ]);
     }
 
