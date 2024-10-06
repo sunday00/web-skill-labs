@@ -1,13 +1,14 @@
 <script>
+import '/node_modules/@fortawesome/fontawesome-free/css/all.css'
 
 export default {
-    name: "App"
+  name: 'App',
 }
 </script>
 
 <template>
   <div>
-        <router-view />
+    <router-view />
   </div>
 </template>
 
