@@ -3,16 +3,15 @@ import Product from './components/Products.vue'
 import './assets/main.css'
 
 export default {
-    name: 'NikeThing',
-    components: {
-        Product,
-    }
+  name: 'NikeThing',
+  components: {
+    Product,
+  },
 }
-
 </script>
 
 <template>
-    <div>
-        <product />
-    </div>
+  <div>
+    <product />
+  </div>
 </template>
