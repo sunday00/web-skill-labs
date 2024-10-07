@@ -1,5 +1,5 @@
 <template>
-  <div style="height: 100vh; overflow-y: scroll">
+  <div style="margin-bottom: 20px">
     <header id="header">
       <div class="container">
         <div class="cart">
@@ -30,5 +30,14 @@ export default {
       this.cart.push(id)
     },
   },
+  mounted() {
+    document.querySelector('html').dataset.theme = 'light'
+  },
 }
 </script>
+
+<style scoped>
+.container {
+  background: transparent;
+}
+</style>
