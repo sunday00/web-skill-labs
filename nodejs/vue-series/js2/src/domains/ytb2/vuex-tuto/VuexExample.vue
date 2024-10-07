@@ -30,8 +30,6 @@ export default {
 
 <style lang="scss" scoped>
 .container {
-  overflow-y: scroll;
-
   .image-toggle-set {
     display: flex;
     gap: 1em;
