@@ -7,9 +7,15 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { DayjsModule } from './dayjs/dayjs.module';
 import { CheckableModule } from './checkable/checkable.module';
+import { ArticleModule } from './article/article.module';
+import { PrismaModule } from './common/prisma/prisma.module';
+import { ConfigModule } from '@nestjs/config';
+import { configModuleOption } from './common/config/app.config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot(configModuleOption),
+    PrismaModule,
     AppStoreModule,
     B64Module,
     ServeStaticModule.forRoot({
@@ -17,6 +23,7 @@ import { CheckableModule } from './checkable/checkable.module';
     }),
     DayjsModule,
     CheckableModule,
+    ArticleModule,
   ],
   controllers: [AppController],
   providers: [AppService],
