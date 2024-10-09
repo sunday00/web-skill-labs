@@ -3,6 +3,7 @@ import { swagger } from '@elysiajs/swagger'
 
 import { fetchTest } from './domain/fetch-test/fetch-test.route'
 import cors from '@elysiajs/cors'
+import { todayShould } from './domain/today-should/today-should.route'
 
 const app = new Elysia()
   .use(
@@ -17,4 +18,5 @@ const app = new Elysia()
     console.error(error)
   })
   .use(fetchTest)
+  .use(todayShould)
   .listen(3400)
