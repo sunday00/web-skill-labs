@@ -22,7 +22,8 @@ type Special = [8 | 9, ...number[], string, string]
 // const sp: Special = [9, 1, 2, 4, 5, 6, 7, 'ad']
 const sp: Special = [9, 1, 2, 4, 5, 6, '7', 'ad']
 
-type L100 = Omit<Array<number>, 'length'> & { length: 100 } // this is works!
+// type L100 = Omit<Array<number>, 'length'> & { length: 100 } // this is works!
+type L100 = Array<number> & { length: 100 } // this is works!
 const a100: L100 = [
   1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5,
   6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
@@ -31,3 +32,7 @@ const a100: L100 = [
 ]
 type Special2 = [8 | 9, ...L100, string, string]
 const special2: Special2 = [8, 1, 3, 's', '7'] // unfortunately, this is just like same sp
+
+type Special3 = [8 | 9, ...number[], string, string] & { length: 103 }
+// const special3: Special3 = [8, ...a100, 's', '7'] // not worked
+// After many tests, not possible to tuple.
