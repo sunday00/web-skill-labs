@@ -8,6 +8,15 @@ class ArticleCreateDto {
   author: string
   createdAt: Date
   isActivate: boolean
+
+  constructor(id: number, title: string, description: string, author: string, createdAt: Date) {
+    this.id = id
+    this.title = title
+    this.description = description
+    this.author = author
+    this.createdAt = createdAt
+    this.isActivate = true
+  }
 }
 
 type R3 = Exclude<keyof ArticleCreateDto, 'author' | 'createdAt'>
@@ -26,7 +35,7 @@ type EX<A, B> = A extends B ? true : false
 type R = EX<'a' | 'b' | 'c', 'a' | 'b'>
 
 type EX2<A, B> = [A] extends [B] ? true : false
-type R2 = EX2<'a' | 'b' | 'c', 'a' | 'b'>
+type R22 = EX2<'a' | 'b' | 'c', 'a' | 'b'>
 
 type GenerateLink<NodeId, Criteria> = [NodeId] extends [Criteria]
   ? { from: NodeId; to: Criteria }
