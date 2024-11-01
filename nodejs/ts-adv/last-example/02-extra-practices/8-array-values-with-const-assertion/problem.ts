@@ -1,6 +1,11 @@
-const languages = ["java", "c", "go"];
+const languages = ['java', 'c', 'go'] as const
 
-type JavaOrGo = any; // "java" | "go"
-type Languages = any; // "java" | "c" | "go"
+// type JavaOrGo = (typeof languages)[0 | 2] // "java" | "go"
+// type Languages = (typeof languages)[keyof typeof languages]
+type Languages = (typeof languages)[number]
 
-export {};
+const l: Languages = 'java'
+
+export {}
+
+type JavaOrGo = Exclude<Languages, 'c'>

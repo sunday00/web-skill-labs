@@ -1,17 +1,21 @@
 export type Action =
   | {
-      method: "GET";
-      description: "Fetch users.";
+      method: 'GET'
+      description: 'Fetch users.'
     }
   | {
-      method: "POST";
-      description: "Add a user.";
+      method: 'POST'
+      description: 'Add a user.'
     }
   | {
-      method: "DELETE";
-      description: "Delete a user.";
-    };
+      method: 'DELETE'
+      description: 'Delete a user.'
+    }
 
-type NoDeleteAction = any;
+type NoDeleteAction = Exclude<Action, { method: 'DELETE' }>
 
-export {};
+export {}
+
+// type Methods<T> = T extends { method: infer U } ? U : never
+type Methods<T> = T extends { method: infer U } ? U : never
+type RequestActionsMethods = Methods<Action>

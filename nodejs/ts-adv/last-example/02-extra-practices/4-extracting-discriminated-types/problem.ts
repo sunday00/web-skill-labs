@@ -1,17 +1,20 @@
 export type Action =
   | {
-      method: "GET";
-      description: "Fetch users.";
+      method: 'GET'
+      description: 'Fetch users.'
     }
   | {
-      method: "POST";
-      description: "Add a user.";
+      method: 'POST'
+      description: 'Add a user.'
     }
   | {
-      method: "DELETE";
-      description: "Delete a user.";
-    };
+      method: 'DELETE'
+      description: 'Delete a user.'
+    }
 
-type ActionType = any;
+// type Methods<T> = T extends { method: infer U } ? U : never
+// type ActionType = Methods<Action>
 
-export {};
+type ActionType = Action['method']
+
+export {}

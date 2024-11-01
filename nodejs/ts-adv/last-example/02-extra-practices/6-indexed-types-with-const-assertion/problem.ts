@@ -1,9 +1,12 @@
 const STATUS = {
-  PENDING: "Request is pending.",
-  FAILED: "Request failed.",
-  SUCCESS: "Request was successful",
-} as const;
+  PENDING: 'Request is pending.',
+  FAILED: 'Request failed.',
+  SUCCESS: 'Request was successful',
+} as const
 
-type StatusWithResult = any;
+// type StatusWithResult = typeof STATUS extends { [K in keyof typeof STATUS]: infer V } ? V : never
+type StatusWithResult = (typeof STATUS)[keyof typeof STATUS]
 
-export {};
+const s: StatusWithResult = 'Request is pending.'
+
+export {}

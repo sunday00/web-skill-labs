@@ -1,13 +1,22 @@
 const values = {
-  UUID: "uuid",
+  UUID: 'uuid',
   Int: 23,
-  String: "A String.",
+  String: 'A String.',
   Boolean: false,
-};
+  Obj: {
+    key: 'value',
+  },
+}
 
-type UUIDType = any;
-type IntType = any;
-type StringType = any;
-type BooleanType = any;
+type ValuesType = typeof values
 
-export {};
+type UUIDType = ValuesType['UUID']
+type IntType = ValuesType['Int']
+type StringType = ValuesType['String']
+type BooleanType = ValuesType['Boolean']
+type ObjType = ValuesType['Obj']
+type KeyType = ValuesType['Obj']['key']
+
+export {}
+
+const a: IntType = 3
