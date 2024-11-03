@@ -1,5 +1,6 @@
-type Tools = "Core Java and Spring Boot" | "Golang" | "Node, MongoDB and React";
+type Tools = 'Core Java and Spring Boot' | 'Golang' | 'Node, MongoDB and React'
 
-type MultipleTools = any;
+// type MultipleTools = Exclude<Tools, 'Golang'>
+type MultipleTools = Extract<Tools, `${string} and ${string}`>
 
-export {};
+export {}

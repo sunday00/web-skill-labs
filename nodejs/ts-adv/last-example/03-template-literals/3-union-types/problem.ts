@@ -1,11 +1,13 @@
-type FrameWork = "NodeJS" | "Spring" | ".Net";
-type Database = "GraphQL" | "MongoDB" | "PostgreSQL";
+type FrameWork = 'NodeJS' | 'Spring' | '.Net'
+type Database = 'GraphQL' | 'MongoDB' | 'PostgreSQL'
 
-type Backend = any;
+type Backend = `${FrameWork} with ${Database}`
 // "NodeJS with GraphQL"    |
 // "NodeJS with MongoDB"    |
 // "NodeJS with PostgreSQL" |
 // "Spring with GraphQL"    |
 // ...
 
-export {};
+const b: Backend = 'NodeJS with GraphQL'
+
+export {}
