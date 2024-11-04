@@ -1,21 +1,21 @@
 export const fakeFetch = async () => {
   return {
-    id: "test_id",
-  };
-};
+    id: 'test_id',
+  }
+}
 
 const getFakeData = async () => {
-  const data = await fakeFetch();
+  const data = await fakeFetch()
   return {
     result: {
       data,
     },
-  };
-};
+  }
+}
 
-type InferDataFromResult<T> = unknown;
+type InferDataFromResult<T> = T extends () => Promise<infer D> ? D : never
 
-type test = InferDataFromResult<typeof getFakeData>;
+type test = InferDataFromResult<typeof getFakeData>
 /*
    {
       data: {

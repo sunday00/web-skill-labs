@@ -1,5 +1,5 @@
-export type ProgrammingLanguage = "Java" | "Golang" | "C";
+export type ProgrammingLanguage = 'Java' | 'Golang' | 'C'
 
-type JavaOrC = ProgrammingLanguage extends "Java" | "C" ? "Java" | "C" : never;
+type JavaOrC<T> = T extends 'Java' | 'C' ? T : never
 
 // "Java" | "C"
