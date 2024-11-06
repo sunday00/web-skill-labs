@@ -11,16 +11,5 @@ import { map } from 'rxjs/operators'
 export class AboutComponent implements OnInit {
   constructor() {}
 
-  ngOnInit() {
-    const http$ = createHttpObservable('/api/courses')
-
-    const courses$ = http$.pipe(map((r) => Object.values(r['payload'])))
-
-    courses$.subscribe(
-      (c) => console.log(c),
-      // () => {},
-      noop,
-      () => console.log('done'),
-    )
-  }
+  ngOnInit() {}
 }
