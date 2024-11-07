@@ -3,7 +3,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog'
 import { Course } from '../model/course'
 import { FormBuilder, FormGroup, Validators } from '@angular/forms'
 import moment from 'moment'
-import { filter } from 'rxjs/operators'
+import { concatMap, filter } from 'rxjs/operators'
 import { fromPromise } from 'rxjs/internal-compatibility'
 
 @Component({
@@ -35,19 +35,24 @@ export class CourseDialogComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit() {
-    this.form.valueChanges.pipe(filter(() => this.form.valid)).subscribe((changes) => {
-      const saveCourse$ = fromPromise(
-        fetch(`/api/courses/${this.course.id}`, {
-          method: 'PUT',
-          body: JSON.stringify(changes),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }),
+    this.form.valueChanges
+      .pipe(
+        filter(() => this.form.valid),
+        concatMap((changes) => this.saveCourses(changes)),
       )
+      .subscribe()
+  }
 
-      saveCourse$.subscribe()
-    })
+  saveCourses(changes) {
+    return fromPromise(
+      fetch(`/api/courses/${this.course.id}`, {
+        method: 'PUT',
+        body: JSON.stringify(changes),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }),
+    )
   }
 
   ngAfterViewInit() {}
