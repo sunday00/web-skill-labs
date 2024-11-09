@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core'
-import { Observable } from 'rxjs'
-import { map, shareReplay, tap } from 'rxjs/operators'
+import { Observable, of } from 'rxjs'
+import { catchError, map, shareReplay, tap } from 'rxjs/operators'
 import { createHttpObservable } from '../common/util'
 import { Course } from '../model/course'
 
@@ -22,6 +22,7 @@ export class HomeComponent implements OnInit {
       tap(() => console.log('executed')),
       map((r) => Object.values(r['payload'])),
       shareReplay(),
+      catchError((err) => of([])),
     )
 
     this.beginnerCourses$ = courses$.pipe(
