@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs'
 
-export function createHttpObservable(url: string) {
+export function createHttpObservable<T>(url: string): Observable<T> {
   return new Observable((observer) => {
     const controller = new AbortController()
     const signal = controller.signal
