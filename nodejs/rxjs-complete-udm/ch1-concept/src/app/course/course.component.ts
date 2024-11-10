@@ -4,7 +4,8 @@ import { Course } from '../model/course'
 import { fromEvent, Observable } from 'rxjs'
 import { Lesson } from '../model/lesson'
 import { createHttpObservable } from '../common/util'
-import { map, throttleTime } from 'rxjs/operators'
+import { debounceTime, distinctUntilChanged, map, startWith, switchMap } from 'rxjs/operators'
+import { debug, RxJsLoggingLevel, setRxJsLoggingLevel } from '../common/debug'
 
 @Component({
   selector: 'course',
@@ -24,7 +25,12 @@ export class CourseComponent implements OnInit, AfterViewInit {
   ngOnInit() {
     this.courseId = this.route.snapshot.params['id']
 
-    this.course$ = createHttpObservable(`/api/courses/${this.courseId}`)
+    this.course$ = createHttpObservable<Course>(`/api/courses/${this.courseId}`).pipe(
+      // tap((search) => console.log({ search })),
+      debug(RxJsLoggingLevel.INFO, 'course  value '),
+    )
+
+    setRxJsLoggingLevel(RxJsLoggingLevel.DEBUG)
   }
 
   ngAfterViewInit() {
@@ -39,23 +45,26 @@ export class CourseComponent implements OnInit, AfterViewInit {
     //
     // this.lessons$ = concat(initialLessons$, searchLessons$)
 
-    // this.lessons$ = fromEvent(this.input.nativeElement, 'keyup').pipe(
-    //   map((event: InputEvent) => (event.target as HTMLInputElement).value),
-    //   startWith(''),
-    //   debounceTime(500),
-    //   distinctUntilChanged(),
-    //   switchMap((search) => this.loadLessons(search)),
-    // )
+    this.lessons$ = fromEvent(this.input.nativeElement, 'keyup').pipe(
+      map((event: InputEvent) => (event.target as HTMLInputElement).value),
+      startWith(''),
+      // tap((search) => console.log({ search })),
+      debug(RxJsLoggingLevel.TRACE, 'search'),
+      debounceTime(500),
+      distinctUntilChanged(),
+      switchMap((search) => this.loadLessons(search)),
+      debug(RxJsLoggingLevel.DEBUG, 'lessons value'),
+    )
 
-    fromEvent(this.input.nativeElement, 'keyup')
-      .pipe(
-        map((event: InputEvent) => (event.target as HTMLInputElement).value),
-        // startWith(''),
-        // debounceTime(500),
-        // throttle(() => interval(500)),
-        throttleTime(500),
-      )
-      .subscribe(console.log)
+    // fromEvent(this.input.nativeElement, 'keyup')
+    //   .pipe(
+    //     map((event: InputEvent) => (event.target as HTMLInputElement).value),
+    //     startWith(''),
+    //     debounceTime(500),
+    //     // throttle(() => interval(500)),
+    //     throttleTime(500),
+    //   )
+    //   .subscribe(console.log)
   }
 
   loadLessons(search = ''): Observable<Lesson[]> {
