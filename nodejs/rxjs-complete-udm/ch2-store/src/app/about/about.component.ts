@@ -1,5 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { BehaviorSubject } from "rxjs";
+import { ReplaySubject } from "rxjs";
 
 @Component({
   selector: "about",
@@ -9,7 +9,9 @@ import { BehaviorSubject } from "rxjs";
 export class AboutComponent implements OnInit {
   ngOnInit() {
     // const subject = new Subject();
-    const subject = new BehaviorSubject(0);
+    // const subject = new BehaviorSubject(0);
+    // const subject = new AsyncSubject();
+    const subject = new ReplaySubject();
 
     // subject.complete()
     const series$ = subject.asObservable();
