@@ -59,4 +59,10 @@ export class Store {
       }),
     );
   }
+
+  selectCourseById(courseId: number): Observable<Course> {
+    return this.courses$.pipe(
+      map((courses) => courses.find((course) => course.id === courseId)),
+    );
+  }
 }
