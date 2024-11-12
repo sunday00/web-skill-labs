@@ -12,8 +12,9 @@ import {
   distinctUntilChanged,
   map,
   switchMap,
+  take,
 } from "rxjs/operators";
-import { concat, fromEvent, Observable } from "rxjs";
+import { concat, forkJoin, fromEvent, Observable } from "rxjs";
 import { Lesson } from "../model/lesson";
 import { createHttpObservable } from "../common/util";
 import { Store } from "../common/store.service";
@@ -38,10 +39,15 @@ export class CourseComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit() {
-    this.courseId = this.route.snapshot.params["id"];
+    this.courseId = Number(this.route.snapshot.params["id"] ?? 0);
 
     // this.course$ = createHttpObservable(`/api/courses/${this.courseId}`);
-    this.course$ = this.store.selectCourseById(this.courseId);
+    this.course$ = this.store.selectCourseById(this.courseId).pipe(
+      // first()
+      take(1),
+    );
+
+    forkJoin(this.course$, this.loadLessons()).subscribe(console.log);
   }
 
   ngAfterViewInit() {
