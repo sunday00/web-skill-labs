@@ -13,8 +13,9 @@ import {
   map,
   switchMap,
   take,
+  withLatestFrom,
 } from "rxjs/operators";
-import { concat, forkJoin, fromEvent, Observable } from "rxjs";
+import { concat, fromEvent, Observable } from "rxjs";
 import { Lesson } from "../model/lesson";
 import { createHttpObservable } from "../common/util";
 import { Store } from "../common/store.service";
@@ -28,6 +29,7 @@ export class CourseComponent implements OnInit, AfterViewInit {
   courseId: number;
 
   course$: Observable<Course>;
+  // course: Course;
 
   lessons$: Observable<Lesson[]>;
 
@@ -47,7 +49,18 @@ export class CourseComponent implements OnInit, AfterViewInit {
       take(1),
     );
 
-    forkJoin(this.course$, this.loadLessons()).subscribe(console.log);
+    // forkJoin(this.course$, this.loadLessons()).subscribe(console.log);
+
+    // this.course$.subscribe((course) => {
+    //   this.course = course;
+    // });
+    this.loadLessons()
+      .pipe(withLatestFrom(this.course$))
+      .subscribe(([lessons, course]) => {
+        console.log(lessons);
+
+        console.log(course);
+      });
   }
 
   ngAfterViewInit() {
