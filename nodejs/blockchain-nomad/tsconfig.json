@@ -1,3 +1,7 @@
 {
-
+  "include": ["03-project/src"],
+  "compilerOptions": {
+    "outDir": "03-project/dist",
+    "target": "ES2016"
+  }
 }
