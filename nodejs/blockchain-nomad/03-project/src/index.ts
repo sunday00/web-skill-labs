@@ -1,3 +1,5 @@
+import { init } from 'my-package'
+
 class Block {
   constructor(private data: string) {}
 
@@ -7,3 +9,5 @@ class Block {
 }
 
 console.log(Block.Hello())
+
+init()
