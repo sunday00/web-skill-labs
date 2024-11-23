@@ -1,4 +1,5 @@
 import { init } from 'my-package'
+import { hello } from './normal'
 
 class Block {
   constructor(private data: string) {}
@@ -11,3 +12,4 @@ class Block {
 console.log(Block.Hello())
 
 init()
+hello('123')

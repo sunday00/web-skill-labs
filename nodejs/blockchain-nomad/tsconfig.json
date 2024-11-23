@@ -3,6 +3,7 @@
   "compilerOptions": {
     "outDir": "03-project/dist",
     "target": "ES2016",
-    "strict": true
+    "strict": true,
+    "allowJs": true
   }
 }
