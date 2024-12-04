@@ -8,6 +8,8 @@ fn main() {
         ch1(args.get(2).unwrap())
     } else if ch == 2 {
         ch2(args.get(2).unwrap())
+    } else if ch == 3 {
+        ch3(args.get(2).unwrap())
     }
 }
 
@@ -121,4 +123,36 @@ fn dangle () -> String {
 
     s // ✅so, if you need to return value that was made on local function,
     // should return itself, not ref(borrow).
+}
+
+fn ch3 (str : &String) {
+    let s = String::from(str);
+    let fw = first_word(&s);
+    let fw2 = first_word(&s[6..]);
+    let fw3 = first_word("something is wrong");
+
+    // s.clear();
+
+    println!("{} {} {}", fw, fw2, fw3);
+
+    slices();
+}
+
+fn first_word(s : &str) -> &str {
+    let bytes = s.as_bytes();
+
+    for (i, &item) in bytes.iter().enumerate() {
+        if item == b' ' {
+            return &s[0..i];
+        }
+    }
+
+    &s[..]
+}
+
+fn slices() {
+    let a = [1, 2, 3, 4, 5];
+    let slice = &a[1..3];
+
+    assert_eq!(slice, &[2, 3]);
 }
