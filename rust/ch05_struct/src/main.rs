@@ -7,7 +7,7 @@ fn main() {
     if ch == 1 {
         ch1(args.get(2).unwrap())
     } else if ch == 2 {
-        // ch2(args.get(2).unwrap())
+        ch2(args.get(2).unwrap(), args.get(3).unwrap())
     } else if ch == 3 {
         // ch3(args.get(2).unwrap())
     }
@@ -85,4 +85,18 @@ fn user_factory(username: String, email: String) -> User {
         email,
         sign_in_count: 1,
     }
+}
+
+fn ch2(arg1: &str, arg2: &str) {
+    let width1 = arg1.parse().unwrap();
+    let height1 = arg2.parse().unwrap();
+
+    println!(
+        "The area of the rectangle is {} square pixels.",
+        area(width1, height1)
+    );
+}
+
+fn area(width: u32, height: u32) -> u32 {
+    width * height
 }
