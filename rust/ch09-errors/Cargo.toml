@@ -1,0 +1,9 @@
+[package]
+name = "ch09-errors"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+[profile.release]
+panic = "abort"
