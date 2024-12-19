@@ -10,6 +10,8 @@ pub fn run() {
         "base" => {
             if args.get(2).unwrap().eq("1") {
                 a_base::ch1::exec()
+            } else if args.get(2).unwrap().eq("2") {
+                a_base::ch2::exec()
             }
         }
         _ => {}
