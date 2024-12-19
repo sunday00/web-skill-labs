@@ -2,6 +2,7 @@ use std::env;
 
 pub mod a_base;
 pub mod b_trait;
+pub mod c_lifetime;
 
 pub fn run() {
     let args: Vec<String> = env::args().collect();
@@ -21,6 +22,14 @@ pub fn run() {
             } else if args.get(2).unwrap().eq("2") {
                 b_trait::ch2::exec()
             }
+        }
+        "lf" => {
+            if args.get(2).unwrap().eq("1") {
+                c_lifetime::ch1::exec()
+            }
+            // else if args.get(2).unwrap().eq("2") {
+            //     b_trait::ch2::exec()
+            // }
         }
         _ => {}
     }
