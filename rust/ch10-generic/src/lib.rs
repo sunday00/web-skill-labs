@@ -26,10 +26,9 @@ pub fn run() {
         "lf" => {
             if args.get(2).unwrap().eq("1") {
                 c_lifetime::ch1::exec()
+            } else if args.get(2).unwrap().eq("2") {
+                c_lifetime::ch2::exec()
             }
-            // else if args.get(2).unwrap().eq("2") {
-            //     b_trait::ch2::exec()
-            // }
         }
         _ => {}
     }
