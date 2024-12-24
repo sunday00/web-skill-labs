@@ -1,0 +1,11 @@
+[package]
+name = "ch14-cargo"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "HOHOHO"
+
+[dependencies]
+
+[profile.dev]
+opt-level = 1 # 0 is fast compile, slow run. 3 is tightly compile and fastest run.
