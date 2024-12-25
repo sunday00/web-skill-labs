@@ -2,6 +2,7 @@ use std::env;
 
 pub mod a_box;
 pub mod b_deref;
+pub mod c_drop;
 
 pub fn run() {
     let args: Vec<String> = env::args().collect();
@@ -16,6 +17,13 @@ pub fn run() {
         "deref" => {
             if args.get(2).unwrap().eq("1") {
                 b_deref::ch1::exec();
+            }
+        }
+        "drop" => {
+            if args.get(2).unwrap().eq("1") {
+                c_drop::ch1::exec();
+            } else if args.get(2).unwrap().eq("2") {
+                c_drop::ch2::exec();
             }
         }
         _ => {}
