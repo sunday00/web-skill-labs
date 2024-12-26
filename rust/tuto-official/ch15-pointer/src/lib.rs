@@ -1,9 +1,10 @@
 use std::env;
 
-pub mod a_box;
-pub mod b_deref;
-pub mod c_drop;
-pub mod d_rc;
+mod a_box;
+mod b_deref;
+mod c_drop;
+mod d_rc;
+mod e_refcell;
 
 pub fn run() {
     let args: Vec<String> = env::args().collect();
@@ -30,6 +31,13 @@ pub fn run() {
         "rc" => {
             if args.get(2).unwrap().eq("1") {
                 d_rc::ch1::exec();
+            }
+        }
+        "refcell" => {
+            if args.get(2).unwrap().eq("1") {
+                e_refcell::ch1::exec();
+            } else if args.get(2).unwrap().eq("2") {
+                e_refcell::ch2::exec();
             }
         }
         _ => {}
