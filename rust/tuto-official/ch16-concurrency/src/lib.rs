@@ -2,6 +2,7 @@ use std::env;
 
 mod a_base;
 mod b_msg;
+mod c_mutex;
 
 pub fn run() {
     let args: Vec<String> = env::args().collect();
@@ -24,6 +25,13 @@ pub fn run() {
                 b_msg::ch2::exec()
             } else if args.get(2).unwrap().eq("2-2") {
                 b_msg::ch2::exec2()
+            }
+        }
+        "mutex" => {
+            if args.get(2).unwrap().eq("1") {
+                c_mutex::ch1::exec()
+            } else if args.get(2).unwrap().eq("2") {
+                c_mutex::ch2::exec()
             }
         }
         _ => {}
