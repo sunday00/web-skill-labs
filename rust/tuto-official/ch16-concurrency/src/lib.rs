@@ -3,6 +3,7 @@ use std::env;
 mod a_base;
 mod b_msg;
 mod c_mutex;
+mod d_sync;
 
 pub fn run() {
     let args: Vec<String> = env::args().collect();
@@ -32,6 +33,11 @@ pub fn run() {
                 c_mutex::ch1::exec()
             } else if args.get(2).unwrap().eq("2") {
                 c_mutex::ch2::exec()
+            }
+        }
+        "sync" => {
+            if args.get(2).unwrap().eq("1") {
+                d_sync::ch1::exec()
             }
         }
         _ => {}
