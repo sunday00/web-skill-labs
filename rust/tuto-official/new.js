@@ -14,7 +14,7 @@ fn main() {
 const makeLibFile = async (project) => {
     const content = `use std::env;
 
-pub mod a_base;
+mod a_base;
 
 pub fn run() {
     let args: Vec<String> = env::args().collect();
