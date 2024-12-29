@@ -1,6 +1,7 @@
 use std::env;
 
 mod a_unsafe;
+mod b_trait;
 
 pub fn run() {
     let args: Vec<String> = env::args().collect();
@@ -20,6 +21,15 @@ pub fn run() {
                 a_unsafe::ch4::exec()
             } else if args.get(2).unwrap().eq("5") {
                 a_unsafe::ch5::exec()
+            }
+        }
+        "trait" => {
+            if args.get(2).unwrap().eq("1") {
+                b_trait::ch1::exec()
+            } else if args.get(2).unwrap().eq("2") {
+                b_trait::ch2::exec()
+            } else if args.get(2).unwrap().eq("2-2") {
+                b_trait::ch2::exec2()
             }
         }
         _ => {}
