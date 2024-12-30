@@ -30,6 +30,10 @@ pub fn run() {
                 b_trait::ch2::exec()
             } else if args.get(2).unwrap().eq("2-2") {
                 b_trait::ch2::exec2()
+            } else if args.get(2).unwrap().eq("3") {
+                b_trait::ch3::exec()
+            } else if args.get(2).unwrap().eq("4") {
+                b_trait::ch4::exec()
             }
         }
         _ => {}
