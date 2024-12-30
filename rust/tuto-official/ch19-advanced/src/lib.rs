@@ -4,6 +4,7 @@ mod a_unsafe;
 mod b_trait;
 mod c_type;
 mod d_fn;
+mod e_macro;
 
 pub fn run() {
     let args: Vec<String> = env::args().collect();
@@ -52,6 +53,15 @@ pub fn run() {
         "fn" => {
             if args.get(2).unwrap().eq("1") {
                 d_fn::ch1::exec()
+            }
+        }
+        "macro" => {
+            if args.get(2).unwrap().eq("1") {
+                e_macro::ch1::exec()
+            } else if args.get(2).unwrap().eq("2") {
+                e_macro::ch2::exec()
+            } else if args.get(2).unwrap().eq("3") {
+                e_macro::ch3::exec()
             }
         }
         _ => {}

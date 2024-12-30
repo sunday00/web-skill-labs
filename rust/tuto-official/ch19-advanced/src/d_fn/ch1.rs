@@ -19,9 +19,9 @@ pub fn exec() {
         Stop,
     }
 
-    let list_of_statuses: Vec<Status> = (0u32..20).map(Status::Value).collect();
-
-    println!("{}", list_of_statuses.join(" "));
+    // let list_of_statuses: Vec<Status> = (0u32..20).map(Status::Value).collect();
+    //
+    // println!("{}", list_of_statuses.join(" "));
 }
 
 fn add_one(x: i32) -> i32 {
