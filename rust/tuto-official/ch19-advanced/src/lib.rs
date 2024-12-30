@@ -2,6 +2,7 @@ use std::env;
 
 mod a_unsafe;
 mod b_trait;
+mod c_type;
 
 pub fn run() {
     let args: Vec<String> = env::args().collect();
@@ -34,6 +35,17 @@ pub fn run() {
                 b_trait::ch3::exec()
             } else if args.get(2).unwrap().eq("4") {
                 b_trait::ch4::exec()
+            } else if args.get(2).unwrap().eq("5") {
+                b_trait::ch5::exec()
+            } else if args.get(2).unwrap().eq("6") {
+                b_trait::ch6::exec()
+            }
+        }
+        "type" => {
+            if args.get(2).unwrap().eq("1") {
+                c_type::ch1::exec()
+            } else if args.get(2).unwrap().eq("2") {
+                c_type::ch2::exec()
             }
         }
         _ => {}
