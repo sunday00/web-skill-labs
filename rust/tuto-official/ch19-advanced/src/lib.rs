@@ -3,6 +3,7 @@ use std::env;
 mod a_unsafe;
 mod b_trait;
 mod c_type;
+mod d_fn;
 
 pub fn run() {
     let args: Vec<String> = env::args().collect();
@@ -46,6 +47,11 @@ pub fn run() {
                 c_type::ch1::exec()
             } else if args.get(2).unwrap().eq("2") {
                 c_type::ch2::exec()
+            }
+        }
+        "fn" => {
+            if args.get(2).unwrap().eq("1") {
+                d_fn::ch1::exec()
             }
         }
         _ => {}
