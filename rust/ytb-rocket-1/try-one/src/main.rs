@@ -9,13 +9,43 @@ use rocket::response::Redirect;
 use rocket::serde::json::{json, Value};
 use rocket::serde::{json::Json, Serialize};
 use rocket::State;
+use std::collections::HashMap;
+use std::time::SystemTime;
 
 const API: Origin<'static> = uri!("/api");
 const REPO: &str = "sunday00/lecture-master";
 
+pub struct TauriGHRelease {
+    pub value: Value,
+    pub expiry: SystemTime,
+}
+
 #[get("/")]
 fn index() -> &'static str {
     "hello rocket"
+}
+
+pub fn remove_suffix<'a>(s: &'a str, suffix: &str) -> &'a str {
+    s.strip_suffix(suffix).unwrap_or_else(|| s)
+}
+
+async fn create_tauri_response(raw: &Value) -> Option<Value> {
+    let platforms_available: HashMap<&str, Vec<&str>> = HashMap::from([
+        ("amd64.AppImage.tar.gz", vec!["/linux-x86_64"]),
+        ("app.tar.gz", vec!["/darwin-x86_64"]),
+        ("x64_en-US.msi.zip", vec!["/windows-x86_64"]),
+    ]);
+
+    let mut res = json!({
+        "version": raw["tag_name"].as_str()?,
+        "notes": remove_suffix(&raw["body"].as_str()?, "See the assets to download this version and install.").trim_end_matches(['\r', '\n', ' ']),
+        "pbu_date": raw["published_at"].as_str()?,
+        "platforms": {},
+    });
+
+    // mapping assets ...
+
+    Some(res)
 }
 
 async fn get_latest_release(client: &Client, repo: &str) -> Result<Value, reqwest::Error> {
@@ -25,9 +55,9 @@ async fn get_latest_release(client: &Client, repo: &str) -> Result<Value, reqwes
     // let release: Value = res.json().await?;
     let release = res.json::<Value>().await?;
 
-    println!("{:#?}", release);
+    create_tauri_response(&release).await.ok_or(json!({})).or_else(|e| Ok(e))
 
-    Ok(release)
+    // Ok(release)
 }
 
 #[get("/google-keep-desktop/<_platform>/<current_version>?<msg>")]
