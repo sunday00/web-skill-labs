@@ -1,0 +1,9 @@
+[default]
+port = 3000
+baz = { quax = "enter" }
+
+[default.second]
+foo = "bar"
+
+[release]
+port = 9999
