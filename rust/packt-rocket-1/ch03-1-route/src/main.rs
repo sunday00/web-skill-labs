@@ -1,12 +1,11 @@
 #[macro_use]
 extern crate rocket;
 
-use rocket::{Build, Rocket};
-use rocket_okapi::okapi::schemars;
-use rocket_okapi::okapi::schemars::JsonSchema;
+use rocket::{Build, Rocket, serde::{Serialize, Deserialize, json::Json}};
+use rocket_okapi::okapi::{schemars, schemars::JsonSchema};
 use rocket_okapi::{openapi, openapi_get_routes, swagger_ui::*};
 
-#[derive(FromForm, JsonSchema)]
+#[derive(FromForm, Serialize, Deserialize, JsonSchema)]
 struct Filters {
     age: u8,
     active: bool,
@@ -19,11 +18,15 @@ fn get_user(uuid: &str) { /* ... */ }
 #[get("/users/<grade>?<filters..>")]
 fn users(grade: u8, filters: Filters) { /* ... */ }
 
+#[openapi(tag = "Users")]
+#[post("/users/<grade>", data = "<filters>")]
+fn create_users(grade: u8, filters: Json<Filters>) { /* ... */ }
+
 #[launch]
 fn rocket() -> Rocket<Build> {
     // rocket::build().mount("/", routes![user, users])
 
-    rocket::build().mount("/", openapi_get_routes![users])
+    rocket::build().mount("/", openapi_get_routes![users, create_users])
         .mount("/docs/", make_swagger_ui(&SwaggerUIConfig {
             url: "../openapi.json".to_owned(),
             ..Default::default()
