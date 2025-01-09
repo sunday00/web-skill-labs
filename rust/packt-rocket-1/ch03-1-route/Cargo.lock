@@ -1050,6 +1050,7 @@ dependencies = [
 name = "routings"
 version = "0.1.0"
 dependencies = [
+ "lazy_static",
  "rocket",
  "rocket_okapi",
  "serde",

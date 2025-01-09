@@ -11,6 +11,15 @@ struct Filters {
     active: bool,
 }
 
+#[derive(Debug)]
+struct User {
+    uuid: String,
+    name: String,
+    age: u8,
+    grade: u8,
+    active: bool,
+}
+
 #[route(GET, uri = "/user/<uuid>", rank = 1, format = "text/plain")]
 fn get_user(uuid: &str) { /* ... */ }
 
