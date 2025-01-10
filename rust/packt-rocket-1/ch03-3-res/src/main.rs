@@ -10,6 +10,10 @@ use std::collections::HashMap;
 use std::io::Cursor;
 use rocket::http::ContentType;
 use rocket::response::Responder;
+use rocket_okapi::gen::OpenApiGenerator;
+use rocket_okapi::okapi::openapi3::RefOr::Ref;
+use rocket_okapi::okapi::openapi3::{RefOr, Responses};
+use rocket_okapi::response::OpenApiResponderInner;
 
 #[derive(FromForm, Serialize, Deserialize, JsonSchema, Debug)]
 struct Filters {
@@ -43,6 +47,12 @@ impl<'r> Responder<'r, 'r> for &'r User {
     }
 }
 
+impl<'r> OpenApiResponderInner for &'r User {
+    fn responses(gen: &mut OpenApiGenerator) -> rocket_okapi::Result<Responses> {
+        <String>::responses(gen)
+    }
+}
+
 lazy_static! {
     static ref USERS: HashMap<&'static str, User> = {
         let mut map = HashMap::new();
@@ -58,8 +68,8 @@ lazy_static! {
     };
 }
 
-// #[openapi(tag = "Users")]
-#[get("/user/<uuid>", rank = 1, format = "text/plain")]
+#[openapi(tag = "Users")]
+#[get("/user/<uuid>", rank = 1, format = "application/json")]
 fn get_user(uuid: &str) -> Option<&User> {
     let user = USERS.get(uuid);
 
@@ -72,36 +82,11 @@ fn get_user(uuid: &str) -> Option<&User> {
 // ======
 #[launch]
 fn rocket() -> Rocket<Build> {
-    rocket::build().mount("/", openapi_get_routes![])
+    rocket::build()
+        .mount("/", openapi_get_routes![get_user])
         .mount("/docs/", make_swagger_ui(&SwaggerUIConfig {
             url: "../openapi.json".to_owned(),
             ..Default::default()
         }), )
-        .mount("/no-s/", routes![get_user])
+        .mount("/no-s/", routes![])
 }
-
-
-// #[rocket::main]
-// async fn main() {
-//     let launch_result = rocket::build()
-//         .mount(
-//             "/",
-//             openapi_get_routes![
-//                 get_all_users,
-//             ],
-//         )
-//         .mount(
-//             "/docs/",
-//             make_swagger_ui(&SwaggerUIConfig {
-//                 url: "../openapi.json".to_owned(),
-//                 ..Default::default()
-//             }),
-//         )
-//         .launch()
-//         .await;
-//
-//     match launch_result {
-//         Ok(_) => println!("Rocket shut down gracefully."),
-//         Err(err) => println!("Rocket had an error: {}", err),
-//     };
-// }
