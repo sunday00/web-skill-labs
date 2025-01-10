@@ -106,13 +106,64 @@ fn post(data: Json<Filters>) -> &'static str {
 
 // ======
 
+#[derive(FromForm, Serialize, Deserialize, JsonSchema, Debug)]
+#[schemars(example = "name_grade_example")]
+struct NameGrade<'r> {
+    name: &'r str,
+    grade: u8,
+}
+
+fn name_grade_example() -> String {
+    String::from("\"John_1\"")
+}
+
+impl<'r> FromParam<'r> for NameGrade<'r> {
+    type Error = &'static str;
+
+    fn from_param(param: &'r str) -> Result<Self, Self::Error> {
+        const ERROR_MESSAGE: Result<NameGrade, &'static str> = Err("Error parsing user parameter");
+
+        let name_grade_vec: Vec<&'r str> = param.split('_').collect();
+
+        match name_grade_vec.len() {
+            2 => match name_grade_vec[1].parse::<u8>() {
+                Ok(n) => Ok(Self { name: name_grade_vec[0], grade: n }),
+                Err(_) => ERROR_MESSAGE
+            },
+            _ => ERROR_MESSAGE
+        }
+    }
+}
+
+#[openapi(tag = "Users")]
+#[get("/users/complicated/<name_grade>?<filters..>")]
+fn users_by_name_grade(name_grade: NameGrade, filters: Option<Filters>) -> String {
+    let users: Vec<&User> = USERS.values()
+        .filter(|u| u.name.contains(&name_grade.name) && u.grade == name_grade.grade)
+        // .filter(|u| u.age == filters.age && u.active == filters.active)
+        .filter(|u| {
+            if let Some(fts) = &filters {
+                u.age == fts.age && u.active == fts.active
+            } else {
+                true
+            }
+        })
+        .collect();
+
+    if users.len() > 0 {
+        users.iter().map(|u| u.name.to_string()).collect::<Vec<String>>().join("")
+    } else {
+        String::from("Not found")
+    }
+}
+
 
 // ======
 #[launch]
 fn rocket() -> Rocket<Build> {
     // rocket::build().mount("/", routes![user, users])
 
-    rocket::build().mount("/", openapi_get_routes![get_user, users, create_users, first, second])
+    rocket::build().mount("/", openapi_get_routes![get_user, users, create_users, first, second, users_by_name_grade])
         .mount("/docs/", make_swagger_ui(&SwaggerUIConfig {
             url: "../openapi.json".to_owned(),
             ..Default::default()
