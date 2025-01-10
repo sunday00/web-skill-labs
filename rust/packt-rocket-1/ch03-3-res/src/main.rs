@@ -36,20 +36,25 @@ struct User {
 }
 
 impl<'r> Responder<'r, 'r> for &'r User {
-    fn respond_to(self, _: &'r Request<'_>) -> response::Result<'r> {
-        let user = format!("Found user: {:?}", self);
+    fn respond_to(self, req: &'r Request<'_>) -> response::Result<'r> {
+        // let user = format!("Found user: {:?}", self);
+        // let user = Json(self);
 
-        Response::build()
-            .sized_body(user.len(), Cursor::new(user))
+        Response::
+            // build()
+            // .sized_body(user.len(), Cursor::new(user))
+            build_from(Json(self).respond_to(req)?)
             .raw_header("X-USER-ID", self.uuid.to_string())
-            .header(ContentType::Plain)
+            // .header(ContentType::Plain)
+            .header(ContentType::JSON)
             .ok()
     }
 }
 
 impl<'r> OpenApiResponderInner for &'r User {
     fn responses(gen: &mut OpenApiGenerator) -> rocket_okapi::Result<Responses> {
-        <String>::responses(gen)
+        // <String>::responses(gen)
+        <Json<&User>>::responses(gen)
     }
 }
 
@@ -69,7 +74,7 @@ lazy_static! {
 }
 
 #[openapi(tag = "Users")]
-#[get("/user/<uuid>", rank = 1, format = "application/json")]
+#[get("/user/<uuid>", rank = 1)]
 fn get_user(uuid: &str) -> Option<&User> {
     let user = USERS.get(uuid);
 
