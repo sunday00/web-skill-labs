@@ -1,0 +1,11 @@
+[package]
+name = "respo"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rocket = { version = "0.5.1", features = ["json"] }
+rocket_okapi = { version = "0.9.0", features = ["swagger"] }
+lazy_static = "1.5.0"
+serde = "1.0.217"
+
