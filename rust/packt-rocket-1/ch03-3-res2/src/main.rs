@@ -2,9 +2,9 @@
 extern crate rocket;
 
 use lazy_static::lazy_static;
-use rocket::http::ContentType;
+use rocket::http::{ContentType, Status};
 use rocket::request::{FromParam, Request};
-use rocket::response::{self, Responder, Response};
+use rocket::response::{self, status, Responder, Response};
 use rocket::serde::{json::Json, Deserialize, Serialize};
 use rocket::{Build, Rocket};
 use rocket_okapi::gen::OpenApiGenerator;
@@ -139,12 +139,15 @@ lazy_static! {
 
 #[openapi(tag = "Users")]
 #[get("/user/<uuid>", rank = 1)]
-fn user(uuid: Uuid) -> Option<&'static User> {
+// fn user(uuid: Uuid) -> Option<&'static User> {
+// fn user(uuid: Uuid) -> status::Accepted<&'static User> {
+fn user(uuid: Uuid) -> status::Custom<Option<&'static User>> {
     let user = USERS.get(uuid.0.as_str());
 
     match user {
-        Some(u) => Some(u),
-        None => None,
+        Some(u) => status::Custom(Status::Accepted, Some(u)),
+        // None => status::Custom(Status::NotFound, None),
+        None => status::Custom(Status::Unauthorized, None),
     }
 }
 
