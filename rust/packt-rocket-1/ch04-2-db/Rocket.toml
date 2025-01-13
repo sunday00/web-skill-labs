@@ -1,0 +1,2 @@
+[development]
+ROCKET_DATABASE_URL="sqlite:///Users/sunday00/workspace/web-skill-labs/rust/packt-rocket-1/ch04-2-db/rocket_exam.db"
