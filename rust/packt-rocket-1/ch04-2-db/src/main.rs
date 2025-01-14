@@ -18,7 +18,7 @@ use std::vec::Vec;
 use sqlx::{FromRow, SqlitePool};
 use sqlx::sqlite::SqlitePoolOptions;
 
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize, FromForm, JsonSchema, Debug)]
 struct Config {
     database_url: String,
 }
@@ -27,6 +27,37 @@ struct Config {
 struct Filters {
     age: u8,
     active: bool,
+}
+
+#[derive(Serialize, Deserialize, FromForm, JsonSchema, Debug)]
+#[schemars(example = "name_grade_example")]
+struct NameGrade<'r> {
+    name: &'r str,
+    grade: u8,
+}
+
+impl<'r> FromParam<'r> for NameGrade<'r> {
+    type Error = &'static str;
+
+    fn from_param(param: &'r str) -> Result<Self, Self::Error> {
+        const ERROR_MESSAGE: Result<NameGrade, &'static str> = Err("Error parsing user parameter");
+
+        let name_grade_vec: Vec<&'r str> = param.split('_').collect();
+        match name_grade_vec.len() {
+            2 => match name_grade_vec[1].parse::<u8>() {
+                Ok(n) => Ok(Self {
+                    name: name_grade_vec[0],
+                    grade: n,
+                }),
+                Err(_) => ERROR_MESSAGE,
+            },
+            _ => ERROR_MESSAGE,
+        }
+    }
+}
+
+fn name_grade_example() -> String {
+    String::from("\"John_1\"")
 }
 
 #[derive(Serialize, Deserialize, FromForm, JsonSchema, Debug)]
@@ -119,30 +150,28 @@ async fn user(counter: &State<VisitorCounter>, pool: &rocket::State<SqlitePool>,
 }
 
 #[openapi(tag = "Users")]
-#[get("/user", rank = 1)]
-async fn users(counter: &State<VisitorCounter>, pool: &rocket::State<SqlitePool>) -> Result<Users, Status> {
+#[get("/users/<name_grade>?<filters..>", rank = 1)]
+async fn users(counter: &State<VisitorCounter>, pool: &rocket::State<SqlitePool>, name_grade: NameGrade<'_>, filters: Option<Filters>,) -> Result<Users, Status> {
     // counter.visitor.fetch_add(1, Ordering::Relaxed);
     counter.increment_counter();
     println!("visitors: {}", counter.visitor.load(Ordering::Relaxed));
 
     // Users(USERS.values().collect())
 
-    // let mut query_str = String::from("SELECT * FROM users WHERE name LIKE $1 AND grade = $2");
-    let mut query_str = String::from("SELECT * FROM users");
+    let mut query_str = String::from("SELECT * FROM users WHERE name LIKE $1 AND grade = $2");
 
-    // if filters.is_some() {
-    //     query_str.push_str(" AND age = $3 AND active = $4");
-    // }
+    if filters.is_some() {
+        query_str.push_str(" AND age = $3 AND active = $4");
+    }
 
     let mut query = sqlx::query_as::<_, User>(&query_str)
-        // .bind(format!("%{}%", &name_grade.name))
-        // .bind(name_grade.grade as i16)
+        .bind(format!("%{}%", &name_grade.name))
+        .bind(name_grade.grade as i16)
     ;
 
-    // if let Some(fts) = &filters {
-    //     query = query.bind(fts.age as i16).bind(fts.
-    //         active);
-    // }
+    if let Some(fts) = &filters {
+        query = query.bind(fts.age as i16).bind(fts.active);
+    }
 
     let unwrapped_users = query.fetch_all(pool.inner()).await;
     let users: Vec<User> = unwrapped_users.map_err(|_| Status::InternalServerError)?;
