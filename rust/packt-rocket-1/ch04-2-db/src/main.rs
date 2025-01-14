@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate rocket;
 
-use rocket::http::{ContentType, Status};
+use rocket::http::{ContentType, Header, Status};
 use rocket::response::Responder;
 use rocket::serde::json::Json;
 use rocket::serde::{Deserialize, Serialize};
@@ -18,6 +18,7 @@ use std::vec::Vec;
 use rocket::fairing::{Fairing, Info, Kind};
 use sqlx::{FromRow, SqlitePool};
 use sqlx::sqlite::SqlitePoolOptions;
+use uuid::Uuid as UUID;
 
 #[derive(Serialize, Deserialize, FromForm, JsonSchema, Debug)]
 struct Config {
@@ -158,6 +159,30 @@ impl Fairing for VisitorCounter {
     }
 }
 
+const X_TRACE_ID: &str = "X-TRACE-ID";
+struct XTraceId {}
+
+#[rocket::async_trait]
+impl Fairing for XTraceId {
+    fn info(&self) -> Info {
+        Info {
+            name: "X-TRACE-ID Injector",
+            kind: Kind::Request | Kind::Response,
+        }
+    }
+
+    async fn on_request(&self, req: &mut Request<'_>, _data: &mut Data<'_>) {
+        let header = Header::new(X_TRACE_ID, UUID::new_v4().to_string());
+        req.add_header(header);
+    }
+
+    async fn on_response<'r>(&self, req: &'r Request<'_>, res: &mut Response<'r>) {
+        let header = req.headers().get_one(X_TRACE_ID).unwrap();
+        res.set_header(Header::new(X_TRACE_ID, header));
+    }
+}
+
+
 #[openapi(tag = "Users")]
 #[get("/user/<uuid>", rank = 1)]
 async fn user(
@@ -219,6 +244,8 @@ async fn rocket() -> Rocket<Build> {
         visitor: AtomicU64::new(0),
     };
 
+    let x_trace_id = XTraceId {};
+
     let rocket_frame = rocket::build();
 
     let config: Config = rocket_frame
@@ -235,6 +262,7 @@ async fn rocket() -> Rocket<Build> {
     rocket_frame
         .manage(pool)
         .attach(visitor_counter)
+        .attach(x_trace_id)
         .mount("/", openapi_get_routes![user, users])
         .mount("/docs/", make_swagger_ui(&SwaggerUIConfig {
             url: "../openapi.json".to_owned(),
