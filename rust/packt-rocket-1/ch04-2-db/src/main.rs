@@ -62,17 +62,17 @@ fn name_grade_example() -> String {
 
 #[derive(Serialize, Deserialize, FromForm, JsonSchema, Debug)]
 #[schemars(example = "example_uuid")]
-struct Uuid(String);
+struct Uuid<'r>(&'r str);
 
 fn example_uuid() -> String {
     String::from("2a1d0e01-a0cd-4e47-b785-8a5c8ed5bafd")
 }
 
-impl<'r> FromParam<'r> for Uuid {
+impl<'r> FromParam<'r> for Uuid<'r> {
     type Error = ();
 
     fn from_param(param: &'r str) -> Result<Self, Self::Error> {
-        Ok(Uuid(String::from(param)))
+        Ok(Uuid(param))
     }
 }
 
@@ -136,7 +136,7 @@ impl VisitorCounter {
 
 #[openapi(tag = "Users")]
 #[get("/user/<uuid>", rank = 1)]
-async fn user(counter: &State<VisitorCounter>, pool: &rocket::State<SqlitePool>, uuid: Uuid) -> Result<User, Status> {
+async fn user(counter: &State<VisitorCounter>, pool: &rocket::State<SqlitePool>, uuid: Uuid<'_>) -> Result<User, Status> {
     // counter.visitor.fetch_add(1, Ordering::Relaxed);
     counter.increment_counter();
     println!("visitors: {}", counter.visitor.load(Ordering::Relaxed));
