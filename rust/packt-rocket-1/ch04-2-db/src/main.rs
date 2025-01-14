@@ -5,7 +5,7 @@ use rocket::http::{ContentType, Status};
 use rocket::response::Responder;
 use rocket::serde::json::Json;
 use rocket::serde::{Deserialize, Serialize};
-use rocket::{request::FromParam, response, Request, Response, State};
+use rocket::{request::FromParam, response, Data, Orbit, Request, Response};
 use rocket::{Build, Rocket};
 use rocket_okapi::gen::OpenApiGenerator;
 use rocket_okapi::okapi::openapi3::Responses;
@@ -15,6 +15,7 @@ use rocket_okapi::swagger_ui::{make_swagger_ui, SwaggerUIConfig};
 use rocket_okapi::{openapi, openapi_get_routes};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::vec::Vec;
+use rocket::fairing::{Fairing, Info, Kind};
 use sqlx::{FromRow, SqlitePool};
 use sqlx::sqlite::SqlitePoolOptions;
 
@@ -134,12 +135,38 @@ impl VisitorCounter {
     }
 }
 
+#[rocket::async_trait]
+impl Fairing for VisitorCounter {
+    fn info(&self) -> Info {
+        Info {
+            name: "Visit Counter",
+            kind: Kind::Ignite | Kind::Liftoff | Kind::Request,
+        }
+    }
+
+    async fn on_ignite(&self, rocket: Rocket<Build>) -> rocket::fairing::Result {
+        println!("setting up visitor counter");
+        Ok(rocket)
+    }
+
+    async fn on_liftoff(&self, _rocket: &Rocket<Orbit>) {
+        println!("finish serring up visitor counter");
+    }
+
+    async fn on_request(&self, _req: &mut Request<'_>, _data: &mut Data<'_>) {
+        self.increment_counter();
+    }
+}
+
 #[openapi(tag = "Users")]
 #[get("/user/<uuid>", rank = 1)]
-async fn user(counter: &State<VisitorCounter>, pool: &rocket::State<SqlitePool>, uuid: Uuid<'_>) -> Result<User, Status> {
+async fn user(
+    // counter: &State<VisitorCounter>,
+    pool: &rocket::State<SqlitePool>, uuid: Uuid<'_>) -> Result<User, Status> {
+
     // counter.visitor.fetch_add(1, Ordering::Relaxed);
-    counter.increment_counter();
-    println!("visitors: {}", counter.visitor.load(Ordering::Relaxed));
+    // counter.increment_counter();
+    // println!("visitors: {}", counter.visitor.load(Ordering::Relaxed));
 
     let uuid_param = uuid.0.to_string();
 
@@ -151,10 +178,13 @@ async fn user(counter: &State<VisitorCounter>, pool: &rocket::State<SqlitePool>,
 
 #[openapi(tag = "Users")]
 #[get("/users/<name_grade>?<filters..>", rank = 1)]
-async fn users(counter: &State<VisitorCounter>, pool: &rocket::State<SqlitePool>, name_grade: NameGrade<'_>, filters: Option<Filters>,) -> Result<Users, Status> {
+async fn users(
+    // counter: &State<VisitorCounter>,
+    pool: &rocket::State<SqlitePool>, name_grade: NameGrade<'_>, filters: Option<Filters>,) -> Result<Users, Status> {
+
     // counter.visitor.fetch_add(1, Ordering::Relaxed);
-    counter.increment_counter();
-    println!("visitors: {}", counter.visitor.load(Ordering::Relaxed));
+    // counter.increment_counter();
+    // println!("visitors: {}", counter.visitor.load(Ordering::Relaxed));
 
     // Users(USERS.values().collect())
 
@@ -202,8 +232,9 @@ async fn rocket() -> Rocket<Build> {
         .await
         .expect("Unable to connect to database");
 
-    rocket_frame.manage(visitor_counter)
+    rocket_frame
         .manage(pool)
+        .attach(visitor_counter)
         .mount("/", openapi_get_routes![user, users])
         .mount("/docs/", make_swagger_ui(&SwaggerUIConfig {
             url: "../openapi.json".to_owned(),
