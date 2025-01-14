@@ -8,6 +8,5 @@ rocket = { version = "0.5.1", features = ["json"] }
 rocket_okapi = { version = "0.9.0", features = ["swagger"] }
 serde = "1.0.217"
 sqlx = { version = "0.8.3", features = ["sqlite", "uuid", "runtime-tokio-rustls"] }
-uuid = "1.11.1"
 
 

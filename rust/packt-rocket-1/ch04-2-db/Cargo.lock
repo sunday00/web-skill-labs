@@ -2780,7 +2780,6 @@ dependencies = [
  "rocket_okapi",
  "serde",
  "sqlx",
- "uuid",
 ]
 
 [[package]]
