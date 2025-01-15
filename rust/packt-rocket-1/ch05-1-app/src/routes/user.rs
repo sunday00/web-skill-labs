@@ -31,9 +31,34 @@ pub async fn get_user(pool: &rocket::State<SqlitePool>, uuid: &str) -> HtmlRespo
     Ok(RawHtml(html_string))
 }
 
-#[get("/users?<_pagination>", format = "text/html")]
-pub async fn get_users(_pool: &rocket::State<SqlitePool>, _pagination: Option<Pagination>) -> HtmlResponse {
-    todo!("will implement later");
+#[get("/users?<pagination>", format = "text/html")]
+pub async fn get_users(pool: &rocket::State<SqlitePool>, pagination: Option<Pagination>) -> HtmlResponse {
+    let (users, new_pagination) = User::find_all(pool, pagination).await.map_err(|_| Status::NotFound)?;
+
+    let mut html_string = String::from(USER_HTML_PREFIX);
+
+    for user in users {
+        html_string.push_str(r#"<div style="display: flex; gap: 0.5em;">"#);
+        html_string.push_str(&user.to_mini_string());
+        html_string.push_str(format!(r#"<a href="/users/{}">show</a>"#, user.uuid).as_ref());
+        html_string.push_str(format!(r#"<a href="/users/edit/{}">edit</a>"#, user.uuid).as_ref());
+        html_string.push_str(r#"</div>"#);
+    }
+
+    if let Some(pg) = new_pagination {
+        html_string.push_str(
+            format!(
+                r#"<a href="/users?pagination.next={}&pagination.limit={}">Next</a><br/>"#,
+                &(pg.next.0).timestamp_nanos(),
+                &pg.limit
+            ).as_ref(),
+        )
+    }
+
+    html_string.push_str(r#"<a href="/users/new">new</a>"#);
+    html_string.push_str(USER_HTML_SUFFIX);
+
+    Ok(RawHtml(html_string))
 }
 
 #[get("/users/new", format = "text/html")]
