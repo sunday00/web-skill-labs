@@ -8,26 +8,6 @@ use our_application::routes::{post, user};
 use rocket::serde::{Deserialize, Serialize};
 use rocket::{Build, Rocket};
 use rocket_okapi::swagger_ui::{make_swagger_ui, SwaggerUIConfig};
-// ==== [[[[routes]]]] ===========
-// |
-// |
-// ==== user routes ====
-
-
-// ==== post routes ====
-
-
-// |
-// |
-// ==== [[[[routes]]]] ===========
-
-// ==== [[[[define errors]]]] ===========
-// |
-// |
-
-// |
-// |
-// ==== [[[[define errors]]]] ===========
 
 // ==== [[[[config and launch]]]] ===========
 // |
