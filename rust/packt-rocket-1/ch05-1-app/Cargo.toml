@@ -4,8 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-rocket = { version = "0.5.1", features = ["json"] }
+chrono = "0.4.39"
+rocket = { version = "0.5.1", features = ["json", "uuid"] }
 rocket_okapi = { version = "0.9.0", features = ["swagger"] }
 serde = "1.0.217"
-sqlx = { version = "0.8.3", features = ["sqlite", "uuid", "runtime-tokio-rustls"] }
+sqlx = { version = "0.8.3", features = ["sqlite", "uuid", "runtime-tokio-rustls", "chrono"] }
 uuid = { version = "1.11.1", features = ["v4"] }
