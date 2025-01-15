@@ -64,7 +64,36 @@ pub async fn get_users(pool: &rocket::State<SqlitePool>, pagination: Option<Pagi
 
 #[get("/users/new", format = "text/html")]
 pub async fn new_user(_pool: &rocket::State<SqlitePool>) -> HtmlResponse {
-    todo!("will implement later");
+    let mut html_string = String::from(USER_HTML_PREFIX);
+
+    html_string.push_str(
+        r#"<form accept-charset="UTF-8" action="/users" autocomplete="off" method="POST">
+    <div>
+        <label for="username">Username:</label>
+        <input name="username" type="text"/>
+    </div>
+    <div>
+        <label for="email">Email:</label>
+        <input name="email" type="email"/>
+    </div>
+    <div>
+        <label for="password">Password:</label>
+        <input name="password" type="password"/>
+    </div>
+    <div>
+        <label for="password_confirmation">Password Confirmation:</label>
+        <input name="password_confirmation" type="password"/>
+    </div>
+    <div>
+        <label for="description">Tell us a little bit more about yourself:</label>
+        <textarea name="description"></textarea>
+    </div>
+    <button type="submit" value="Submit">Submit</button>
+</form>"#
+    );
+
+    html_string.push_str(USER_HTML_SUFFIX);
+    Ok(RawHtml(html_string))
 }
 
 #[post("/users", format = "text/html", data = "<_user>")]
