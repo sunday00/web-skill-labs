@@ -3,8 +3,9 @@ use rocket::form;
 use rocket::form::{DataField, FromFormField, ValueField};
 use sqlx::FromRow;
 
-#[derive(Debug, FromRow)]
-pub struct OurDateTime(DateTime<Utc>);
+#[derive(Debug, FromRow, sqlx::Type)]
+#[sqlx(transparent)]
+pub struct OurDateTime(pub DateTime<Utc>);
 
 #[rocket::async_trait]
 impl<'r> FromFormField<'r> for OurDateTime {

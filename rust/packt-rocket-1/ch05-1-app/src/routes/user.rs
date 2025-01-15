@@ -2,11 +2,33 @@ use super::HtmlResponse;
 use crate::models::pagination::Pagination;
 use crate::models::user::User;
 use rocket::form::Form;
+use rocket::http::Status;
+use rocket::response::content::RawHtml;
 use sqlx::SqlitePool;
 
-#[get("/users/<_uuid>", format = "text/html")]
-pub async fn get_user(_pool: &rocket::State<SqlitePool>, _uuid: &str) -> HtmlResponse {
-    todo!("will implement later");
+const USER_HTML_PREFIX: &str = r#"<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Our Application User</title>
+</head>
+<body>"#;
+
+const USER_HTML_SUFFIX: &str = r#"</body>
+</html>"#;
+
+#[get("/users/<uuid>", format = "text/html")]
+pub async fn get_user(pool: &rocket::State<SqlitePool>, uuid: &str) -> HtmlResponse {
+    let user = User::find(pool, uuid).await.map_err(|_| Status::NotFound)?;
+
+    let mut html_string = String::from(USER_HTML_PREFIX);
+    html_string.push_str(&user.to_html_string());
+    html_string.push_str(r#"<div style="display: flex; gap: 0.5em;">"#);
+    html_string.push_str(format!(r#"<a href="/users/edit/{}">Edit User</a>"#, user.uuid).as_ref());
+    html_string.push_str(r#"<a href="/users">User List</a>"#);
+    html_string.push_str(r#"</div>"#);
+    html_string.push_str(USER_HTML_SUFFIX);
+    Ok(RawHtml(html_string))
 }
 
 #[get("/users?<_pagination>", format = "text/html")]
