@@ -1,9 +1,11 @@
 use super::HtmlResponse;
 use crate::models::pagination::Pagination;
-use crate::models::user::User;
-use rocket::form::Form;
+use crate::models::user::{NewUser, User};
+use rocket::form::{Contextual, Form};
 use rocket::http::Status;
+use rocket::request::FlashMessage;
 use rocket::response::content::RawHtml;
+use rocket::response::{Flash, Redirect};
 use sqlx::SqlitePool;
 
 const USER_HTML_PREFIX: &str = r#"<!DOCTYPE html>
@@ -19,10 +21,15 @@ const USER_HTML_SUFFIX: &str = r#"</body>
 </html>"#;
 
 #[get("/users/<uuid>", format = "text/html")]
-pub async fn get_user(pool: &rocket::State<SqlitePool>, uuid: &str) -> HtmlResponse {
+pub async fn get_user(pool: &rocket::State<SqlitePool>, uuid: &str, flash: Option<FlashMessage<'_>>) -> HtmlResponse {
     let user = User::find(pool, uuid).await.map_err(|_| Status::NotFound)?;
 
     let mut html_string = String::from(USER_HTML_PREFIX);
+
+    if flash.is_some() {
+        html_string.push_str(flash.unwrap().message());
+    }
+
     html_string.push_str(&user.to_html_string());
     html_string.push_str(r#"<div style="display: flex; gap: 0.5em;">"#);
     html_string.push_str(format!(r#"<a href="/users/edit/{}">Edit User</a>"#, user.uuid).as_ref());
@@ -63,8 +70,12 @@ pub async fn get_users(pool: &rocket::State<SqlitePool>, pagination: Option<Pagi
 }
 
 #[get("/users/new", format = "text/html")]
-pub async fn new_user(_pool: &rocket::State<SqlitePool>) -> HtmlResponse {
+pub async fn new_user(flash: Option<FlashMessage<'_>>) -> HtmlResponse {
     let mut html_string = String::from(USER_HTML_PREFIX);
+
+    if flash.is_some() {
+        html_string.push_str(format!(r#"<div style="color: red;">{}</div>"#, flash.unwrap().message()).as_ref());
+    }
 
     html_string.push_str(
         r#"<form accept-charset="UTF-8" action="/users" autocomplete="off" method="POST">
@@ -96,9 +107,26 @@ pub async fn new_user(_pool: &rocket::State<SqlitePool>) -> HtmlResponse {
     Ok(RawHtml(html_string))
 }
 
-#[post("/users", format = "text/html", data = "<_user>")]
-pub async fn create_user(_pool: &rocket::State<SqlitePool>, _user: Form<User>) -> HtmlResponse {
-    todo!("will implement later");
+#[post("/users", format = "application/x-www-form-urlencoded", data = "<user_context>")]
+pub async fn create_user<'r>(pool: &rocket::State<SqlitePool>, user_context: Form<Contextual<'r, NewUser<'r>>>) -> Result<Flash<Redirect>, Flash<Redirect>> {
+    if user_context.value.is_none() {
+        let error_message = format!(
+            "<div>{}</div>",
+            user_context.context.errors().map(|e| e.to_string()).collect::<Vec<_>>().join("<br />")
+        );
+
+        return Err(Flash::error(Redirect::to("/users/new"), error_message));
+    }
+
+    let new_user = user_context.value.as_ref().unwrap();
+    let user = User::create(pool, new_user).await.map_err(|e| {
+        println!("{}", e);
+        Flash::error(Redirect::to("/users/new"), String::from("<h2>Failed to create user</h2>"))
+    })?;
+
+    Ok(Flash::success(
+        Redirect::to(format!("/users/{}", user.uuid)), "<h2>Successfully created user</h2>",
+    ))
 }
 
 #[get("/users/edit/<_uuid>", format = "text/html")]
