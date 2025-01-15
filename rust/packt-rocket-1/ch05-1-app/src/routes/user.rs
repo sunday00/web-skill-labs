@@ -11,6 +11,7 @@ const USER_HTML_PREFIX: &str = r#"<!DOCTYPE html>
 <head>
 <meta charset="utf-8" />
 <title>Our Application User</title>
+<link rel="icon" type="image/x-icon" href="/favicon.png">
 </head>
 <body>"#;
 

@@ -5,9 +5,11 @@ use our_application::catchers;
 use our_application::fairings::db::DBConnection;
 use our_application::routes::assets;
 use our_application::routes::{post, user};
+use rocket::fs::{relative, NamedFile};
 use rocket::serde::{Deserialize, Serialize};
 use rocket::{Build, Rocket};
 use rocket_okapi::swagger_ui::{make_swagger_ui, SwaggerUIConfig};
+use std::path::Path;
 
 // ==== [[[[config and launch]]]] ===========
 // |
@@ -15,6 +17,13 @@ use rocket_okapi::swagger_ui::{make_swagger_ui, SwaggerUIConfig};
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
     pub database_url: String,
+}
+
+#[get("/favicon.png")]
+async fn favicon() -> NamedFile {
+    NamedFile::open(Path::new(relative!("static")).join("favicon.png"))
+        .await
+        .unwrap()
 }
 
 #[launch]
@@ -31,6 +40,7 @@ async fn rocket() -> Rocket<Build> {
     server.manage(db.pool().await)
         // .mount("/", openapi_get_routes![])
         .mount("/", routes![
+            favicon,
             user::get_user, user::get_users, user::new_user, user::edit_user,
             user::create_user,  user::put_user, user::patch_user, user::delete_user,
             post::get_post, post::get_posts, post::create_post, post::delete_post,
