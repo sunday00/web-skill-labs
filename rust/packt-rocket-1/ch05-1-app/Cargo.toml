@@ -3,6 +3,14 @@ name = "our_application"
 version = "0.1.0"
 edition = "2021"
 
+[[bin]]
+name = "our_application"
+path = "src/main.rs"
+
+[lib]
+name = "our_application"
+path = "src/lib.rs"
+
 [dependencies]
 chrono = "0.4.39"
 rocket = { version = "0.5.1", features = ["json", "uuid"] }
