@@ -30,6 +30,9 @@ impl Error for OurError {
 
 impl OurError {
     fn new_error_with_status(status: Status, message: String, debug: Option<Box<dyn Error>>) -> Self {
+        if debug.is_some() {
+            log::error!("Error: {:?}", &debug);
+        }
         OurError {
             status,
             message,
@@ -55,6 +58,12 @@ impl OurError {
                 String::from("NotFound"), Some(Box::new(e)),
             ),
             sqlxError::Database(ee) => {
+                if ee.code().unwrap_or(Cow::Borrowed("2067")).eq("2067") {
+                    return OurError::new_bad_request_error(
+                        String::from("Duplicated UniqueValue"), Some(Box::new(ee)),
+                    );
+                }
+
                 if ee.code().unwrap_or(Cow::Borrowed("2300")).starts_with("23") {
                     return OurError::new_bad_request_error(
                         String::from("Cannot create or update resource"), Some(Box::new(ee)),

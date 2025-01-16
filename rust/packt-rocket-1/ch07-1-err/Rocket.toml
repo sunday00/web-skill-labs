@@ -1,5 +1,6 @@
 [default]
 database_url = "sqlite:///Users/sunday00/workspace/web-skill-labs/rust/packt-rocket-1/ch05-1-app/rocket_exam.db"
+log_level = "normal"
 
 [debug]
 database_url = "sqlite:///Users/sunday00/workspace/web-skill-labs/rust/packt-rocket-1/ch05-1-app/rocket_exam.db"

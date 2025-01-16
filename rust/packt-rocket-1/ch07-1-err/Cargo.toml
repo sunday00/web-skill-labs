@@ -14,7 +14,10 @@ path = "src/lib.rs"
 [dependencies]
 ammonia = "4.0.0"
 argon2 = { version = "0.5.3", features = ["std"] }
+async-log = "2.0.0"
 chrono = "0.4.39"
+fern = "0.7.1"
+log = "0.4.25"
 rand_core = { version = "0.6.4", features = ["std"] }
 regex = "1.11.1"
 rocket = { version = "0.5.1", features = ["json", "uuid"] }
