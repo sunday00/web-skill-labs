@@ -7,6 +7,7 @@ use rocket::request::FlashMessage;
 use rocket::response::content::RawHtml;
 use rocket::response::{Flash, Redirect};
 use sqlx::SqlitePool;
+use std::fmt::format;
 
 const USER_HTML_PREFIX: &str = r#"<!DOCTYPE html>
 <html lang="en">
@@ -22,7 +23,7 @@ const USER_HTML_SUFFIX: &str = r#"</body>
 
 #[get("/users/<uuid>", format = "text/html")]
 pub async fn get_user(pool: &rocket::State<SqlitePool>, uuid: &str, flash: Option<FlashMessage<'_>>) -> HtmlResponse {
-    let user = User::find(pool, uuid).await.map_err(|_| Status::NotFound)?;
+    let user = User::find(pool, uuid).await.map_err(|e| e.status)?;
 
     let mut html_string = String::from(USER_HTML_PREFIX);
 
@@ -41,7 +42,7 @@ pub async fn get_user(pool: &rocket::State<SqlitePool>, uuid: &str, flash: Optio
 
 #[get("/users?<pagination>", format = "text/html")]
 pub async fn get_users(pool: &rocket::State<SqlitePool>, pagination: Option<Pagination>, flash: Option<FlashMessage<'_>>) -> HtmlResponse {
-    let (users, new_pagination) = User::find_all(pool, pagination).await.map_err(|_| Status::NotFound)?;
+    let (users, new_pagination) = User::find_all(pool, pagination).await.map_err(|e| e.status)?;
 
     let mut html_string = String::from(USER_HTML_PREFIX);
 
@@ -128,7 +129,7 @@ pub async fn create_user<'r>(pool: &rocket::State<SqlitePool>, user_context: For
     let new_user = user_context.value.as_ref().unwrap();
     let user = User::create(pool, new_user).await.map_err(|e| {
         println!("{}", e);
-        Flash::error(Redirect::to("/users/new"), String::from("<h2>Failed to create user</h2>"))
+        Flash::error(Redirect::to("/users/new"), format!("<h2>{}</h2>", e.to_string()))
     })?;
 
     Ok(Flash::success(
@@ -138,7 +139,7 @@ pub async fn create_user<'r>(pool: &rocket::State<SqlitePool>, user_context: For
 
 #[get("/users/edit/<uuid>", format = "text/html")]
 pub async fn edit_user(pool: &rocket::State<SqlitePool>, uuid: &str, flash: Option<FlashMessage<'_>>) -> HtmlResponse {
-    let user = User::find(pool, uuid).await.map_err(|_| Status::NotFound)?;
+    let user = User::find(pool, uuid).await.map_err(|e| e.status)?;
 
     let mut html_string = String::from(USER_HTML_PREFIX);
     if flash.is_some() {
@@ -216,7 +217,7 @@ pub async fn put_user<'r>(pool: &rocket::State<SqlitePool>, uuid: &str, user_con
         println!("{}", e);
         Flash::error(
             Redirect::to(format!("/users/edit/{}", uuid)),
-            "<div>Something went wrong when updating user</div>",
+            format!("<div>{}</div>", e),
         )
     })?;
     Ok(Flash::success(
@@ -242,7 +243,7 @@ pub async fn delete_user(pool: &rocket::State<SqlitePool>, uuid: &str) -> Result
 
         Flash::error(
             Redirect::to("/users"),
-            "<div>Something went wrong when deleting user</div>",
+            format!("<div>{}</div>", e),
         )
     })?;
 

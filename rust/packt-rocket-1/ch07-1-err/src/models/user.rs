@@ -1,5 +1,6 @@
 use super::our_date_time::OurDateTime;
 use super::user_status::UserStatus;
+use crate::errors::our_error::OurError;
 use crate::models::bool_wrapper::BoolWrapper;
 use crate::models::clean_html;
 use crate::models::pagination::{Pagination, DEFAULT_LIMIT};
@@ -11,7 +12,6 @@ use regex::Regex;
 use rocket::form;
 use rocket::form::Error as FormError;
 use sqlx::{FromRow, SqlitePool};
-use std::error::Error;
 use uuid::Uuid;
 
 #[derive(Debug, FromRow, FromForm)]
@@ -27,9 +27,15 @@ pub struct User {
 }
 
 impl User {
-    pub async fn find(pool: &rocket::State<SqlitePool>, uuid: &str) -> Result<Self, Box<dyn Error>> {
+    pub async fn find(pool: &rocket::State<SqlitePool>, uuid: &str) -> Result<Self, OurError> {
         let query = "SELECT * FROM users WHERE uuid = $1";
-        Ok(sqlx::query_as::<_, Self>(query).bind(uuid).fetch_one(pool.inner()).await?)
+        Ok(
+            sqlx::query_as::<_, Self>(query)
+                .bind(uuid)
+                .fetch_one(pool.inner())
+                .await
+                .map_err(OurError::from_sqlx_error)?
+        )
     }
 
     pub fn to_html_string(&self) -> String {
@@ -61,7 +67,7 @@ impl User {
         )
     }
 
-    pub async fn find_all(pool: &rocket::State<SqlitePool>, pagination: Option<Pagination>) -> Result<(Vec<Self>, Option<Pagination>), Box<dyn Error>> {
+    pub async fn find_all(pool: &rocket::State<SqlitePool>, pagination: Option<Pagination>) -> Result<(Vec<Self>, Option<Pagination>), OurError> {
         let pagination_prams: Pagination;
 
         if pagination.is_some() {
@@ -79,7 +85,8 @@ impl User {
             .bind(&pagination_prams.next)
             .bind(pagination_prams.limit as i32)
             .fetch_all(pool.inner())
-            .await?;
+            .await
+            .map_err(OurError::from_sqlx_error)?;
 
         let mut new_pagination: Option<Pagination> = None;
         if users.len() == pagination_prams.limit {
@@ -87,7 +94,8 @@ impl User {
             let exists = sqlx::query_as::<_, BoolWrapper>(query_str)
                 .bind(&users.last().unwrap().created_at)
                 .fetch_one(pool.inner())
-                .await?;
+                .await
+                .map_err(OurError::from_sqlx_error)?;
             if exists.0 {
                 new_pagination = Some(Pagination {
                     next: users.last().unwrap().created_at.to_owned(),
@@ -98,17 +106,23 @@ impl User {
         Ok((users, new_pagination))
     }
 
-    pub async fn create<'r>(pool: &rocket::State<SqlitePool>, new_user: &'r NewUser<'r>) -> Result<Self, Box<dyn Error>> {
+    pub async fn create<'r>(pool: &rocket::State<SqlitePool>, new_user: &'r NewUser<'r>) -> Result<Self, OurError> {
         let uuid = Uuid::new_v4();
         let user_name = &(clean_html(new_user.username));
         let description = &(new_user.description.map(clean_html));
 
         let salt = SaltString::generate(&mut OsRng);
         let argon2 = Argon2::default();
-        let password_hash = argon2.hash_password(new_user.password.as_bytes(), &salt);
-        if password_hash.is_err() {
-            return Err("cannot create password hash".into());
-        }
+        let password_hash = argon2.hash_password(new_user.password.as_bytes(), &salt)
+            .map_err(|e| {
+                OurError::new_internal_server_error(
+                    String::from("cannot create password hash"),
+                    Some(Box::new(e)),
+                )
+            });
+        // if password_hash.is_err() {
+        //     return Err("cannot create password hash".into());
+        // }
 
         let query_str = r#"INSERT INTO users (uuid, username, email, password_hash, description, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *"#;
         Ok(
@@ -119,11 +133,12 @@ impl User {
                 .bind(password_hash.unwrap().to_string())
                 .bind(description)
                 .bind(UserStatus::Inactive)
-                .fetch_one(pool.inner()).await?
+                .fetch_one(pool.inner()).await
+                .map_err(OurError::from_sqlx_error)?
         )
     }
 
-    pub async fn update<'r>(pool: &rocket::State<SqlitePool>, uuid: &'r str, user: &'r EditedUser<'r>) -> Result<Self, Box<dyn Error>> {
+    pub async fn update<'r>(pool: &rocket::State<SqlitePool>, uuid: &'r str, user: &'r EditedUser<'r>) -> Result<Self, OurError> {
         let old_user = Self::find(pool, uuid).await?;
 
         let now = OurDateTime(Utc::now());
@@ -142,13 +157,31 @@ impl User {
 
         if is_with_password {
             let old_password_hash = PasswordHash::new(&old_user.password_hash)
-                .map_err(|_| "can't read password hash")?;
+                // .map_err(|_| "can't read password hash")?;
+                .map_err(|e| {
+                    OurError::new_internal_server_error(
+                        String::from("Input error"),
+                        Some(Box::new(e)),
+                    )
+                })?;
             let argon2 = Argon2::default();
             argon2.verify_password(user.password.as_bytes(), &old_password_hash)
-                .map_err(|_| "cannot confirm old password")?;
+                // .map_err(|_| "cannot confirm old password")?;
+                .map_err(|e| {
+                    OurError::new_internal_server_error(
+                        String::from("Cannot confirm old password"),
+                        Some(Box::new(e)),
+                    )
+                })?;
             let salt = SaltString::generate(&mut OsRng);
             let new_hash = argon2.hash_password(user.password.as_bytes(), &salt)
-                .map_err(|_| "cannot update password hash")?;
+                // .map_err(|_| "cannot update password hash")?;
+                .map_err(|e| {
+                    OurError::new_internal_server_error(
+                        String::from("Something went wrong"),
+                        Some(Box::new(e)),
+                    )
+                })?;
 
             password_string.push_str(&new_hash.to_string().as_ref());
             set_strings.push("password_hash = $5");
@@ -169,13 +202,13 @@ impl User {
             binded = binded.bind(password_string);
         }
 
-        Ok(binded.bind(uuid).fetch_one(pool.inner()).await?)
+        Ok(binded.bind(uuid).fetch_one(pool.inner()).await.map_err(OurError::from_sqlx_error)?)
     }
 
-    pub async fn destroy(pool: &rocket::State<SqlitePool>, uuid: &str) -> Result<(), Box<dyn Error>> {
+    pub async fn destroy(pool: &rocket::State<SqlitePool>, uuid: &str) -> Result<(), OurError> {
         let query_str = r#"DELETE FROM users WHERE uuid = $1"#;
 
-        sqlx::query(query_str).bind(uuid).execute(pool.inner()).await?;
+        sqlx::query(query_str).bind(uuid).execute(pool.inner()).await.map_err(OurError::from_sqlx_error)?;
 
         Ok(())
     }
