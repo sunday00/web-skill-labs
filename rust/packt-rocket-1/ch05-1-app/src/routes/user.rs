@@ -1,6 +1,6 @@
 use super::HtmlResponse;
 use crate::models::pagination::Pagination;
-use crate::models::user::{NewUser, User};
+use crate::models::user::{EditedUser, NewUser, User};
 use rocket::form::{Contextual, Form};
 use rocket::http::Status;
 use rocket::request::FlashMessage;
@@ -40,16 +40,23 @@ pub async fn get_user(pool: &rocket::State<SqlitePool>, uuid: &str, flash: Optio
 }
 
 #[get("/users?<pagination>", format = "text/html")]
-pub async fn get_users(pool: &rocket::State<SqlitePool>, pagination: Option<Pagination>) -> HtmlResponse {
+pub async fn get_users(pool: &rocket::State<SqlitePool>, pagination: Option<Pagination>, flash: Option<FlashMessage<'_>>) -> HtmlResponse {
     let (users, new_pagination) = User::find_all(pool, pagination).await.map_err(|_| Status::NotFound)?;
 
     let mut html_string = String::from(USER_HTML_PREFIX);
+
+    if flash.is_some() {
+        html_string.push_str(format!(r#"<div style="color: red;">{}</div>"#, flash.unwrap().message()).as_ref());
+    }
 
     for user in users {
         html_string.push_str(r#"<div style="display: flex; gap: 0.5em;">"#);
         html_string.push_str(&user.to_mini_string());
         html_string.push_str(format!(r#"<a href="/users/{}">show</a>"#, user.uuid).as_ref());
         html_string.push_str(format!(r#"<a href="/users/edit/{}">edit</a>"#, user.uuid).as_ref());
+        html_string.push_str(format!(r#"<form accept-charset="UTF-8" action="/users/delete/{}" autocomplete="off" method="POST">
+            <button type="submit" value="Submit">Delete</button>
+        </form>"#, user.uuid).as_ref());
         html_string.push_str(r#"</div>"#);
     }
 
@@ -129,22 +136,118 @@ pub async fn create_user<'r>(pool: &rocket::State<SqlitePool>, user_context: For
     ))
 }
 
-#[get("/users/edit/<_uuid>", format = "text/html")]
-pub async fn edit_user(_pool: &rocket::State<SqlitePool>, _uuid: &str) -> HtmlResponse {
-    todo!("will implement later");
+#[get("/users/edit/<uuid>", format = "text/html")]
+pub async fn edit_user(pool: &rocket::State<SqlitePool>, uuid: &str, flash: Option<FlashMessage<'_>>) -> HtmlResponse {
+    let user = User::find(pool, uuid).await.map_err(|_| Status::NotFound)?;
+
+    let mut html_string = String::from(USER_HTML_PREFIX);
+    if flash.is_some() {
+        html_string.push_str(format!(r#"<div style="color: red;">{}</div>"#, flash.unwrap().message()).as_ref());
+    }
+
+    html_string.push_str(
+        format!(
+            r#"<form accept-charset="UTF-8" action="/users/{}" autocomplete="off" method="POST">
+    <input type="hidden" name="_METHOD" value="PUT"/>
+    <div>
+        <label for="username">Username:</label>
+        <input name="username" type="text" value="{}"/>
+    </div>
+    <div>
+        <label for="email">Email:</label>
+        <input name="email" type="email" value="{}"/>
+    </div>
+    <div>
+        <label for="old_password">Old password:</label>
+        <input name="old_password" type="password"/>
+    </div>
+    <div>
+        <label for="password">New password:</label>
+        <input name="password" type="password"/>
+    </div>
+    <div>
+        <label for="password_confirmation">Password Confirmation:</label>
+        <input name="password_confirmation" type="password"/>
+    </div>
+    <div>
+        <label for="description">Tell us a little bit more about yourself:</label>
+        <textarea name="description">{}</textarea>
+    </div>
+    <button type="submit" value="Submit">Submit</button>
+</form>"#,
+            &user.uuid,
+            &user.username,
+            &user.email,
+            &user.description.unwrap_or_else(|| "".to_string()),
+        )
+            .as_ref(),
+    );
+    html_string.push_str(USER_HTML_SUFFIX);
+    Ok(RawHtml(html_string))
 }
 
-#[put("/users/<_uuid>", format = "text/html", data = "<_user>")]
-pub async fn put_user(_pool: &rocket::State<SqlitePool>, _uuid: &str, _user: Form<User>) -> HtmlResponse {
-    todo!("will implement later");
+#[post("/users/<uuid>", format = "application/x-www-form-urlencoded", data = "<user_context>")]
+pub async fn update_user<'r>(pool: &rocket::State<SqlitePool>, uuid: &str, user_context: Form<Contextual<'r, EditedUser<'r>>>) -> Result<Flash<Redirect>, Flash<Redirect>> {
+    if user_context.value.is_none() {
+        let error_message = format!(
+            "<div>{}</div>",
+            user_context.context.errors()
+                .map(|e| e.to_string()).collect::<Vec<_>>().join("<br />")
+        );
+        return Err(Flash::error(
+            Redirect::to(format!("/users/edit/{}", uuid)), error_message,
+        ));
+    }
+    let user_value = user_context.value.as_ref().unwrap();
+    match user_value.method {
+        "PUT" => put_user(pool, uuid, user_context).await,
+        "PATCH" => patch_user(pool, uuid, user_context).await,
+        _ => Err(Flash::error(
+            Redirect::to(format!("/users/edit/{}", uuid)),
+            "<div>Something went wrong when updating user. Not supported FORM method.</div>",
+        ))
+    }
 }
 
-#[patch("/users/<_uuid>", format = "text/html", data = "<_user>")]
-pub async fn patch_user(_pool: &rocket::State<SqlitePool>, _uuid: &str, _user: Form<User>) -> HtmlResponse {
-    todo!("will implement later");
+#[put("/users/<uuid>", format = "application/x-www-form-urlencoded", data = "<user_context>")]
+pub async fn put_user<'r>(pool: &rocket::State<SqlitePool>, uuid: &str, user_context: Form<Contextual<'r, EditedUser<'r>>>) -> Result<Flash<Redirect>, Flash<Redirect>> {
+    let user_value = user_context.value.as_ref().unwrap();
+    let user = User::update(pool, uuid, user_value).await.map_err(|e| {
+        println!("{}", e);
+        Flash::error(
+            Redirect::to(format!("/users/edit/{}", uuid)),
+            "<div>Something went wrong when updating user</div>",
+        )
+    })?;
+    Ok(Flash::success(
+        Redirect::to(format!("/users/{}", user.uuid)),
+        "<div>Successfully updated user</div>",
+    ))
 }
 
-#[delete("/users/<_uuid>", format = "text/html")]
-pub async fn delete_user(_pool: &rocket::State<SqlitePool>, _uuid: &str) -> HtmlResponse {
-    todo!("will implement later");
+#[patch("/users/<uuid>", format = "application/x-www-form-urlencoded", data = "<user_context>")]
+pub async fn patch_user<'r>(pool: &rocket::State<SqlitePool>, uuid: &str, user_context: Form<Contextual<'r, EditedUser<'r>>>) -> Result<Flash<Redirect>, Flash<Redirect>> {
+    put_user(pool, uuid, user_context).await
+}
+
+#[post("/users/delete/<uuid>", format = "application/x-www-form-urlencoded")]
+pub async fn delete_user_entry_point(pool: &rocket::State<SqlitePool>, uuid: &str) -> Result<Flash<Redirect>, Flash<Redirect>> {
+    delete_user(pool, uuid).await
+}
+
+#[delete("/users/<uuid>", format = "application/x-www-form-urlencoded")]
+pub async fn delete_user(pool: &rocket::State<SqlitePool>, uuid: &str) -> Result<Flash<Redirect>, Flash<Redirect>> {
+    User::destroy(pool, uuid).await.map_err(|e| {
+        println!("{}", e);
+
+        Flash::error(
+            Redirect::to("/users"),
+            "<div>Something went wrong when deleting user</div>",
+        )
+    })?;
+
+    Ok(Flash::success(
+        Redirect::to("/users"),
+        "<div>Successfully deleted user</div>",
+    ))
 }

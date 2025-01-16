@@ -41,8 +41,9 @@ async fn rocket() -> Rocket<Build> {
         // .mount("/", openapi_get_routes![])
         .mount("/", routes![
             favicon,
-            user::get_user, user::get_users, user::new_user, user::edit_user,
-            user::create_user,  user::put_user, user::patch_user, user::delete_user,
+            user::get_user, user::get_users, user::new_user,  user::create_user,
+            user::edit_user, user::update_user, user::put_user, user::patch_user,
+            user::delete_user_entry_point, user::delete_user,
             post::get_post, post::get_posts, post::create_post, post::delete_post,
         ])
         .mount("/assets", routes![assets])
