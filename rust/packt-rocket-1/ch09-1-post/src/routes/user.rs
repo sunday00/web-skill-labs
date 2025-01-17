@@ -5,41 +5,14 @@ use crate::models::user::{EditedUser, GetUser, NewUser, User};
 use rocket::form::{Contextual, Form};
 use rocket::http::Status;
 use rocket::request::FlashMessage;
-use rocket::response::content::RawHtml;
 use rocket::response::{Flash, Redirect};
 use rocket_dyn_templates::{context, Template};
 use sqlx::SqlitePool;
 use std::fmt::format;
 
-// const USER_HTML_PREFIX: &str = r#"<!DOCTYPE html>
-// <html lang="en">
-// <head>
-// <meta charset="utf-8" />
-// <title>Our Application User</title>
-// <link rel="icon" type="image/x-icon" href="/assets/favicon.png">
-// </head>
-// <body>"#;
-//
-// const USER_HTML_SUFFIX: &str = r#"</body>
-// </html>"#;
-
 #[get("/users/<uuid>", format = "text/html")]
 pub async fn get_user(pool: &rocket::State<SqlitePool>, uuid: &str, flash: Option<FlashMessage<'_>>) -> HtmlResponse {
     let user = User::find(pool, uuid).await.map_err(|e| e.status)?;
-
-    // let mut html_string = String::from(USER_HTML_PREFIX);
-    //
-    // if flash.is_some() {
-    //     html_string.push_str(flash.unwrap().message());
-    // }
-    //
-    // html_string.push_str(&user.to_html_string());
-    // html_string.push_str(r#"<div style="display: flex; gap: 0.5em;">"#);
-    // html_string.push_str(format!(r#"<a href="/users/edit/{}">Edit User</a>"#, user.uuid).as_ref());
-    // html_string.push_str(r#"<a href="/users">User List</a>"#);
-    // html_string.push_str(r#"</div>"#);
-    // html_string.push_str(USER_HTML_SUFFIX);
-    // Ok(RawHtml(html_string))
 
     Ok(Template::render("users/show", &GetUser {
         user,
@@ -51,38 +24,6 @@ pub async fn get_user(pool: &rocket::State<SqlitePool>, uuid: &str, flash: Optio
 pub async fn get_users(pool: &rocket::State<SqlitePool>, pagination: Option<Pagination>, flash: Option<FlashMessage<'_>>) -> HtmlResponse {
     let (users, new_pagination) = User::find_all(pool, pagination).await.map_err(|e| e.status)?;
 
-    // let mut html_string = String::from(USER_HTML_PREFIX);
-
-    // if flash.is_some() {
-    //     html_string.push_str(format!(r#"<div style="color: red;">{}</div>"#, flash.unwrap().message()).as_ref());
-    // }
-    //
-    // for user in users {
-    //     html_string.push_str(r#"<div style="display: flex; gap: 0.5em;">"#);
-    //     html_string.push_str(&user.to_mini_string());
-    //     html_string.push_str(format!(r#"<a href="/users/{}">show</a>"#, user.uuid).as_ref());
-    //     html_string.push_str(format!(r#"<a href="/users/edit/{}">edit</a>"#, user.uuid).as_ref());
-    //     html_string.push_str(format!(r#"<form accept-charset="UTF-8" action="/users/delete/{}" autocomplete="off" method="POST">
-    //         <button type="submit" value="Submit">Delete</button>
-    //     </form>"#, user.uuid).as_ref());
-    //     html_string.push_str(r#"</div>"#);
-    // }
-    //
-    // if let Some(pg) = new_pagination {
-    //     html_string.push_str(
-    //         format!(
-    //             r#"<a href="/users?pagination.next={}&pagination.limit={}">Next</a><br/>"#,
-    //             &(pg.next.0).timestamp_nanos(),
-    //             &pg.limit
-    //         ).as_ref(),
-    //     )
-    // }
-    //
-    // html_string.push_str(r#"<a href="/users/new">new</a>"#);
-    // html_string.push_str(USER_HTML_SUFFIX);
-    //
-    // Ok(RawHtml(html_string))
-
     Ok(Template::render("users/index", context! {
         users, pagination: new_pagination.map(|pg| pg.to_context()), flash: flash.map(|f| String::from(f.message())),
     }))
@@ -90,41 +31,6 @@ pub async fn get_users(pool: &rocket::State<SqlitePool>, pagination: Option<Pagi
 
 #[get("/users/new", format = "text/html")]
 pub async fn new_user(flash: Option<FlashMessage<'_>>, csrf_token: CsrfToken) -> HtmlResponse {
-    //     let mut html_string = String::from(USER_HTML_PREFIX);
-    //
-    //     if flash.is_some() {
-    //         html_string.push_str(format!(r#"<div style="color: red;">{}</div>"#, flash.unwrap().message()).as_ref());
-    //     }
-    //
-    //     html_string.push_str(
-    //         r#"<form accept-charset="UTF-8" action="/users" autocomplete="off" method="POST">
-    //     <div>
-    //         <label for="username">Username:</label>
-    //         <input name="username" type="text"/>
-    //     </div>
-    //     <div>
-    //         <label for="email">Email:</label>
-    //         <input name="email" type="email"/>
-    //     </div>
-    //     <div>
-    //         <label for="password">Password:</label>
-    //         <input name="password" type="password"/>
-    //     </div>
-    //     <div>
-    //         <label for="password_confirmation">Password Confirmation:</label>
-    //         <input name="password_confirmation" type="password"/>
-    //     </div>
-    //     <div>
-    //         <label for="description">Tell us a little bit more about yourself:</label>
-    //         <textarea name="description"></textarea>
-    //     </div>
-    //     <button type="submit" value="Submit">Submit</button>
-    // </form>"#
-    //     );
-    //
-    //     html_string.push_str(USER_HTML_SUFFIX);
-    // Ok(RawHtml(html_string))
-
     Ok(Template::render("users/form", context!(
         edit: false,
         form_url: "/users",
@@ -167,51 +73,6 @@ pub async fn create_user<'r>(pool: &rocket::State<SqlitePool>, user_context: For
 #[get("/users/edit/<uuid>", format = "text/html")]
 pub async fn edit_user(pool: &rocket::State<SqlitePool>, uuid: &str, flash: Option<FlashMessage<'_>>, csrf_token: CsrfToken) -> HtmlResponse {
     let user = User::find(pool, uuid).await.map_err(|e| e.status)?;
-
-    //     let mut html_string = String::from(USER_HTML_PREFIX);
-    //     if flash.is_some() {
-    //         html_string.push_str(format!(r#"<div style="color: red;">{}</div>"#, flash.unwrap().message()).as_ref());
-    //     }
-    //
-    //     html_string.push_str(
-    //         format!(
-    //             r#"<form accept-charset="UTF-8" action="/users/{}" autocomplete="off" method="POST">
-    //     <input type="hidden" name="_METHOD" value="PUT"/>
-    //     <div>
-    //         <label for="username">Username:</label>
-    //         <input name="username" type="text" value="{}"/>
-    //     </div>
-    //     <div>
-    //         <label for="email">Email:</label>
-    //         <input name="email" type="email" value="{}"/>
-    //     </div>
-    //     <div>
-    //         <label for="old_password">Old password:</label>
-    //         <input name="old_password" type="password"/>
-    //     </div>
-    //     <div>
-    //         <label for="password">New password:</label>
-    //         <input name="password" type="password"/>
-    //     </div>
-    //     <div>
-    //         <label for="password_confirmation">Password Confirmation:</label>
-    //         <input name="password_confirmation" type="password"/>
-    //     </div>
-    //     <div>
-    //         <label for="description">Tell us a little bit more about yourself:</label>
-    //         <textarea name="description">{}</textarea>
-    //     </div>
-    //     <button type="submit" value="Submit">Submit</button>
-    // </form>"#,
-    //             &user.uuid,
-    //             &user.username,
-    //             &user.email,
-    //             &user.description.unwrap_or_else(|| "".to_string()),
-    //         )
-    //             .as_ref(),
-    //     );
-    //     html_string.push_str(USER_HTML_SUFFIX);
-    // Ok(RawHtml(html_string))
 
     Ok(Template::render("users/form", context!(
         edit: true,
