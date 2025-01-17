@@ -10,7 +10,7 @@
 <body>
 <div class="container">
     {% if flash %}
-        <div class="toast" onclick="this.remove()" style="color: red;">
+        <div class="toast" onclick="this.remove()">
             <h3> {{ flash | safe }} </h3>
         </div>
     {% endif %}

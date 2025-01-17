@@ -10,17 +10,17 @@ use rocket_dyn_templates::{context, Template};
 use sqlx::SqlitePool;
 use std::fmt::format;
 
-const USER_HTML_PREFIX: &str = r#"<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<title>Our Application User</title>
-<link rel="icon" type="image/x-icon" href="/assets/favicon.png">
-</head>
-<body>"#;
-
-const USER_HTML_SUFFIX: &str = r#"</body>
-</html>"#;
+// const USER_HTML_PREFIX: &str = r#"<!DOCTYPE html>
+// <html lang="en">
+// <head>
+// <meta charset="utf-8" />
+// <title>Our Application User</title>
+// <link rel="icon" type="image/x-icon" href="/assets/favicon.png">
+// </head>
+// <body>"#;
+//
+// const USER_HTML_SUFFIX: &str = r#"</body>
+// </html>"#;
 
 #[get("/users/<uuid>", format = "text/html")]
 pub async fn get_user(pool: &rocket::State<SqlitePool>, uuid: &str, flash: Option<FlashMessage<'_>>) -> HtmlResponse {
@@ -89,49 +89,54 @@ pub async fn get_users(pool: &rocket::State<SqlitePool>, pagination: Option<Pagi
 
 #[get("/users/new", format = "text/html")]
 pub async fn new_user(flash: Option<FlashMessage<'_>>) -> HtmlResponse {
-    let mut html_string = String::from(USER_HTML_PREFIX);
-
-    if flash.is_some() {
-        html_string.push_str(format!(r#"<div style="color: red;">{}</div>"#, flash.unwrap().message()).as_ref());
-    }
-
-    html_string.push_str(
-        r#"<form accept-charset="UTF-8" action="/users" autocomplete="off" method="POST">
-    <div>
-        <label for="username">Username:</label>
-        <input name="username" type="text"/>
-    </div>
-    <div>
-        <label for="email">Email:</label>
-        <input name="email" type="email"/>
-    </div>
-    <div>
-        <label for="password">Password:</label>
-        <input name="password" type="password"/>
-    </div>
-    <div>
-        <label for="password_confirmation">Password Confirmation:</label>
-        <input name="password_confirmation" type="password"/>
-    </div>
-    <div>
-        <label for="description">Tell us a little bit more about yourself:</label>
-        <textarea name="description"></textarea>
-    </div>
-    <button type="submit" value="Submit">Submit</button>
-</form>"#
-    );
-
-    html_string.push_str(USER_HTML_SUFFIX);
+    //     let mut html_string = String::from(USER_HTML_PREFIX);
+    //
+    //     if flash.is_some() {
+    //         html_string.push_str(format!(r#"<div style="color: red;">{}</div>"#, flash.unwrap().message()).as_ref());
+    //     }
+    //
+    //     html_string.push_str(
+    //         r#"<form accept-charset="UTF-8" action="/users" autocomplete="off" method="POST">
+    //     <div>
+    //         <label for="username">Username:</label>
+    //         <input name="username" type="text"/>
+    //     </div>
+    //     <div>
+    //         <label for="email">Email:</label>
+    //         <input name="email" type="email"/>
+    //     </div>
+    //     <div>
+    //         <label for="password">Password:</label>
+    //         <input name="password" type="password"/>
+    //     </div>
+    //     <div>
+    //         <label for="password_confirmation">Password Confirmation:</label>
+    //         <input name="password_confirmation" type="password"/>
+    //     </div>
+    //     <div>
+    //         <label for="description">Tell us a little bit more about yourself:</label>
+    //         <textarea name="description"></textarea>
+    //     </div>
+    //     <button type="submit" value="Submit">Submit</button>
+    // </form>"#
+    //     );
+    //
+    //     html_string.push_str(USER_HTML_SUFFIX);
     // Ok(RawHtml(html_string))
 
-    Ok(Template::render("users/tmp", context!()))
+    Ok(Template::render("users/form", context!(
+        edit: false,
+        form_url: "/users",
+        legend: "New User",
+        flash: flash.map(|f| String::from(f.message())),
+    )))
 }
 
 #[post("/users", format = "application/x-www-form-urlencoded", data = "<user_context>")]
 pub async fn create_user<'r>(pool: &rocket::State<SqlitePool>, user_context: Form<Contextual<'r, NewUser<'r>>>) -> Result<Flash<Redirect>, Flash<Redirect>> {
     if user_context.value.is_none() {
         let error_message = format!(
-            "<div>{}</div>",
+            r#"<span style="color: red;">{}</span>"#,
             user_context.context.errors().map(|e| e.to_string()).collect::<Vec<_>>().join("<br />")
         );
 
@@ -141,11 +146,11 @@ pub async fn create_user<'r>(pool: &rocket::State<SqlitePool>, user_context: For
     let new_user = user_context.value.as_ref().unwrap();
     let user = User::create(pool, new_user).await.map_err(|e| {
         println!("{}", e);
-        Flash::error(Redirect::to("/users/new"), format!("<h2>{}</h2>", e.to_string()))
+        Flash::error(Redirect::to("/users/new"), format!(r#"<span style="color: red;">{}</span>"#, e.to_string()))
     })?;
 
     Ok(Flash::success(
-        Redirect::to(format!("/users/{}", user.uuid)), "<h2>Successfully created user</h2>",
+        Redirect::to(format!("/users/{}", user.uuid)), r#"<span style="color: green;">Successfully created user</span>"#,
     ))
 }
 
@@ -153,59 +158,65 @@ pub async fn create_user<'r>(pool: &rocket::State<SqlitePool>, user_context: For
 pub async fn edit_user(pool: &rocket::State<SqlitePool>, uuid: &str, flash: Option<FlashMessage<'_>>) -> HtmlResponse {
     let user = User::find(pool, uuid).await.map_err(|e| e.status)?;
 
-    let mut html_string = String::from(USER_HTML_PREFIX);
-    if flash.is_some() {
-        html_string.push_str(format!(r#"<div style="color: red;">{}</div>"#, flash.unwrap().message()).as_ref());
-    }
-
-    html_string.push_str(
-        format!(
-            r#"<form accept-charset="UTF-8" action="/users/{}" autocomplete="off" method="POST">
-    <input type="hidden" name="_METHOD" value="PUT"/>
-    <div>
-        <label for="username">Username:</label>
-        <input name="username" type="text" value="{}"/>
-    </div>
-    <div>
-        <label for="email">Email:</label>
-        <input name="email" type="email" value="{}"/>
-    </div>
-    <div>
-        <label for="old_password">Old password:</label>
-        <input name="old_password" type="password"/>
-    </div>
-    <div>
-        <label for="password">New password:</label>
-        <input name="password" type="password"/>
-    </div>
-    <div>
-        <label for="password_confirmation">Password Confirmation:</label>
-        <input name="password_confirmation" type="password"/>
-    </div>
-    <div>
-        <label for="description">Tell us a little bit more about yourself:</label>
-        <textarea name="description">{}</textarea>
-    </div>
-    <button type="submit" value="Submit">Submit</button>
-</form>"#,
-            &user.uuid,
-            &user.username,
-            &user.email,
-            &user.description.unwrap_or_else(|| "".to_string()),
-        )
-            .as_ref(),
-    );
-    html_string.push_str(USER_HTML_SUFFIX);
+    //     let mut html_string = String::from(USER_HTML_PREFIX);
+    //     if flash.is_some() {
+    //         html_string.push_str(format!(r#"<div style="color: red;">{}</div>"#, flash.unwrap().message()).as_ref());
+    //     }
+    //
+    //     html_string.push_str(
+    //         format!(
+    //             r#"<form accept-charset="UTF-8" action="/users/{}" autocomplete="off" method="POST">
+    //     <input type="hidden" name="_METHOD" value="PUT"/>
+    //     <div>
+    //         <label for="username">Username:</label>
+    //         <input name="username" type="text" value="{}"/>
+    //     </div>
+    //     <div>
+    //         <label for="email">Email:</label>
+    //         <input name="email" type="email" value="{}"/>
+    //     </div>
+    //     <div>
+    //         <label for="old_password">Old password:</label>
+    //         <input name="old_password" type="password"/>
+    //     </div>
+    //     <div>
+    //         <label for="password">New password:</label>
+    //         <input name="password" type="password"/>
+    //     </div>
+    //     <div>
+    //         <label for="password_confirmation">Password Confirmation:</label>
+    //         <input name="password_confirmation" type="password"/>
+    //     </div>
+    //     <div>
+    //         <label for="description">Tell us a little bit more about yourself:</label>
+    //         <textarea name="description">{}</textarea>
+    //     </div>
+    //     <button type="submit" value="Submit">Submit</button>
+    // </form>"#,
+    //             &user.uuid,
+    //             &user.username,
+    //             &user.email,
+    //             &user.description.unwrap_or_else(|| "".to_string()),
+    //         )
+    //             .as_ref(),
+    //     );
+    //     html_string.push_str(USER_HTML_SUFFIX);
     // Ok(RawHtml(html_string))
 
-    Ok(Template::render("users/tmp", context!()))
+    Ok(Template::render("users/form", context!(
+        edit: true,
+        form_url: format!("/users/{}", &user.uuid ),
+        user,
+        legend: "Edit User",
+        flash: flash.map(|f| String::from(f.message())).unwrap_or_else(|| "".to_string()),
+    )))
 }
 
 #[post("/users/<uuid>", format = "application/x-www-form-urlencoded", data = "<user_context>")]
 pub async fn update_user<'r>(pool: &rocket::State<SqlitePool>, uuid: &str, user_context: Form<Contextual<'r, EditedUser<'r>>>) -> Result<Flash<Redirect>, Flash<Redirect>> {
     if user_context.value.is_none() {
         let error_message = format!(
-            "<div>{}</div>",
+            r#"<span style="color: red;">{}</span>"#,
             user_context.context.errors()
                 .map(|e| e.to_string()).collect::<Vec<_>>().join("<br />")
         );
@@ -219,7 +230,7 @@ pub async fn update_user<'r>(pool: &rocket::State<SqlitePool>, uuid: &str, user_
         "PATCH" => patch_user(pool, uuid, user_context).await,
         _ => Err(Flash::error(
             Redirect::to(format!("/users/edit/{}", uuid)),
-            "<div>Something went wrong when updating user. Not supported FORM method.</div>",
+            r#"<span style="color: red;">Something went wrong when updating user. Not supported FORM method.</span>"#,
         ))
     }
 }
@@ -231,12 +242,12 @@ pub async fn put_user<'r>(pool: &rocket::State<SqlitePool>, uuid: &str, user_con
         println!("{}", e);
         Flash::error(
             Redirect::to(format!("/users/edit/{}", uuid)),
-            format!("<div>{}</div>", e),
+            format!(r#"<span style="color: red;">{}</span>"#, e),
         )
     })?;
     Ok(Flash::success(
         Redirect::to(format!("/users/{}", user.uuid)),
-        "<div>Successfully updated user</div>",
+        r#"<span style="color: green;">Successfully updated user</span>"#,
     ))
 }
 
@@ -257,12 +268,12 @@ pub async fn delete_user(pool: &rocket::State<SqlitePool>, uuid: &str) -> Result
 
         Flash::error(
             Redirect::to("/users"),
-            format!("<div>{}</div>", e),
+            format!(r#"<span style="color: red;">{}</span>"#, e),
         )
     })?;
 
     Ok(Flash::success(
         Redirect::to("/users"),
-        "<div>Successfully deleted user</div>",
+        r#"<span style="color: green;">Successfully updated user</span>"#,
     ))
 }
