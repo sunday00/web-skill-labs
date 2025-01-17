@@ -11,10 +11,11 @@ use rand_core::OsRng;
 use regex::Regex;
 use rocket::form;
 use rocket::form::Error as FormError;
+use rocket::serde::Serialize;
 use sqlx::{FromRow, SqlitePool};
 use uuid::Uuid;
 
-#[derive(Debug, FromRow, FromForm)]
+#[derive(Debug, FromRow, FromForm, Serialize)]
 pub struct User {
     pub uuid: String,
     pub username: String,
@@ -287,4 +288,10 @@ fn skip_validate_password<'v>(password: &'v str, old_password: &'v str, password
     }
 
     Ok(())
+}
+
+#[derive(Serialize)]
+pub struct GetUser {
+    pub user: User,
+    pub flash: Option<String>,
 }

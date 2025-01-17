@@ -1,13 +1,15 @@
-use std::path::{Path, PathBuf};
 use rocket::fs::{relative, NamedFile};
 use rocket::http::Status;
 use rocket::response::content::RawHtml;
 use rocket::Shutdown;
+use rocket_dyn_templates::Template;
+use std::path::{Path, PathBuf};
 
 pub mod post;
 pub mod user;
 
-type HtmlResponse = Result<RawHtml<String>, Status>;
+// type HtmlResponse = Result<RawHtml<String>, Status>;
+type HtmlResponse = Result<Template, Status>;
 
 // ==== file upload ====
 #[get("/<filename..>")]

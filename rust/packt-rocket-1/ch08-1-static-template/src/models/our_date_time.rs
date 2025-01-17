@@ -2,10 +2,11 @@ use chrono::{DateTime, TimeZone, Utc};
 use rocket::data::ToByteUnit;
 use rocket::form;
 use rocket::form::{DataField, FromFormField, ValueField};
+use rocket::serde::Serialize;
 use sqlx::FromRow;
 use std::str::from_utf8;
 
-#[derive(Debug, FromRow, sqlx::Type, Clone)]
+#[derive(Debug, FromRow, sqlx::Type, Clone, Serialize)]
 #[sqlx(transparent)]
 pub struct OurDateTime(pub DateTime<Utc>);
 

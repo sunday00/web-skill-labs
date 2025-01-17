@@ -1,7 +1,8 @@
+use rocket::serde::Serialize;
 use std::fmt;
 use std::fmt::Formatter;
 
-#[derive(sqlx::Type, Debug, FromFormField)]
+#[derive(sqlx::Type, Debug, FromFormField, Serialize)]
 #[repr(i32)]
 pub enum UserStatus {
     Inactive = 0,

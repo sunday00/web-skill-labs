@@ -10,11 +10,13 @@
 <body>
 <div class="container">
     {% if flash %}
-        <div class="toast" onclick="this.remove()">
-            {{ flash | safe }}
+        <div class="toast" onclick="this.remove()" style="color: red;">
+            <h3> {{ flash | safe }} </h3>
         </div>
     {% endif %}
-    {% block body %}{% endblock body %}
+    {% block body %}
+
+    {% endblock body %}
 </div>
 </body>
 </html>

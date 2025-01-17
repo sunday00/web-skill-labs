@@ -1,11 +1,12 @@
 use super::HtmlResponse;
 use crate::models::pagination::Pagination;
-use crate::models::user::{EditedUser, NewUser, User};
+use crate::models::user::{EditedUser, GetUser, NewUser, User};
 use rocket::form::{Contextual, Form};
 use rocket::http::Status;
 use rocket::request::FlashMessage;
 use rocket::response::content::RawHtml;
 use rocket::response::{Flash, Redirect};
+use rocket_dyn_templates::{context, Template};
 use sqlx::SqlitePool;
 use std::fmt::format;
 
@@ -25,56 +26,65 @@ const USER_HTML_SUFFIX: &str = r#"</body>
 pub async fn get_user(pool: &rocket::State<SqlitePool>, uuid: &str, flash: Option<FlashMessage<'_>>) -> HtmlResponse {
     let user = User::find(pool, uuid).await.map_err(|e| e.status)?;
 
-    let mut html_string = String::from(USER_HTML_PREFIX);
+    // let mut html_string = String::from(USER_HTML_PREFIX);
+    //
+    // if flash.is_some() {
+    //     html_string.push_str(flash.unwrap().message());
+    // }
+    //
+    // html_string.push_str(&user.to_html_string());
+    // html_string.push_str(r#"<div style="display: flex; gap: 0.5em;">"#);
+    // html_string.push_str(format!(r#"<a href="/users/edit/{}">Edit User</a>"#, user.uuid).as_ref());
+    // html_string.push_str(r#"<a href="/users">User List</a>"#);
+    // html_string.push_str(r#"</div>"#);
+    // html_string.push_str(USER_HTML_SUFFIX);
+    // Ok(RawHtml(html_string))
 
-    if flash.is_some() {
-        html_string.push_str(flash.unwrap().message());
-    }
-
-    html_string.push_str(&user.to_html_string());
-    html_string.push_str(r#"<div style="display: flex; gap: 0.5em;">"#);
-    html_string.push_str(format!(r#"<a href="/users/edit/{}">Edit User</a>"#, user.uuid).as_ref());
-    html_string.push_str(r#"<a href="/users">User List</a>"#);
-    html_string.push_str(r#"</div>"#);
-    html_string.push_str(USER_HTML_SUFFIX);
-    Ok(RawHtml(html_string))
+    Ok(Template::render("users/show", &GetUser {
+        user,
+        flash: flash.map(|f| String::from(f.message())),
+    }))
 }
 
 #[get("/users?<pagination>", format = "text/html")]
 pub async fn get_users(pool: &rocket::State<SqlitePool>, pagination: Option<Pagination>, flash: Option<FlashMessage<'_>>) -> HtmlResponse {
     let (users, new_pagination) = User::find_all(pool, pagination).await.map_err(|e| e.status)?;
 
-    let mut html_string = String::from(USER_HTML_PREFIX);
+    // let mut html_string = String::from(USER_HTML_PREFIX);
 
-    if flash.is_some() {
-        html_string.push_str(format!(r#"<div style="color: red;">{}</div>"#, flash.unwrap().message()).as_ref());
-    }
+    // if flash.is_some() {
+    //     html_string.push_str(format!(r#"<div style="color: red;">{}</div>"#, flash.unwrap().message()).as_ref());
+    // }
+    //
+    // for user in users {
+    //     html_string.push_str(r#"<div style="display: flex; gap: 0.5em;">"#);
+    //     html_string.push_str(&user.to_mini_string());
+    //     html_string.push_str(format!(r#"<a href="/users/{}">show</a>"#, user.uuid).as_ref());
+    //     html_string.push_str(format!(r#"<a href="/users/edit/{}">edit</a>"#, user.uuid).as_ref());
+    //     html_string.push_str(format!(r#"<form accept-charset="UTF-8" action="/users/delete/{}" autocomplete="off" method="POST">
+    //         <button type="submit" value="Submit">Delete</button>
+    //     </form>"#, user.uuid).as_ref());
+    //     html_string.push_str(r#"</div>"#);
+    // }
+    //
+    // if let Some(pg) = new_pagination {
+    //     html_string.push_str(
+    //         format!(
+    //             r#"<a href="/users?pagination.next={}&pagination.limit={}">Next</a><br/>"#,
+    //             &(pg.next.0).timestamp_nanos(),
+    //             &pg.limit
+    //         ).as_ref(),
+    //     )
+    // }
+    //
+    // html_string.push_str(r#"<a href="/users/new">new</a>"#);
+    // html_string.push_str(USER_HTML_SUFFIX);
+    //
+    // Ok(RawHtml(html_string))
 
-    for user in users {
-        html_string.push_str(r#"<div style="display: flex; gap: 0.5em;">"#);
-        html_string.push_str(&user.to_mini_string());
-        html_string.push_str(format!(r#"<a href="/users/{}">show</a>"#, user.uuid).as_ref());
-        html_string.push_str(format!(r#"<a href="/users/edit/{}">edit</a>"#, user.uuid).as_ref());
-        html_string.push_str(format!(r#"<form accept-charset="UTF-8" action="/users/delete/{}" autocomplete="off" method="POST">
-            <button type="submit" value="Submit">Delete</button>
-        </form>"#, user.uuid).as_ref());
-        html_string.push_str(r#"</div>"#);
-    }
-
-    if let Some(pg) = new_pagination {
-        html_string.push_str(
-            format!(
-                r#"<a href="/users?pagination.next={}&pagination.limit={}">Next</a><br/>"#,
-                &(pg.next.0).timestamp_nanos(),
-                &pg.limit
-            ).as_ref(),
-        )
-    }
-
-    html_string.push_str(r#"<a href="/users/new">new</a>"#);
-    html_string.push_str(USER_HTML_SUFFIX);
-
-    Ok(RawHtml(html_string))
+    Ok(Template::render("users/index", context! {
+        users, pagination: new_pagination.map(|pg| pg.to_context()), flash: flash.map(|f| String::from(f.message())),
+    }))
 }
 
 #[get("/users/new", format = "text/html")]
@@ -112,7 +122,9 @@ pub async fn new_user(flash: Option<FlashMessage<'_>>) -> HtmlResponse {
     );
 
     html_string.push_str(USER_HTML_SUFFIX);
-    Ok(RawHtml(html_string))
+    // Ok(RawHtml(html_string))
+
+    Ok(Template::render("users/tmp", context!()))
 }
 
 #[post("/users", format = "application/x-www-form-urlencoded", data = "<user_context>")]
@@ -184,7 +196,9 @@ pub async fn edit_user(pool: &rocket::State<SqlitePool>, uuid: &str, flash: Opti
             .as_ref(),
     );
     html_string.push_str(USER_HTML_SUFFIX);
-    Ok(RawHtml(html_string))
+    // Ok(RawHtml(html_string))
+
+    Ok(Template::render("users/tmp", context!()))
 }
 
 #[post("/users/<uuid>", format = "application/x-www-form-urlencoded", data = "<user_context>")]
