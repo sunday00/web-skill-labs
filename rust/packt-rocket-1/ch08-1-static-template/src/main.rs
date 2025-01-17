@@ -16,7 +16,6 @@ pub struct Config {
     pub database_url: String,
 }
 
-
 fn setup_logger() {
     let (level, logger) = fern::Dispatch::new()
         .format(move |out, message, record| {
@@ -42,11 +41,6 @@ fn setup_logger() {
 
 #[launch]
 async fn rocket() -> Rocket<Build> {
-    // let secret_file_path = env::current_dir().unwrap().join("secret_file");
-    // if !secret_file_path.exists() {
-    //     panic!("secret does not exists");
-    // }
-
     setup_logger();
 
     let server = rocket::build();
@@ -59,7 +53,6 @@ async fn rocket() -> Rocket<Build> {
     let db = DBConnection::new(&config.database_url);
 
     server.manage(db.pool().await)
-        // .mount("/", openapi_get_routes![])
         .mount("/", routes![
             user::get_user, user::get_users, user::new_user,  user::create_user,
             user::edit_user, user::update_user, user::put_user, user::patch_user,

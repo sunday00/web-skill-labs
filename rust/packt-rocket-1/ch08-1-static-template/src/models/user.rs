@@ -39,35 +39,6 @@ impl User {
         )
     }
 
-    pub fn to_html_string(&self) -> String {
-        format!(r#"
-<div><span>UUID: </span>{uuid}</div>
-<div><span>Username: </span>{username}</div>
-<div><span>Email: </span>{email}</div>
-<div><span>Description: </span>{description}</div>
-<div><span>Status: </span>{status}</div>
-<div><span>Created At: </span>{created_at}</div>
-<div><span>Updated At: </span>{updated_at}</div>
-        "#,
-                uuid = self.uuid,
-                username = self.username,
-                email = self.email,
-                description = self.description.as_ref().unwrap_or(&String::from("")),
-                status = self.status.to_string(),
-                created_at = self.created_at.0.to_rfc3339(),
-                updated_at = self.updated_at.0.to_rfc3339(),
-        )
-    }
-
-    pub fn to_mini_string(&self) -> String {
-        format!(r#"
-            <div><span>UUID: </span>{uuid} <span>Username: </span>{username}</div>
-        "#,
-                uuid = self.uuid,
-                username = self.username,
-        )
-    }
-
     pub async fn find_all(pool: &rocket::State<SqlitePool>, pagination: Option<Pagination>) -> Result<(Vec<Self>, Option<Pagination>), OurError> {
         let pagination_prams: Pagination;
 
@@ -121,9 +92,6 @@ impl User {
                     Some(Box::new(e)),
                 )
             });
-        // if password_hash.is_err() {
-        //     return Err("cannot create password hash".into());
-        // }
 
         let query_str = r#"INSERT INTO users (uuid, username, email, password_hash, description, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *"#;
         Ok(
@@ -270,10 +238,6 @@ fn validate_email(email: &str) -> form::Result<'_, ()> {
 }
 
 fn validate_password(password: &str) -> form::Result<'_, ()> {
-    // let entropy = zxcvbn(password, &[]);
-    // if (entropy.score() as i32) < 3 {
-    //     return Err(FormError::validation("weak password").into());
-    // }
     if password.len() < 4 {
         return Err(FormError::validation("should over 4 letters").into());
     }
