@@ -1,23 +1,20 @@
 #[macro_use]
 extern crate rocket;
 
+use our_application::fairings::csrf::Csrf;
 use our_application::fairings::db::DBConnection;
 use our_application::routes::assets;
 use our_application::routes::{post, user};
 use our_application::{catchers, routes};
-use rocket::fs::{relative, NamedFile};
 use rocket::serde::{Deserialize, Serialize};
 use rocket::{Build, Rocket};
-use rocket_okapi::swagger_ui::{make_swagger_ui, SwaggerUIConfig};
-use std::env;
-use std::path::Path;
 use rocket_dyn_templates::Template;
+use rocket_okapi::swagger_ui::{make_swagger_ui, SwaggerUIConfig};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
     pub database_url: String,
 }
-
 
 
 fn setup_logger() {
@@ -76,5 +73,6 @@ async fn rocket() -> Rocket<Build> {
             ..Default::default()
         }), )
         .attach(Template::fairing())
+        .attach(Csrf::new())
         .register("/", catchers![catchers::not_found, catchers::unprocessable_entity, catchers::internal_server_error])
 }

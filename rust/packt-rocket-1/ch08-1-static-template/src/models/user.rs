@@ -231,6 +231,8 @@ pub struct NewUser<'r> {
 
     #[field(default = "", /*name = uncased("html-field-name")*/)]
     pub description: Option<&'r str>,
+
+    pub authenticity_token: &'r str,
 }
 
 #[derive(Debug, FromForm)]
@@ -254,6 +256,8 @@ pub struct EditedUser<'r> {
 
     #[field(default = "", /*name = uncased("html-field-name")*/)]
     pub description: Option<&'r str>,
+
+    pub authenticity_token: &'r str,
 }
 
 fn validate_email(email: &str) -> form::Result<'_, ()> {

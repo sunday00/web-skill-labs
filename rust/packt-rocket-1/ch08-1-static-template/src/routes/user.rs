@@ -1,4 +1,5 @@
 use super::HtmlResponse;
+use crate::fairings::csrf::Token as CsrfToken;
 use crate::models::pagination::Pagination;
 use crate::models::user::{EditedUser, GetUser, NewUser, User};
 use rocket::form::{Contextual, Form};
@@ -88,7 +89,7 @@ pub async fn get_users(pool: &rocket::State<SqlitePool>, pagination: Option<Pagi
 }
 
 #[get("/users/new", format = "text/html")]
-pub async fn new_user(flash: Option<FlashMessage<'_>>) -> HtmlResponse {
+pub async fn new_user(flash: Option<FlashMessage<'_>>, csrf_token: CsrfToken) -> HtmlResponse {
     //     let mut html_string = String::from(USER_HTML_PREFIX);
     //
     //     if flash.is_some() {
@@ -129,11 +130,12 @@ pub async fn new_user(flash: Option<FlashMessage<'_>>) -> HtmlResponse {
         form_url: "/users",
         legend: "New User",
         flash: flash.map(|f| String::from(f.message())),
+        csrf_token: csrf_token,
     )))
 }
 
 #[post("/users", format = "application/x-www-form-urlencoded", data = "<user_context>")]
-pub async fn create_user<'r>(pool: &rocket::State<SqlitePool>, user_context: Form<Contextual<'r, NewUser<'r>>>) -> Result<Flash<Redirect>, Flash<Redirect>> {
+pub async fn create_user<'r>(pool: &rocket::State<SqlitePool>, user_context: Form<Contextual<'r, NewUser<'r>>>, csrf_token: CsrfToken) -> Result<Flash<Redirect>, Flash<Redirect>> {
     if user_context.value.is_none() {
         let error_message = format!(
             r#"<span style="color: red;">{}</span>"#,
@@ -144,6 +146,14 @@ pub async fn create_user<'r>(pool: &rocket::State<SqlitePool>, user_context: For
     }
 
     let new_user = user_context.value.as_ref().unwrap();
+
+    csrf_token.verify(&new_user.authenticity_token).map_err(|_| {
+        Flash::error(
+            Redirect::to("/users/new"),
+            r#"<span style="color: red;">Something went wrong when creating user</span>"#,
+        )
+    })?;
+
     let user = User::create(pool, new_user).await.map_err(|e| {
         println!("{}", e);
         Flash::error(Redirect::to("/users/new"), format!(r#"<span style="color: red;">{}</span>"#, e.to_string()))
@@ -155,7 +165,7 @@ pub async fn create_user<'r>(pool: &rocket::State<SqlitePool>, user_context: For
 }
 
 #[get("/users/edit/<uuid>", format = "text/html")]
-pub async fn edit_user(pool: &rocket::State<SqlitePool>, uuid: &str, flash: Option<FlashMessage<'_>>) -> HtmlResponse {
+pub async fn edit_user(pool: &rocket::State<SqlitePool>, uuid: &str, flash: Option<FlashMessage<'_>>, csrf_token: CsrfToken) -> HtmlResponse {
     let user = User::find(pool, uuid).await.map_err(|e| e.status)?;
 
     //     let mut html_string = String::from(USER_HTML_PREFIX);
@@ -209,11 +219,12 @@ pub async fn edit_user(pool: &rocket::State<SqlitePool>, uuid: &str, flash: Opti
         user,
         legend: "Edit User",
         flash: flash.map(|f| String::from(f.message())).unwrap_or_else(|| "".to_string()),
+        csrf_token: csrf_token,
     )))
 }
 
 #[post("/users/<uuid>", format = "application/x-www-form-urlencoded", data = "<user_context>")]
-pub async fn update_user<'r>(pool: &rocket::State<SqlitePool>, uuid: &str, user_context: Form<Contextual<'r, EditedUser<'r>>>) -> Result<Flash<Redirect>, Flash<Redirect>> {
+pub async fn update_user<'r>(pool: &rocket::State<SqlitePool>, uuid: &str, user_context: Form<Contextual<'r, EditedUser<'r>>>, csrf_token: CsrfToken) -> Result<Flash<Redirect>, Flash<Redirect>> {
     if user_context.value.is_none() {
         let error_message = format!(
             r#"<span style="color: red;">{}</span>"#,
@@ -226,8 +237,8 @@ pub async fn update_user<'r>(pool: &rocket::State<SqlitePool>, uuid: &str, user_
     }
     let user_value = user_context.value.as_ref().unwrap();
     match user_value.method {
-        "PUT" => put_user(pool, uuid, user_context).await,
-        "PATCH" => patch_user(pool, uuid, user_context).await,
+        "PUT" => put_user(pool, uuid, user_context, csrf_token).await,
+        "PATCH" => patch_user(pool, uuid, user_context, csrf_token).await,
         _ => Err(Flash::error(
             Redirect::to(format!("/users/edit/{}", uuid)),
             r#"<span style="color: red;">Something went wrong when updating user. Not supported FORM method.</span>"#,
@@ -236,8 +247,18 @@ pub async fn update_user<'r>(pool: &rocket::State<SqlitePool>, uuid: &str, user_
 }
 
 #[put("/users/<uuid>", format = "application/x-www-form-urlencoded", data = "<user_context>")]
-pub async fn put_user<'r>(pool: &rocket::State<SqlitePool>, uuid: &str, user_context: Form<Contextual<'r, EditedUser<'r>>>) -> Result<Flash<Redirect>, Flash<Redirect>> {
+pub async fn put_user<'r>(pool: &rocket::State<SqlitePool>, uuid: &str, user_context: Form<Contextual<'r, EditedUser<'r>>>, csrf_token: CsrfToken) -> Result<Flash<Redirect>, Flash<Redirect>> {
     let user_value = user_context.value.as_ref().unwrap();
+
+    csrf_token
+        .verify(&user_value.authenticity_token)
+        .map_err(|_| {
+            Flash::error(
+                Redirect::to(format!("/users/edit/{}", uuid)),
+                r#"<span style="color: red;">Something went wrong when updating user</span>"#,
+            )
+        })?;
+
     let user = User::update(pool, uuid, user_value).await.map_err(|e| {
         println!("{}", e);
         Flash::error(
@@ -252,8 +273,8 @@ pub async fn put_user<'r>(pool: &rocket::State<SqlitePool>, uuid: &str, user_con
 }
 
 #[patch("/users/<uuid>", format = "application/x-www-form-urlencoded", data = "<user_context>")]
-pub async fn patch_user<'r>(pool: &rocket::State<SqlitePool>, uuid: &str, user_context: Form<Contextual<'r, EditedUser<'r>>>) -> Result<Flash<Redirect>, Flash<Redirect>> {
-    put_user(pool, uuid, user_context).await
+pub async fn patch_user<'r>(pool: &rocket::State<SqlitePool>, uuid: &str, user_context: Form<Contextual<'r, EditedUser<'r>>>, csrf_token: CsrfToken) -> Result<Flash<Redirect>, Flash<Redirect>> {
+    put_user(pool, uuid, user_context, csrf_token).await
 }
 
 #[post("/users/delete/<uuid>", format = "application/x-www-form-urlencoded")]
