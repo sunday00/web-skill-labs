@@ -22,7 +22,6 @@ use std::fmt::format;
 //
 // const USER_HTML_SUFFIX: &str = r#"</body>
 // </html>"#;
-//
 
 #[get("/users/<uuid>", format = "text/html")]
 pub async fn get_user(pool: &rocket::State<SqlitePool>, uuid: &str, flash: Option<FlashMessage<'_>>) -> HtmlResponse {
