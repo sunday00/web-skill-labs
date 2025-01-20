@@ -12,6 +12,12 @@ use rocket::form::FromForm;
 use rocket::serde::Serialize;
 use sqlx::{FromRow, SqlitePool};
 
+#[derive(Serialize)]
+pub struct ShowPost {
+    pub uuid: String,
+    pub post_html: String,
+}
+
 #[derive(Debug, FromRow, rocket::FromForm, Serialize)]
 pub struct Post {
     pub uuid: String,
@@ -22,19 +28,19 @@ pub struct Post {
 }
 
 impl Post {
-    pub fn to_text(self) -> TextPost {
-        TextPost(self)
+    pub fn to_text(&self) -> TextPost {
+        TextPost::new(self)
     }
 
-    pub fn to_photo(self) -> PhotoPost {
-        PhotoPost(self)
+    pub fn to_photo(&self) -> PhotoPost {
+        PhotoPost::new(self)
     }
 
-    pub fn to_video(self) -> VideoPost {
-        VideoPost(self)
+    pub fn to_video(&self) -> VideoPost {
+        VideoPost::new(self)
     }
 
-    pub fn to_media(self) -> Box<dyn DisplayPostContent> {
+    pub fn to_media<'a>(&'a self) -> Box<dyn DisplayPostContent + 'a> {
         match self.post_type {
             PostType::Text => Box::new(self.to_text()),
             PostType::Photo => Box::new(self.to_photo()),
@@ -42,11 +48,18 @@ impl Post {
         }
     }
 
-    pub fn to_html(self) -> String {
-        match self.post_type {
-            PostType::Text => self.to_text().raw_html(),
-            PostType::Photo => self.to_photo().raw_html(),
-            PostType::Video => self.to_video().raw_html(),
+    // pub fn to_html<'a>(&'a self) -> String {
+    //     match self.post_type {
+    //         PostType::Text => self.to_text().raw_html(),
+    //         PostType::Photo => self.to_photo().raw_html(),
+    //         PostType::Video => self.to_video().raw_html(),
+    //     }
+    // }
+
+    pub fn to_show<'a>(&'a self) -> ShowPost {
+        ShowPost {
+            uuid: String::from(&self.uuid),
+            post_html: self.to_media().raw_html(),
         }
     }
 
@@ -102,3 +115,4 @@ impl Post {
         Ok((posts, new_pagination))
     }
 }
+
