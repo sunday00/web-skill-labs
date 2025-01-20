@@ -34,6 +34,14 @@ impl Post {
         VideoPost(self)
     }
 
+    pub fn to_media(self) -> Box<dyn DisplayPostContent> {
+        match self.post_type {
+            PostType::Text => Box::new(self.to_text()),
+            PostType::Photo => Box::new(self.to_photo()),
+            PostType::Video => Box::new(self.to_video()),
+        }
+    }
+
     pub fn to_html(self) -> String {
         match self.post_type {
             PostType::Text => self.to_text().raw_html(),

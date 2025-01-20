@@ -19,19 +19,53 @@ pub async fn get_post(pool: &rocket::State<SqlitePool>, user_uuid: &str, uuid: &
 
     if post.user_uuid != user.uuid { return Err(Status::InternalServerError); };
 
-    let mut post_html = String::new();
-    match post.post_type {
-        PostType::Text => post_html = post.to_text().raw_html(),
-        PostType::Photo => post_html = post.to_photo().raw_html(),
-        PostType::Video => post_html = post.to_video().raw_html(),
+    /**
+    * way one
+    */
+    // let mut post_html = String::new();
+    // match post.post_type {
+    //     PostType::Text => post_html = post.to_text().raw_html(),
+    //     PostType::Photo => post_html = post.to_photo().raw_html(),
+    //     PostType::Video => post_html = post.to_video().raw_html(),
+    // }
+    //
+    // Ok(Template::render("posts/show", context! {
+    //     user,
+    //     post: context!{
+    //         post_html
+    //     }
+    // }))
+
+    /**
+    * way two
+    */
+    #[derive(Serialize)]
+    struct ShowPost {
+        post_html: String,
     }
 
-    Ok(Template::render("posts/show", context! {
-        user,
-        post: context!{
-            post_html
+    #[derive(Serialize)]
+    struct Context {
+        user: User,
+        post: ShowPost,
+    }
+
+    fn create_context<T>(user: User, media: &T) -> Context
+    where
+        T: crate::traits::DisplayPostContent + ?Sized,
+    {
+        Context {
+            user,
+            post: ShowPost {
+                post_html: media.raw_html()
+            },
         }
-    }))
+    }
+
+    let media = post.to_media();
+    let context = create_context(user, &*media);
+
+    Ok(Template::render("posts/show", context))
 }
 
 #[get("/users/<user_uuid>/posts?<pagination>", format = "text/html")]
