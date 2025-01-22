@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS posts
                                              lower(hex(randomblob(6)))) PRIMARY KEY,
     user_uuid  VARCHAR     NOT NULL,
     post_type  INTEGER     NOT NULL DEFAULT 0,
-    content    VARCHAR     NOT NULL UNIQUE,
+    content    TEXT        NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (user_uuid) REFERENCES "users" (uuid)

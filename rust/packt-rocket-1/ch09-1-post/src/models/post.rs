@@ -8,7 +8,6 @@ use crate::models::text_post::TextPost;
 use crate::models::video_post::VideoPost;
 use crate::traits::DisplayPostContent;
 use chrono::Utc;
-use rocket::form::FromForm;
 use rocket::serde::Serialize;
 use sqlx::{FromRow, SqlitePool};
 
@@ -48,15 +47,7 @@ impl Post {
         }
     }
 
-    // pub fn to_html<'a>(&'a self) -> String {
-    //     match self.post_type {
-    //         PostType::Text => self.to_text().raw_html(),
-    //         PostType::Photo => self.to_photo().raw_html(),
-    //         PostType::Video => self.to_video().raw_html(),
-    //     }
-    // }
-
-    pub fn to_show<'a>(&'a self) -> ShowPost {
+    pub fn to_show(&self) -> ShowPost {
         ShowPost {
             uuid: String::from(&self.uuid),
             post_html: self.to_media().raw_html(),
@@ -113,6 +104,20 @@ impl Post {
             }
         }
         Ok((posts, new_pagination))
+    }
+
+    pub async fn create(pool: &rocket::State<SqlitePool>, user_uuid: &str, post_type: PostType, content: &str) -> Result<Self, OurError> {
+        let query_str = r#"INSERT INTO posts (user_uuid, post_type, content) VALUES ($1, $2, $3) RETURNING *"#;
+
+        Ok(
+            sqlx::query_as::<_, Self>(query_str)
+                .bind(user_uuid)
+                .bind(post_type)
+                .bind(content)
+                .fetch_one(pool.inner())
+                .await
+                .map_err(OurError::from_sqlx_error)?
+        )
     }
 }
 

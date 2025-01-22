@@ -3,12 +3,10 @@ use crate::fairings::csrf::Token as CsrfToken;
 use crate::models::pagination::Pagination;
 use crate::models::user::{EditedUser, GetUser, NewUser, User};
 use rocket::form::{Contextual, Form};
-use rocket::http::Status;
 use rocket::request::FlashMessage;
 use rocket::response::{Flash, Redirect};
 use rocket_dyn_templates::{context, Template};
 use sqlx::SqlitePool;
-use std::fmt::format;
 
 #[get("/users/<uuid>", format = "text/html")]
 pub async fn get_user(pool: &rocket::State<SqlitePool>, uuid: &str, flash: Option<FlashMessage<'_>>) -> HtmlResponse {
@@ -138,7 +136,7 @@ pub async fn patch_user<'r>(pool: &rocket::State<SqlitePool>, uuid: &str, user_c
     put_user(pool, uuid, user_context, csrf_token).await
 }
 
-#[post("/users/delete/<uuid>", format = "application/x-www-form-urlencoded")]
+#[post("/users/delete/<uuid>", format = "application/x-www-form-urlencoded", rank = 2)]
 pub async fn delete_user_entry_point(pool: &rocket::State<SqlitePool>, uuid: &str) -> Result<Flash<Redirect>, Flash<Redirect>> {
     delete_user(pool, uuid).await
 }

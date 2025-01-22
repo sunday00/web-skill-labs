@@ -9,5 +9,6 @@
         </form>
         <button type="submit" value="Submit" form="deleteUser">Delete</button>
         <a href="/users" class="button">User List</a>
+        <a href="/users/{{ user.uuid }}/posts" class="button">posts list on user</a>
     </div>
 {% endblock body %}

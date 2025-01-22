@@ -1,5 +1,6 @@
 use argon2::password_hash::SaltString;
 use argon2::{Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
+use base64::{engine::general_purpose, Engine};
 use rand_core::{OsRng, RngCore};
 use rocket::fairing::{Fairing, Info, Kind};
 use rocket::http::{Cookie, Status};
@@ -20,7 +21,8 @@ impl RequestCsrf for Request<'_> {
     fn get_csrf_token(&self) -> Option<Vec<u8>> {
         self.cookies()
             .get_private(CSRF_NAME)
-            .and_then(|c| base64::decode(c.value()).ok())
+            // .and_then(|c| base64::decode(c.value()).ok())
+            .and_then(|c| general_purpose::STANDARD.decode(c.value()).ok())
             .and_then(|r| {
                 if r.len() >= CSRF_LENGTH {
                     Some(r)
@@ -59,7 +61,8 @@ impl Fairing for Csrf {
         }
         let mut key = vec![0; CSRF_LENGTH];
         OsRng.fill_bytes(&mut key);
-        let encoded = base64::encode(&key[..]);
+        // let encoded = base64::encode(&key[..]);
+        let encoded = general_purpose::STANDARD.encode(&key[..]);
         let expires = OffsetDateTime::now_utc() + CSRF_DURATION;
         let mut csrf_cookie = Cookie::new(String::from(CSRF_NAME), encoded);
         csrf_cookie.set_expires(expires);
@@ -77,7 +80,7 @@ impl<'r> FromRequest<'r> for Token {
 
     async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
         match request.get_csrf_token() {
-            Some(csrf_token) => Outcome::Success(Self(base64::encode(csrf_token))),
+            Some(csrf_token) => Outcome::Success(Self(general_purpose::STANDARD.encode(csrf_token))),
             None => Outcome::Error((Status::Forbidden, ())),
         }
     }
