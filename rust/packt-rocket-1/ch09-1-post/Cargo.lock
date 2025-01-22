@@ -1747,6 +1747,7 @@ dependencies = [
  "chrono",
  "fern",
  "log",
+ "multer",
  "rand_core",
  "regex",
  "rocket",
@@ -1755,6 +1756,7 @@ dependencies = [
  "serde",
  "sqlx",
  "time",
+ "tokio-util",
  "uuid",
 ]
 

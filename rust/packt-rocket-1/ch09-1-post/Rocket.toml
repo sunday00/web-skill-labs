@@ -3,5 +3,10 @@ database_url = "sqlite:///Users/sunday00/workspace/web-skill-labs/rust/packt-roc
 log_level = "normal"
 template_dir = "src/views"
 
+limits = { "file/avif" = "1Mib", "file/gif" = "1Mib", "file/jpg" = "1Mib", "file/jpeg" = "1Mib", "file/png" = "1Mib", "file/svg" = "1Mib", "file/webp" = "1Mib", "file/webm" = "64Mib", "file/mp4" = "64Mib", "file/mpeg4" = "64Mib", "file/mpg" = "64Mib", "file/mpeg" = "64Mib", "file/mov" = "64Mib" }
+temp_dir = "/tmp"
+
+secret_key = "109169cc9c576af390c87167ca75f47a9b5ef7475bce8017b60b81afe63ae58f"
+
 [debug]
 database_url = "sqlite:///Users/sunday00/workspace/web-skill-labs/rust/packt-rocket-1/ch09-1-post/rocket_exam.db"
