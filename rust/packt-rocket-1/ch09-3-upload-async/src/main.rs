@@ -6,6 +6,7 @@ use our_application::fairings::db::DBConnection;
 use our_application::models::worker::Message;
 use our_application::routes::assets;
 use our_application::routes::{post, user};
+use our_application::workers::video::process_video;
 use our_application::{catchers, routes};
 use rocket::futures::StreamExt;
 use rocket::serde::{Deserialize, Serialize};
@@ -56,8 +57,9 @@ async fn rocket() -> Rocket<Build> {
         .expect("Incorrect Rocket.toml configuration");
 
     let db = DBConnection::new(&config.database_url);
+    let pool = db.pool().await;
 
-    let rk = server.manage(db.pool().await)
+    let rk = server.manage(pool.clone())
         .mount("/", routes![
             user::get_user, user::get_users, user::new_user,  user::create_user,
             user::edit_user, user::update_user, user::put_user, user::patch_user,
@@ -82,19 +84,21 @@ async fn rocket() -> Rocket<Build> {
 
     // let state_pool = State::<SqlitePool>::get(&rk).unwrap();
 
-    // tokio::task::spawn_blocking(move || loop {
-    //     let wm = rx.recv().unwrap();
-    //     // let handle = Handle::current();
-    //     let pre_pool = async { db.pool().await };
-    //     // let pre_pool = db.pool().await;
+    tokio::task::spawn_blocking(move || loop {
     //
-    //     println!("Pre pool: {:#?}", type_name_of_val(&pre_pool));
-    //
-    //     // let pool = handle.block_on(pre_pool);
-    //
-    //
-    //     // let _ = process_video(pre_pool as Pool<SqlitePool>, wm);
-    // });
+        let wm = rx.recv().unwrap();
+
+    // //     // let handle = Handle::current();
+    // //     let pre_pool = async { db.pool().await };
+    // //     // let pre_pool = db.pool().await;
+    // //
+    // //     println!("Pre pool: {:#?}", type_name_of_val(&pre_pool));
+    // //
+    // //     // let pool = handle.block_on(pre_pool);
+    // //
+    // //
+        let _ = process_video(&pool, wm);
+    });
 
     rk
 }

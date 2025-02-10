@@ -10,7 +10,7 @@ use crate::traits::DisplayPostContent;
 use chrono::Utc;
 use rocket::fs::TempFile;
 use rocket::serde::Serialize;
-use sqlx::{FromRow, SqlitePool};
+use sqlx::{FromRow, Pool, Sqlite, SqlitePool};
 
 #[derive(Serialize)]
 pub struct ShowPost {
@@ -45,15 +45,15 @@ impl Post {
         VideoPost::new(self)
     }
 
-    // pub async fn make_permanent(pool: Pool<SqlitePool>, uuid: &str, content: &str) -> Result<Self, OurError> {
-    //     let query = r#"UPDATE posts SET content = $1 WHERE uuid = $2 RETURNING *"#;
-    //     Ok(sqlx::query_as::<_, Self>(query)
-    //         .bind(content)
-    //         .bind(uuid)
-    //         .fetch_one(pool.inner())
-    //         .await
-    //         .map_err(OurError::from_sqlx_error)?)
-    // }
+    pub async fn make_permanent(pool: &Pool<Sqlite>, uuid: &str, content: &str) -> Result<Self, OurError> {
+        let query = r#"UPDATE posts SET content = $1 WHERE uuid = $2 RETURNING *"#;
+        Ok(sqlx::query_as::<_, Self>(query)
+            .bind(content)
+            .bind(uuid)
+            .fetch_one(pool)
+            .await
+            .map_err(OurError::from_sqlx_error)?)
+    }
 
     pub fn to_media<'a>(&'a self) -> Box<dyn DisplayPostContent + 'a> {
         match self.post_type {

@@ -188,14 +188,14 @@ pub async fn create_post<'r>(
         content.push_str("loading/assets/");
         content.push_str(&dest_filename);
         is_video = true;
-        wm.orig_file_name = upload
+        wm.orig_filename = upload
             .file
             .path()
             .unwrap()
             .to_string_lossy()
             .to_string()
             .clone();
-        wm.orig_file_name = dest_filename.clone();
+        wm.orig_filename = dest_filename.clone();
     } else {
         return Err(create_err(None));
     }
