@@ -13,6 +13,7 @@ use rocket::serde::{Deserialize, Serialize};
 use rocket::{Build, Rocket};
 use rocket_dyn_templates::Template;
 use rocket_okapi::swagger_ui::{make_swagger_ui, SwaggerUIConfig};
+use tokio::runtime::Handle;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
@@ -88,7 +89,7 @@ async fn rocket() -> Rocket<Build> {
     //
         let wm = rx.recv().unwrap();
 
-    // //     // let handle = Handle::current();
+        let handle = Handle::current();
     // //     let pre_pool = async { db.pool().await };
     // //     // let pre_pool = db.pool().await;
     // //

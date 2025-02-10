@@ -7,16 +7,21 @@ use crate::models::post::Post;
 use crate::models::worker::Message;
 
 pub fn process_video(pool: &Pool<Sqlite>, wm: Message) -> Result<(), ()> {
-    let mut dest = String::from("static/");
-    dest.push_str(&wm.dest_filename);
+    let mut dest = String::from("./static/");
+    dest.push_str(&wm.orig_filename);
+
+    let mut from = String::from("/tmp/");
+    from.push_str(&wm.orig_filename);
 
     let builder = FfmpegBuilder::new()
         .stderr(Stdio::piped())
         .option(Parameter::Single("nostdin"))
         .option(Parameter::Single("y"))
-        .input(File::new(&wm.orig_filename))
+        // .input(File::new(&wm.orig_filename))
+        .input(File::new(from.as_str()))
         .output(
             File::new(&dest)
+            // File::new("./static/cc.mp4")
                 .option(Parameter::KeyValue("vcodec", "libx265"))
                 .option(Parameter::KeyValue("crf", "28"))
         );
@@ -30,7 +35,7 @@ pub fn process_video(pool: &Pool<Sqlite>, wm: Message) -> Result<(), ()> {
         }
 
         let mut display_path = String::from("/assets/");
-        display_path.push_str(&wm.dest_filename);
+        display_path.push_str(&wm.orig_filename);
 
         Post::make_permanent(pool, &wm.uuid, &display_path).await
     };
