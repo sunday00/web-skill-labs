@@ -11,6 +11,12 @@ impl<'a> VideoPost<'a> {
 
 impl<'a> DisplayPostContent for VideoPost<'a> {
     fn raw_html(&self) -> String {
+        if self.0.content.starts_with("loading") {
+            return String::from(r#"<figure>\
+                    <img src="/assets/loading.gif" class="section media"/>
+                </figure>"#);
+        }
+
         format!(r#"
             <video width="320" height="240" controls>
                 <source src="{}" type="video/mp4" />

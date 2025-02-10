@@ -10,6 +10,7 @@ pub mod text_post;
 pub mod photo_post;
 pub mod video_post;
 pub mod bool_wrapper;
+pub mod worker;
 
 pub fn clean_html(src: &str) -> String {
     ammonia::Builder::default()

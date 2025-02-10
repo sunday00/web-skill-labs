@@ -3,9 +3,11 @@ extern crate rocket;
 
 use our_application::fairings::csrf::Csrf;
 use our_application::fairings::db::DBConnection;
+use our_application::models::worker::Message;
 use our_application::routes::assets;
 use our_application::routes::{post, user};
 use our_application::{catchers, routes};
+use rocket::futures::StreamExt;
 use rocket::serde::{Deserialize, Serialize};
 use rocket::{Build, Rocket};
 use rocket_dyn_templates::Template;
@@ -44,6 +46,8 @@ fn setup_logger() {
 async fn rocket() -> Rocket<Build> {
     setup_logger();
 
+    let (tx, rx) = flume::bounded::<Message>(5);
+
     let server = rocket::build();
 
     let config: Config = server
@@ -53,7 +57,7 @@ async fn rocket() -> Rocket<Build> {
 
     let db = DBConnection::new(&config.database_url);
 
-    server.manage(db.pool().await)
+    let rk = server.manage(db.pool().await)
         .mount("/", routes![
             user::get_user, user::get_users, user::new_user,  user::create_user,
             user::edit_user, user::update_user, user::put_user, user::patch_user,
@@ -68,5 +72,29 @@ async fn rocket() -> Rocket<Build> {
         }), )
         .attach(Template::fairing())
         .attach(Csrf::new())
-        .register("/", catchers![catchers::not_found, catchers::unprocessable_entity, catchers::internal_server_error])
+
+        .manage(tx)
+
+        .register("/", catchers![catchers::not_found, catchers::unprocessable_entity, catchers::internal_server_error]);
+
+    // println!("{:#?}", State::<SqlitePool>::get(&rk));
+
+
+    // let state_pool = State::<SqlitePool>::get(&rk).unwrap();
+
+    // tokio::task::spawn_blocking(move || loop {
+    //     let wm = rx.recv().unwrap();
+    //     // let handle = Handle::current();
+    //     let pre_pool = async { db.pool().await };
+    //     // let pre_pool = db.pool().await;
+    //
+    //     println!("Pre pool: {:#?}", type_name_of_val(&pre_pool));
+    //
+    //     // let pool = handle.block_on(pre_pool);
+    //
+    //
+    //     // let _ = process_video(pre_pool as Pool<SqlitePool>, wm);
+    // });
+
+    rk
 }

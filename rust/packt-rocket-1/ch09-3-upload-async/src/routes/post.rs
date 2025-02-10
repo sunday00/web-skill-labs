@@ -1,8 +1,11 @@
 use super::HtmlResponse;
+use crate::errors::our_error::OurError;
 use crate::models::pagination::Pagination;
 use crate::models::post::{NewPost, Post, ShowPost};
 use crate::models::post_type::PostType;
 use crate::models::user::User;
+use crate::models::worker::Message;
+use flume::Sender;
 use image::codecs::jpeg::JpegEncoder;
 use image::{DynamicImage, ExtendedColorType, ImageEncoder, ImageError, ImageReader};
 // use rocket::data::ByteUnit;
@@ -11,7 +14,7 @@ use rocket::form::Form;
 use rocket::http::Status;
 use rocket::request::FlashMessage;
 use rocket::response::{Flash, Redirect};
-use rocket::Data;
+use rocket::{Data, State};
 // use rocket::serde::Serialize;
 use rocket_dyn_templates::{context, Template};
 use sqlx::SqlitePool;
@@ -56,7 +59,9 @@ pub async fn get_posts(pool: &rocket::State<SqlitePool>, user_uuid: &str, pagina
 }
 
 #[post("/users/<user_uuid>/posts", format = "multipart/form-data", data = "<upload>", rank = 1)]
-pub async fn create_post<'r>(pool: &rocket::State<SqlitePool>, user_uuid: &str, mut upload: Form<NewPost<'r>>) -> Result<Flash<Redirect>, Flash<Redirect>> {
+pub async fn create_post<'r>(
+    pool: &rocket::State<SqlitePool>, user_uuid: &str, mut upload: Form<NewPost<'r>>, tx: &State<Sender<Message>>,
+) -> Result<Flash<Redirect>, Flash<Redirect>> {
     let create_err = |e: Option<&str>| {
         Flash::error(
             Redirect::to(format!("/users/{}/posts", user_uuid)),
@@ -78,6 +83,9 @@ pub async fn create_post<'r>(pool: &rocket::State<SqlitePool>, user_uuid: &str, 
     let mut post_type = PostType::Text;
 
     let mt = upload.file.content_type().unwrap().deref();
+    let mut wm = Message::new();
+    let mut is_video = false;
+
     if mt.is_text() {
         let orig_path = upload.file.path().unwrap().to_string_lossy().to_string();
         let mut text_content = vec![];
@@ -174,16 +182,54 @@ pub async fn create_post<'r>(pool: &rocket::State<SqlitePool>, user_uuid: &str, 
         let dest_path = Path::new(rocket::fs::relative!("static")).join(&dest_filename);
 
         upload.file.move_copy_to(&dest_path).await.map_err(|e| create_err(Some(e.to_string().as_str())))?;
+    } else if mt.is_mp4() || mt.is_mpeg() || mt.is_ogg() || mt.is_mov() || mt.is_webm() {
+        post_type = PostType::Video;
+        let dest_filename = format!("{}.mp4", file_uuid);
+        content.push_str("loading/assets/");
+        content.push_str(&dest_filename);
+        is_video = true;
+        wm.orig_file_name = upload
+            .file
+            .path()
+            .unwrap()
+            .to_string_lossy()
+            .to_string()
+            .clone();
+        wm.orig_file_name = dest_filename.clone();
     } else {
         return Err(create_err(None));
     }
 
-    Post::create(pool, user_uuid, post_type, &content).await.map_err(|e| create_err(Some(e.to_string().as_str())))?;
+    // Post::create(pool, user_uuid, post_type, &content)
+    //     .await
+    //     .map_err(|e| create_err(Some(e.to_string().as_str())))?;
 
-    Ok(Flash::success(
-        Redirect::to(format!("/users/{}/posts", user_uuid)),
-        "Successfully created a post.",
-    ))
+    // Ok(Flash::success(
+    //     Redirect::to(format!("/users/{}/posts", user_uuid)),
+    //     "Successfully created a post.",
+    // ))
+
+    Ok(
+        Post::create(pool, user_uuid, post_type, &content)
+            .await
+            .and_then(move |post| {
+                if is_video {
+                    wm.uuid = post.uuid.to_string();
+                    let _ = tx.send(wm).map_err(|_| {
+                        OurError::new_internal_server_error(
+                            String::from("Cannot process message"),
+                            None,
+                        )
+                    })?;
+                }
+
+                Ok(Flash::success(
+                    Redirect::to(format!("/users/{}/posts", user_uuid)),
+                    "Successfully created post",
+                ))
+            })
+            .map_err(|e| create_err(Some(e.to_string().as_str())))?
+    )
 }
 
 #[delete("/users/<_user_uuid>/posts/<_uuid>", format = "text/html")]

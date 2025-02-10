@@ -10,3 +10,5 @@ pub mod traits;
 
 pub mod errors;
 pub mod views;
+
+pub mod workers;
