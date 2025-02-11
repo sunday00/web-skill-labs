@@ -1,5 +1,5 @@
 [default]
-database_url = "sqlite:///Users/sunday00/workspace/common-lab/rust/packt-rocket-1/ch09-3-upload-async/rocket_exam.db"
+database_url = "sqlite:///Users/sunday00/workspace/web-skill-labs/rust/packt-rocket-1/ch09-3-upload-async/rocket_exam.db"
 log_level = "normal"
 template_dir = "src/views"
 
@@ -9,4 +9,4 @@ temp_dir = "/tmp"
 secret_key = "109169cc9c576af390c87167ca75f47a9b5ef7475bce8017b60b81afe63ae58f"
 
 [debug]
-database_url = "sqlite:///Users/sunday00/workspace/common-lab/rust/packt-rocket-1/ch09-3-upload-async/rocket_exam.db"
+database_url = "sqlite:///Users/sunday00/workspace/web-skill-labs/rust/packt-rocket-1/ch09-3-upload-async/rocket_exam.db"

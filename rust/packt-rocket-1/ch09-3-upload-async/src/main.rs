@@ -8,7 +8,6 @@ use our_application::routes::assets;
 use our_application::routes::{post, user};
 use our_application::workers::video::process_video;
 use our_application::{catchers, routes};
-use rocket::futures::StreamExt;
 use rocket::serde::{Deserialize, Serialize};
 use rocket::{Build, Rocket};
 use rocket_dyn_templates::Template;
@@ -80,24 +79,11 @@ async fn rocket() -> Rocket<Build> {
 
         .register("/", catchers![catchers::not_found, catchers::unprocessable_entity, catchers::internal_server_error]);
 
-    // println!("{:#?}", State::<SqlitePool>::get(&rk));
-
-
-    // let state_pool = State::<SqlitePool>::get(&rk).unwrap();
-
     tokio::task::spawn_blocking(move || loop {
-    //
         let wm = rx.recv().unwrap();
 
-        let handle = Handle::current();
-    // //     let pre_pool = async { db.pool().await };
-    // //     // let pre_pool = db.pool().await;
-    // //
-    // //     println!("Pre pool: {:#?}", type_name_of_val(&pre_pool));
-    // //
-    // //     // let pool = handle.block_on(pre_pool);
-    // //
-    // //
+        let _handle = Handle::current();
+
         let _ = process_video(&pool, wm);
     });
 

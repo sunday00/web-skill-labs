@@ -1,10 +1,9 @@
-use std::process::Stdio;
-use ffmpeg_cli::{FfmpegBuilder, File, Parameter};
-use rocket::http::hyper::body::HttpBody;
-use sqlx::{Pool, Sqlite};
-use tokio::runtime::Handle;
 use crate::models::post::Post;
 use crate::models::worker::Message;
+use ffmpeg_cli::{FfmpegBuilder, File, Parameter};
+use sqlx::{Pool, Sqlite};
+use std::process::Stdio;
+use tokio::runtime::Handle;
 
 pub fn process_video(pool: &Pool<Sqlite>, wm: Message) -> Result<(), ()> {
     let mut dest = String::from("./static/");
@@ -21,7 +20,7 @@ pub fn process_video(pool: &Pool<Sqlite>, wm: Message) -> Result<(), ()> {
         .input(File::new(from.as_str()))
         .output(
             File::new(&dest)
-            // File::new("./static/cc.mp4")
+                // File::new("./static/cc.mp4")
                 .option(Parameter::KeyValue("vcodec", "libx265"))
                 .option(Parameter::KeyValue("crf", "28"))
         );
