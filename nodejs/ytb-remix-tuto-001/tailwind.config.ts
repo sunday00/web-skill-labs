@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss'
+import daisyui from 'daisyui'
 
 export default {
   content: ['./app/**/{**,.client,.server}/**/*.{js,jsx,ts,tsx}'],
@@ -18,6 +19,11 @@ export default {
       },
     },
   },
-  plugins: [],
-  darkMode: 'selector',
+  plugins: [
+    daisyui,
+  ],
+  daisyui: {
+    themes: ['', 'winter', 'cupcake', 'luxury', 'cyberpunk'],
+  },
+  darkMode: ['selector', '[data-theme="luxury"]'],
 } satisfies Config
