@@ -3,6 +3,12 @@ import daisyui from 'daisyui'
 
 export default {
   content: ['./app/**/{**,.client,.server}/**/*.{js,jsx,ts,tsx}'],
+  safelist: [
+    'flex',
+    {
+      pattern: /^(bg-|text-|gap-|w-|h-|justify-|items-)/,
+    },
+  ],
   theme: {
     extend: {
       fontFamily: {
@@ -19,9 +25,7 @@ export default {
       },
     },
   },
-  plugins: [
-    daisyui,
-  ],
+  plugins: [daisyui],
   daisyui: {
     themes: ['', 'winter', 'cupcake', 'luxury', 'cyberpunk'],
   },

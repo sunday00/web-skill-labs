@@ -1,16 +1,15 @@
 import { ReactNode } from 'react'
 
-export default function Box({
+export const Box = ({
   children,
-  gap,
+  gap = 4,
   className,
 }: {
   children?: ReactNode
   gap?: number
   className?: string
-}) {
-  let flexedClassName = 'flex flex-col ' + (className ?? '')
-  if (gap) flexedClassName += ` gap-${gap}`
+}) => {
+  const flexedClassName = `flex flex-col gap-${gap} ${className ?? ''}`
 
   return <div className={flexedClassName}>{children ?? <></>}</div>
 }
