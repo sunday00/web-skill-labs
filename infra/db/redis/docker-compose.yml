@@ -1,0 +1,10 @@
+services:
+  local-redis:
+    image: redis:7-alpine
+    restart: always
+    volumes:
+      - ./data:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - '6380:6379'
