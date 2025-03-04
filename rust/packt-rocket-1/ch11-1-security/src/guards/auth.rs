@@ -2,8 +2,7 @@ use rocket::http::Status;
 use rocket::Request;
 use rocket::request::{FromRequest, Outcome};
 use rocket::serde::Serialize;
-use sqlx::{Pool, Sqlite};
-use sqlx::pool::MaybePoolConnection::Connection;
+use sqlx::{Pool, Sqlite, SqlitePool};
 use crate::fairings::db::DBConnection;
 use crate::models::user::User;
 
@@ -29,9 +28,12 @@ impl<'r> FromRequest<'r> for CurrentUser {
 
         // TODO: this is morph to my pool...
         // TODO: originally, struct with connection. check and search more.
-        // let parsed_db = req.guard::<Connection<DBConnection>>().await;
-        let pool = req.guard::<&Pool<Sqlite>>().await.unwrap();
-        let found_user = User::find_from_pool(pool, uuid);
+        // let parsed_db = req.guard::<DBConnection>().await;
+        // let pool = req.guard::<&Pool<Sqlite>>().await.unwrap();
+        let pool = req.guard::<&rocket::State<SqlitePool>>().await.unwrap();
+
+        let found_user = User::find_from_pool(pool, uuid).await;
+        // let found_user = User::find_from_pool(parsed_db.unwrap().pool(), uuid);
 
         if found_user.is_err() {
             return error;

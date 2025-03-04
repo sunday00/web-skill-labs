@@ -39,7 +39,7 @@ impl User {
         )
     }
 
-    pub async fn find_from_pool(pool:&Pool<Sqlite>, uuid: &str) -> Result<Self, OurError> {
+    pub async fn find_from_pool(pool:&rocket::State<SqlitePool>, uuid: &str) -> Result<Self, OurError> {
         let query = "SELECT * FROM users WHERE uuid = $1";
         Ok(
             sqlx::query_as::<_, Self>(query)
