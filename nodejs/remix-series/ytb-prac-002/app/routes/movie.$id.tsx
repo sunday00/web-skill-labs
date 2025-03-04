@@ -36,8 +36,7 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
     method: 'GET',
     headers: {
       accept: 'application/json',
-      Authorization:
-        'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIzYWNhMzg5ZDIyMzhjNTVlNGQ5NjIwMzE5NGUzYjZjOSIsIm5iZiI6MTYzNzczMjMzNS4xMzIsInN1YiI6IjYxOWRjZmVmNGY5YTk5MDAyNDU1NzQ1ZSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.C263G9l6kZEGltcB7t5xCZyqZTX5_5wjQ_GFwW-ajbc',
+      Authorization: 'Bearer .......',
     },
   }
 
