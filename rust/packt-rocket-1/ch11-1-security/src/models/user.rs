@@ -39,16 +39,16 @@ impl User {
         )
     }
 
-    pub async fn find_from_pool(pool:&rocket::State<SqlitePool>, uuid: &str) -> Result<Self, OurError> {
-        let query = "SELECT * FROM users WHERE uuid = $1";
-        Ok(
-            sqlx::query_as::<_, Self>(query)
-                .bind(uuid)
-                .fetch_one(pool.inner())
-                .await
-                .map_err(OurError::from_sqlx_error)?
-        )
-    }
+    // pub async fn find_from_pool(pool: &rocket::State<SqlitePool>, uuid: &str) -> Result<Self, OurError> {
+    //     let query = "SELECT * FROM users WHERE uuid = $1";
+    //     Ok(
+    //         sqlx::query_as::<_, Self>(query)
+    //             .bind(uuid)
+    //             .fetch_one(pool.inner())
+    //             .await
+    //             .map_err(OurError::from_sqlx_error)?
+    //     )
+    // }
 
     pub async fn find_all(pool: &rocket::State<SqlitePool>, pagination: Option<Pagination>) -> Result<(Vec<Self>, Option<Pagination>), OurError> {
         let pagination_prams: Pagination;
@@ -271,4 +271,16 @@ fn skip_validate_password<'v>(password: &'v str, old_password: &'v str, password
 pub struct GetUser {
     pub user: User,
     pub flash: Option<String>,
+}
+
+
+fn verify_password() {
+    // TODO
+}
+
+#[derive(FromForm)]
+pub struct Login<'r> {
+    pub username: &'r str,
+    pub password: &'r str,
+    pub authenticity_token: &'r str,
 }

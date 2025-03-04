@@ -32,7 +32,7 @@ impl<'r> FromRequest<'r> for CurrentUser {
         // let pool = req.guard::<&Pool<Sqlite>>().await.unwrap();
         let pool = req.guard::<&rocket::State<SqlitePool>>().await.unwrap();
 
-        let found_user = User::find_from_pool(pool, uuid).await;
+        let found_user = User::find(pool, uuid).await;
         // let found_user = User::find_from_pool(parsed_db.unwrap().pool(), uuid);
 
         if found_user.is_err() {
