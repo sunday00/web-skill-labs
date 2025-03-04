@@ -6,7 +6,7 @@ export default {
   safelist: [
     'flex',
     {
-      pattern: /^(bg-|text-|gap-|w-|h-|justify-|items-)/,
+      pattern: /^(bg-|text-|gap-|w-|h-|p-|justify-|items-|btn-|textarea-|input-)/,
     },
   ],
   theme: {
@@ -25,9 +25,7 @@ export default {
       },
     },
   },
-  plugins: [
-    daisyui,
-  ],
+  plugins: [daisyui],
   daisyui: {
     themes: ['', 'winter', 'cupcake', 'luxury', 'cyberpunk'],
   },

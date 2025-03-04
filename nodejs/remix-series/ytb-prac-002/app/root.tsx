@@ -2,6 +2,7 @@ import { Link, Links, Meta, Outlet, Scripts, ScrollRestoration } from '@remix-ru
 import { LinksFunction } from '@remix-run/node'
 
 import './tailwind.css'
+import { ReactNode } from 'react'
 
 export const links: LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -16,7 +17,7 @@ export const links: LinksFunction = () => [
   },
 ]
 
-export function Layout({ children }: { children: React.ReactNode }) {
+export function Layout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" data-theme={'cupcake'}>
       <head>
