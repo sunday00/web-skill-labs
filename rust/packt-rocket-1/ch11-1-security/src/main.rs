@@ -5,7 +5,7 @@ use our_application::fairings::csrf::Csrf;
 use our_application::fairings::db::DBConnection;
 use our_application::models::worker::Message;
 use our_application::routes::assets;
-use our_application::routes::{post, user};
+use our_application::routes::{post, session, user};
 use our_application::workers::video::process_video;
 use our_application::{catchers, routes};
 use rocket::serde::{Deserialize, Serialize};
@@ -64,6 +64,9 @@ async fn rocket() -> Rocket<Build> {
             user::get_user, user::get_users, user::new_user,  user::create_user,
             user::edit_user, user::update_user, user::put_user, user::patch_user,
             user::delete_user_entry_point, user::delete_user,
+
+            session::new, session::create, session::delete,
+
             post::get_post, post::get_posts, post::create_post, post::delete_post,
             routes::shutdown,
         ])

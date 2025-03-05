@@ -1,5 +1,6 @@
 use super::HtmlResponse;
 use crate::errors::our_error::OurError;
+use crate::guards::auth::CurrentUser;
 use crate::models::pagination::Pagination;
 use crate::models::post::{NewPost, Post, ShowPost};
 use crate::models::post_type::PostType;
@@ -55,7 +56,7 @@ pub async fn get_posts(pool: &rocket::State<SqlitePool>, user_uuid: &str, pagina
 
 #[post("/users/<user_uuid>/posts", format = "multipart/form-data", data = "<upload>", rank = 1)]
 pub async fn create_post<'r>(
-    pool: &rocket::State<SqlitePool>, user_uuid: &str, mut upload: Form<NewPost<'r>>, tx: &State<Sender<Message>>,
+    pool: &rocket::State<SqlitePool>, user_uuid: &str, mut upload: Form<NewPost<'r>>, tx: &State<Sender<Message>>, _current_user: CurrentUser,
 ) -> Result<Flash<Redirect>, Flash<Redirect>> {
     let create_err = |e: Option<&str>| {
         Flash::error(
