@@ -1,5 +1,5 @@
-import { createContext, ReactNode, useCallback, useEffect, useState } from 'react'
-import Toast, { ToastProps } from '@/components/feedbacks/toast'
+import { createContext, ReactNode, useEffect, useState } from 'react'
+import { ToastProps, ToastsWrap } from '@/components/feedbacks/toast'
 
 const initialState: {
   // eslint-disable-next-line
@@ -26,37 +26,12 @@ export const Providers = ({ children }: { children: ReactNode }) => {
     ...initialState,
     update,
   })
-  const [isMount, setMount] = useState(false)
-  const [toasts, setToasts] = useState<ReactNode[]>([])
-  const [offToasts, setOffToasts] = useState<number>(0)
-  const [toastKey, setToastKey] = useState<number>(0)
-
-  const addOffToasts = useCallback(() => {
-    setOffToasts(offToasts + 1)
-  }, [offToasts])
-
+  const [isMount, setIsMount] = useState(false)
   useEffect(() => {
-    if (!isMount) setMount(true)
-
-    // TODO??
-    if (state.toasts.length) {
-      const t = state.toasts.pop()
-      const newToasts = [...toasts]
-      newToasts.push(<Toast key={toastKey} status={t!.status} addOffToasts={addOffToasts} />)
-
-      setToastKey(toastKey + 1)
-      setToasts(newToasts)
-      state.update(state)
+    if (!isMount) {
+      setIsMount(true)
     }
-
-    if (toastKey && !state.toasts.length && toasts.length === offToasts) {
-      setToastKey(0)
-      setOffToasts(0)
-      setToasts([])
-    }
-
-    console.log(toasts, toastKey, offToasts)
-  }, [addOffToasts, isMount, offToasts, state, toastKey, toasts])
+  }, [isMount, state])
 
   if (!isMount) {
     return null
@@ -70,7 +45,7 @@ export const Providers = ({ children }: { children: ReactNode }) => {
   return (
     <GlobalContext.Provider value={state}>
       {children}
-      <div className="toast toast-end">{toasts ? (toasts as ReactNode) : <></>}</div>
+      <ToastsWrap />
     </GlobalContext.Provider>
   )
 }
