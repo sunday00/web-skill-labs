@@ -1,8 +1,12 @@
 import { useContext, useEffect, useRef, useState } from 'react'
 import { GlobalContext } from '@/providers/global.context.provider'
+import Title from '@/components/texts/title'
+import Box from '@/components/layouts/box'
 
 export type ToastProps = {
   status: 'success' | 'error' | 'info' | 'warning'
+  title: string
+  message?: string
   duration: number
   key: string
 }
@@ -22,7 +26,11 @@ export const Toast = ({ attr }: { attr: ToastProps }) => {
 
   return show ? (
     <div className={`alert alert-${attr.status}`}>
-      <span>Message sent successfully.</span>
+      <Box gap={1}>
+        <Title as={4} text={attr.title} />
+        {attr.message && attr.message !== '' && <div className="divider my-0" />}
+        <span>{attr.message}</span>
+      </Box>
     </div>
   ) : (
     <></>

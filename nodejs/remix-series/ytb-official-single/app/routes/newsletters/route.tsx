@@ -41,8 +41,10 @@ export default function Newsletters() {
 
   const testToast = () => {
     global.toasts.push({
-      status: Math.ceil(Math.random() * 10) % 2 ? 'success' : 'error',
+      status: 'success',
       duration: 5,
+      title: 'success!!',
+      message: 'successfully subscribe',
       key: global.toasts.length + new Date().getTime() + Math.random().toString(),
     })
     global.update(global)
