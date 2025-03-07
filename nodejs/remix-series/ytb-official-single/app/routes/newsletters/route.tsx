@@ -7,6 +7,7 @@ import Button from '@/components/form/button'
 import { ActionFunction } from '@remix-run/node'
 import { Form, useActionData } from '@remix-run/react'
 import { useEffect, useState } from 'react'
+import Toast from '@/components/feedbacks/toast'
 
 export const action: ActionFunction = async ({ request }) => {
   const fd = await request.formData()
@@ -24,15 +25,15 @@ export const action: ActionFunction = async ({ request }) => {
     },
   })
 
-  return res.json()
+  return [res.status, await res.json()]
 }
 
 export default function Newsletters() {
-  const afterAction = useActionData<{ error?: string; message?: string }>()
+  const afterAction = useActionData<[number, { error?: string; message?: string }]>()
   const [err, setErr] = useState<string>('')
 
   useEffect(() => {
-    if (afterAction?.error) setErr(afterAction?.message ?? '')
+    if (afterAction?.[1].error) setErr(afterAction?.[1]?.message ?? '')
     else setErr('')
   }, [afterAction])
 
@@ -63,6 +64,12 @@ export default function Newsletters() {
             </Fieldset>
           </Box>
         </Form>
+
+        <Toast />
+
+        <button className="btn" onClick={() => document.getElementById('my_modal_3').showModal()}>
+          open modal
+        </button>
       </Box>
     </section>
   )
