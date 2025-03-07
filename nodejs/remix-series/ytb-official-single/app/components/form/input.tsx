@@ -40,7 +40,7 @@ export default function Input({
         />
       </label>
       {description ? <p className={'label-text-alt mt-1 ml-1'}>{description}</p> : null}
-      {/*<div className="validator-hint hidden">Enter valid email address</div>*/}
+      <p className="label-text-alt mt-1 ml-1 text-error">{errorMessage}</p>
     </div>
   )
 }

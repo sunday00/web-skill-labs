@@ -6,7 +6,7 @@ export default {
   safelist: [
     'flex',
     {
-      pattern: /^(bg-|text-|gap-|w-|h-|justify-|items-|font-)/,
+      pattern: /^(bg-|text-|gap-|w-|h-|justify-|items-|font-|btn-)/,
     },
   ],
   theme: {

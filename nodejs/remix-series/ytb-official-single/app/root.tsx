@@ -1,5 +1,5 @@
-import { Links, Meta, Outlet, Scripts, ScrollRestoration } from '@remix-run/react'
-import { LinksFunction } from '@remix-run/node'
+import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from '@remix-run/react'
+import { LinksFunction, LoaderFunction } from '@remix-run/node'
 
 import './tailwind.css'
 import { ReactNode } from 'react'
@@ -18,7 +18,15 @@ export const links: LinksFunction = () => [
   },
 ]
 
+export const loader: LoaderFunction = async ({ request: _ }) => {
+  return {
+    ENV: process.env,
+  }
+}
+
 export function Layout({ children }: { children: ReactNode }) {
+  const data = useLoaderData<typeof loader>()
+
   return (
     <html lang="en" data-theme={'winter'}>
       <head>
@@ -32,6 +40,9 @@ export function Layout({ children }: { children: ReactNode }) {
         <Navigation />
         <main className={'container p-8 mx-auto'}>{children}</main>
         <ScrollRestoration />
+        <script
+          dangerouslySetInnerHTML={{ __html: `window.ENV = ${JSON.stringify(data.ENV)}` }}
+        ></script>
         <Scripts />
       </body>
     </html>

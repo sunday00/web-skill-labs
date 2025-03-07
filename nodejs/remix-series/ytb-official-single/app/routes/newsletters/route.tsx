@@ -5,18 +5,37 @@ import Input from '@/components/form/input'
 import EmailIcon from '@/components/icons/email.icon'
 import Button from '@/components/form/button'
 import { ActionFunction } from '@remix-run/node'
-import { Form } from '@remix-run/react'
+import { Form, useActionData } from '@remix-run/react'
+import { useEffect, useState } from 'react'
 
 export const action: ActionFunction = async ({ request }) => {
   const fd = await request.formData()
   const email = fd.get('email')
 
-  console.log(email)
+  const key = process.env.KIT_KEY
+  const url = process.env.KIT_URL
+  const fid = process.env.KIT_FID
 
-  return { statusCode: 200 }
+  const res = await fetch(`${url}/forms/${fid}/subscribe`, {
+    method: 'POST',
+    body: JSON.stringify({ email, api_key: key }),
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+    },
+  })
+
+  return res.json()
 }
 
-export default function Newsletter() {
+export default function Newsletters() {
+  const afterAction = useActionData<{ error?: string; message?: string }>()
+  const [err, setErr] = useState<string>('')
+
+  useEffect(() => {
+    if (afterAction?.error) setErr(afterAction?.message ?? '')
+    else setErr('')
+  }, [afterAction])
+
   return (
     <section className={''}>
       <Box>
@@ -36,6 +55,7 @@ export default function Newsletter() {
                   autoComplete={'email'}
                   placeholder={'aaa@bbb.ccc'}
                   description={'include @ and .XXX'}
+                  errorMessage={err}
                 />
 
                 <Button type={'submit'} text={'Subscribe'} className={'mx-auto'} />
