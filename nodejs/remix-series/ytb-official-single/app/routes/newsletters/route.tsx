@@ -6,8 +6,8 @@ import EmailIcon from '@/components/icons/email.icon'
 import Button from '@/components/form/button'
 import { ActionFunction } from '@remix-run/node'
 import { Form, useActionData } from '@remix-run/react'
-import { useEffect, useState } from 'react'
-import Toast from '@/components/feedbacks/toast'
+import { useContext, useEffect, useState } from 'react'
+import { GlobalContext } from '@/providers/global.context.provider'
 
 export const action: ActionFunction = async ({ request }) => {
   const fd = await request.formData()
@@ -37,6 +37,15 @@ export default function Newsletters() {
     else setErr('')
   }, [afterAction])
 
+  const global = useContext(GlobalContext)
+
+  const testToast = () => {
+    global.toasts.push({
+      status: Math.ceil(Math.random() * 10) % 2 ? 'success' : 'error',
+    })
+    global.update(global)
+  }
+
   return (
     <section className={''}>
       <Box>
@@ -65,9 +74,7 @@ export default function Newsletters() {
           </Box>
         </Form>
 
-        <Toast />
-
-        <button className="btn" onClick={() => document.getElementById('my_modal_3').showModal()}>
+        <button className="btn" onClick={testToast}>
           open modal
         </button>
       </Box>

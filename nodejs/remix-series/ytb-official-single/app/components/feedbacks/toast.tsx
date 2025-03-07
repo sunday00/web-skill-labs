@@ -1,9 +1,38 @@
-export default function Toast() {
+import { useContext, useEffect, useState } from 'react'
+import { GlobalContext } from '@/providers/global.context.provider'
+
+export type ToastProps = {
+  status: 'success' | 'error' | 'info' | 'warning'
+}
+
+export default function Toast({
+  status,
+  addOffToasts,
+}: ToastProps & {
+  addOffToasts: () => void
+}) {
+  const [show, setShow] = useState(true)
+
+  const global = useContext(GlobalContext)
+
+  useEffect(() => {
+    console.log(global.toasts)
+    const st = setTimeout(() => {
+      setShow(false)
+      addOffToasts()
+      return () => clearTimeout(st)
+    }, 5000)
+  })
+
   return (
-    <div className="toast toast-end">
-      <div className="alert alert-success">
-        <span>Message sent successfully.</span>
-      </div>
-    </div>
+    <>
+      {show ? (
+        <div className={`alert alert-${status}`}>
+          <span>Message sent successfully.</span>
+        </div>
+      ) : (
+        <></>
+      )}
+    </>
   )
 }

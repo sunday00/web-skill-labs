@@ -4,6 +4,7 @@ import { LinksFunction, LoaderFunction } from '@remix-run/node'
 import './tailwind.css'
 import { ReactNode } from 'react'
 import Navigation from '@/components/navigation'
+import { Providers } from '@/providers/global.context.provider'
 
 export const links: LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -50,5 +51,9 @@ export function Layout({ children }: { children: ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />
+  return (
+    <Providers>
+      <Outlet />
+    </Providers>
+  )
 }
