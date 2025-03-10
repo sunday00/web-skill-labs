@@ -51,16 +51,13 @@ export const ToastsWrap = () => {
 
     if (toasts.length) {
       const dur = Math.max(...toasts.map((t) => t.duration))
-      const st = setTimeout(
-        () => {
-          if (!toastWrapRef.current?.querySelectorAll('.alert').length) {
-            setToasts([])
-          }
-        },
-        dur * 1000 + 10,
-      )
+      const st = setInterval(() => {
+        if (!toastWrapRef.current?.querySelectorAll('.alert').length) {
+          setToasts([])
+        }
+      }, dur * 800)
 
-      return () => clearTimeout(st)
+      return () => clearInterval(st)
     }
   }, [global, toasts])
 
