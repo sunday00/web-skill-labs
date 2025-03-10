@@ -35,6 +35,17 @@ export default function Newsletters() {
   useEffect(() => {
     if (afterAction?.[1].error) setErr(afterAction?.[1]?.message ?? '')
     else setErr('')
+
+    if (afterAction?.[0] === 200) {
+      global.toasts.push({
+        status: 'success',
+        duration: 5,
+        title: 'success!!',
+        message: 'successfully subscribe. check email box',
+        key: global.toasts.length + new Date().getTime() + Math.random().toString(),
+      })
+      global.update(global)
+    }
   }, [afterAction])
 
   const global = useContext(GlobalContext)
