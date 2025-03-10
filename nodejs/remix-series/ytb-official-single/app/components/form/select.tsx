@@ -20,13 +20,14 @@ const handleMouse = (
 
   setCurrentFocus(0)
 
-  if (el.open) {
-    el.open = false
-    return
-  }
+  if (!el.open) {
+    el.open = true
 
-  el.open = true
-  ;(document.querySelector(`.${name}-option-0`) as HTMLInputElement).focus()
+    // TODO: check default value
+    ;(document.querySelector(`.${name}-option-0`) as HTMLInputElement).focus()
+  } else {
+    el.open = false
+  }
 }
 
 const handleArrowDown = (
@@ -93,14 +94,14 @@ const handleBlur = (
 
   const target = (e as MouseEvent<HTMLInputElement>).target as HTMLInputElement
 
-  if (target.className.includes(`${name}-select`)) return
-
-  if (target.className.includes(`${name}-option`)) {
+  if (target.classList?.contains(`${name}-option`)) {
     setSelected({ show: target.value, value: target.dataset.value! })
   }
 
-  ;(document.querySelector(`.${name}-select`) as HTMLButtonElement).focus()
-  el.open = false
+  if (!target.classList.contains(`${name}-select`) && el.open) {
+    ;(document.querySelector(`.${name}-select`) as HTMLButtonElement).focus()
+    el.open = false
+  }
 }
 
 const Option = ({ name, option, idx }: { name: string; option: SelectOption; idx: number }) => {
@@ -142,6 +143,9 @@ export default function Select({
 
   const handleActive = (e: MouseEvent<HTMLElement>) => {
     e.preventDefault()
+    e.stopPropagation()
+
+    console.log(e.target as unknown as HTMLOrSVGElement)
 
     handleMouse(wrapRef?.current, name, setCurrentFocus)
   }
@@ -163,6 +167,11 @@ export default function Select({
     }
   }
 
+  const wStyle = { width: '100%', maxWidth: '100%' }
+  if (w === 'fit') {
+    wStyle.width = `${Math.max(...options.map((o) => o.show?.length ?? 0)) * 0.65}em`
+  }
+
   useEffect(() => {
     if (!wrapRef.current) return
     document.querySelector('html')?.addEventListener('click', (e: unknown) => {
@@ -175,7 +184,7 @@ export default function Select({
   })
 
   return (
-    <details className="dropdown" ref={wrapRef}>
+    <details className={`dropdown`} ref={wrapRef} style={{ ...wStyle }}>
       <summary
         tabIndex={0}
         role="button"
@@ -183,7 +192,11 @@ export default function Select({
         onClick={handleActive}
         onKeyDown={handleKeyDown}
       >
-        <span role={'button'} style={{ userSelect: 'none', msUserSelect: 'none' }}>
+        <span
+          role={'button'}
+          className={`${name}-select`}
+          style={{ userSelect: 'none', msUserSelect: 'none' }}
+        >
           {selected.show}
         </span>
         <FaCaretDown />

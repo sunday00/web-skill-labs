@@ -95,7 +95,9 @@ export default function Newsletters() {
                           show: `item-${idx}`,
                           value: idx,
                         }
-                      : { value: 'abracadabra abolute gold - ' + idx },
+                      : {
+                          value: 'abrae gold ffwe f - ' + idx,
+                        },
                   )}
                 />
 

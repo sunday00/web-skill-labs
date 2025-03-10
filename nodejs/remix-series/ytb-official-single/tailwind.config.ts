@@ -4,13 +4,14 @@ import * as themes from 'daisyui/src/theming/themes'
 
 const pattReg01 = /^(text-|gap-|w-|h-|font-|mb-|pb-|rounded-)/
 const pattReg02 = /^(bg-|justify-|items-|btn-|modal-|alert-|hover:)/
+const pattReg03 = /^(truncate)/
 
 export default {
   content: ['./app/**/{**,.client,.server}/**/*.{js,jsx,ts,tsx}'],
   safelist: [
     'flex',
     {
-      pattern: new RegExp(pattReg01.source + '|' + pattReg02.source),
+      pattern: new RegExp(pattReg01.source + '|' + pattReg02.source + '|' + pattReg03.source),
     },
   ],
   theme: {
