@@ -8,6 +8,7 @@ import { ActionFunction } from '@remix-run/node'
 import { Form, useActionData } from '@remix-run/react'
 import { useContext, useEffect, useState } from 'react'
 import { GlobalContext } from '@/providers/global.context.provider'
+import Select from '@/components/form/select'
 
 export const action: ActionFunction = async ({ request }) => {
   const fd = await request.formData()
@@ -32,6 +33,8 @@ export default function Newsletters() {
   const afterAction = useActionData<[number, { error?: string; message?: string }]>()
   const [err, setErr] = useState<string>('')
 
+  const global = useContext(GlobalContext)
+
   useEffect(() => {
     if (afterAction?.[1].error) setErr(afterAction?.[1]?.message ?? '')
     else setErr('')
@@ -44,11 +47,12 @@ export default function Newsletters() {
         message: 'successfully subscribe. check email box',
         key: global.toasts.length + new Date().getTime() + Math.random().toString(),
       })
-      global.update(global)
-    }
-  }, [afterAction])
 
-  const global = useContext(GlobalContext)
+      global.update(global)
+
+      afterAction[0] = 0
+    }
+  }, [afterAction, global])
 
   const testToast = () => {
     global.toasts.push({
@@ -81,6 +85,18 @@ export default function Newsletters() {
                   placeholder={'aaa@bbb.ccc'}
                   description={'include @ and .XXX'}
                   errorMessage={err}
+                />
+
+                <Select
+                  name={'selectTest'}
+                  options={new Array(4).fill(0).map((a, idx) =>
+                    idx % 15
+                      ? {
+                          show: `item-${idx}`,
+                          value: idx,
+                        }
+                      : { value: 'abracadabra abolute gold - ' + idx },
+                  )}
                 />
 
                 <Button type={'submit'} text={'Subscribe'} className={'mx-auto'} />
