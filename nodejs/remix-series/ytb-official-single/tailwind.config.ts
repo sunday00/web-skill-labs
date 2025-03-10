@@ -1,12 +1,16 @@
 import type { Config } from 'tailwindcss'
 import daisyui from 'daisyui'
+import * as themes from 'daisyui/src/theming/themes'
+
+const pattReg01 = /^(text-|gap-|w-|h-|font-|mb-|pb-|rounded-)/
+const pattReg02 = /^(bg-|justify-|items-|btn-|modal-|alert-|hover:)/
 
 export default {
   content: ['./app/**/{**,.client,.server}/**/*.{js,jsx,ts,tsx}'],
   safelist: [
     'flex',
     {
-      pattern: /^(bg-|text-|gap-|w-|h-|justify-|items-|font-|btn-|modal-|mb-|pb-|alert-)/,
+      pattern: new RegExp(pattReg01.source + '|' + pattReg02.source),
     },
   ],
   theme: {
@@ -27,7 +31,24 @@ export default {
   },
   plugins: [daisyui],
   daisyui: {
-    themes: ['', 'winter', 'cupcake', 'luxury', 'cyberpunk'],
+    themes: [
+      '',
+      'winter',
+      'cupcake',
+      'luxury',
+      'cyberpunk',
+      {
+        winter: {
+          ...themes['winter'],
+          '.bg-darker': {
+            'background-color': 'rgba(0,0,0,0.3)',
+          },
+          '.bg-darker:hover': {
+            'background-color': 'rgba(0,0,0,0.3)',
+          },
+        },
+      },
+    ],
   },
   darkMode: ['selector', '[data-theme="luxury"]'],
 } satisfies Config

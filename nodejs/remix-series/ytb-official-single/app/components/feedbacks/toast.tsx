@@ -1,7 +1,10 @@
-import { useContext, useEffect, useRef, useState } from 'react'
+import { ReactNode, useContext, useEffect, useRef, useState } from 'react'
 import { GlobalContext } from '@/providers/global.context.provider'
 import Title from '@/components/texts/title'
 import Box from '@/components/layouts/box'
+import Flex from '@/components/layouts/flex'
+import { IoMdCloseCircle } from 'react-icons/io'
+import CloseBtn from '@/components/form/close.btn'
 
 export type ToastProps = {
   status: 'success' | 'error' | 'info' | 'warning'
@@ -25,9 +28,15 @@ export const Toast = ({ attr }: { attr: ToastProps }) => {
   }, [attr, show])
 
   return show ? (
-    <div className={`alert alert-${attr.status}`}>
+    <div className={`alert alert-${attr.status} block`}>
       <Box gap={1}>
-        <Title as={4} text={attr.title} />
+        <Flex>
+          <Title as={4} text={attr.title} />
+
+          <CloseBtn onClick={() => setShow(false)}>
+            <IoMdCloseCircle />
+          </CloseBtn>
+        </Flex>
         {attr.message && attr.message !== '' && <div className="divider my-0" />}
         <span>{attr.message}</span>
       </Box>
@@ -67,7 +76,7 @@ export const ToastsWrap = () => {
 
   return (
     <div className="toast toast-end" ref={toastWrapRef}>
-      {list}
+      {list as ReactNode}
     </div>
   )
 }
