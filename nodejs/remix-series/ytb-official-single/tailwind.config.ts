@@ -41,10 +41,10 @@ export default {
         winter: {
           ...themes['winter'],
           '.bg-darker': {
-            'background-color': 'rgba(0,0,0,0.3)',
+            'background-color': 'rgba(0,0,0,0.1)',
           },
           '.bg-darker:hover': {
-            'background-color': 'rgba(0,0,0,0.3)',
+            'background-color': 'rgba(0,0,0,0.1)',
           },
         },
       },
