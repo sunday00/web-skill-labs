@@ -23,9 +23,17 @@ export default function Select({
   const [selected, setSelected] = useState<SelectOption>(defaultValue ?? options[0])
   const [open, setOpen] = useState<boolean>(false)
 
-  const wStyle = { width: '100%', maxWidth: '100%' }
+  const wStyle: { width: string | number; maxWidth: string | number; flex?: number } = {
+    width: '100%',
+    maxWidth: '100%',
+  }
   if (w === 'fit') {
-    wStyle.width = `${Math.max(...options.map((o) => o.show?.length ?? 0)) * 0.65}em`
+    const len = Math.max(...options.map((o) => o.show?.length ?? 0))
+    wStyle.width = `${len < 10 ? len * 1.2 : len < 20 ? len * 0.78 : len * 0.65}em`
+  } else if (w === 'full') {
+    wStyle.flex = 1
+  } else if (w) {
+    wStyle.width = w
   }
 
   useEffect(() => {
@@ -61,7 +69,10 @@ export default function Select({
   })
 
   return (
-    <div className="select-input custom-select-basic flex flex-col relative w-full">
+    <div
+      className="select-input custom-select-basic flex flex-col relative w-full"
+      style={{ ...wStyle }}
+    >
       <button
         tabIndex={0}
         type={'button'}
@@ -76,7 +87,7 @@ export default function Select({
       <input type="hidden" name={name} value={selected.value} />
 
       {open ? (
-        <ul className="select-option-list w-full absolute top-14 z-10">
+        <ul className="select-option-list w-full py-2 absolute bg-base-100 top-14 z-10 max-h-[14rem] border-2 overflow-scroll show-scroll-bar">
           {optionLists as ReactNode}
         </ul>
       ) : (

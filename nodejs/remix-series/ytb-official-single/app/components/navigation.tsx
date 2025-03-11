@@ -1,7 +1,7 @@
 import { Link } from '@remix-run/react'
 import { ReactNode } from 'react'
 
-const dirs = ['articles', 'newsletters']
+const dirs = ['articles', 'newsletters', 'plain']
 
 export default function Navigation() {
   const menus = dirs.map((d) => {

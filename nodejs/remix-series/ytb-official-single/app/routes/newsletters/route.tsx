@@ -91,14 +91,15 @@ export default function Newsletters() {
                 <Flex>
                   <Select
                     name={'selectTest'}
-                    options={new Array(4).fill(0).map((a, idx) =>
+                    w={'500px'}
+                    options={new Array(60).fill(0).map((a, idx) =>
                       idx % 15
                         ? {
                             show: `item-${idx}`,
                             value: idx,
                           }
                         : {
-                            value: 'abrae gold ffwe f - ' + idx,
+                            value: 'abrae golsdfewgfdsjhfjkdskd - ' + idx,
                           },
                     )}
                   />
@@ -112,7 +113,7 @@ export default function Newsletters() {
                             value: idx,
                           }
                         : {
-                            value: 'abrae gold ffwe f - ' + idx,
+                            value: 'a - ' + idx,
                           },
                     )}
                   />

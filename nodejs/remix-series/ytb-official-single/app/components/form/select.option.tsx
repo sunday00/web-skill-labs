@@ -55,18 +55,11 @@ export default function Option({
     setOpen(false)
   }
 
-  const sortedClass =
-    idx === 0
-      ? `border-b-0 rounded-t-lg rounded-b-none`
-      : isLast
-        ? `rounded-b-lg border-t-0 rounded-t-none`
-        : `border-y-0 rounded-none`
-
   return (
     <li className={'flex items-center bg-base-100'}>
       <button
         type={'button'}
-        className={`focus:bg-darker hover:bg-darker w-full text-start input input-bordered ${sortedClass} select-none ${name}-select-option ${name}-select-option-${idx}`}
+        className={`focus:bg-darker hover:bg-darker w-full px-4 py-2 text-start select-none ${name}-select-option ${name}-select-option-${idx}`}
         tabIndex={0}
         onKeyDown={handleOptionKeyDown}
         onClick={handleOptionClick}
