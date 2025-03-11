@@ -9,6 +9,7 @@ import { Form, useActionData } from '@remix-run/react'
 import { useContext, useEffect, useState } from 'react'
 import { GlobalContext } from '@/providers/global.context.provider'
 import Select from '@/components/form/select'
+import Flex from '@/components/layouts/flex'
 
 export const action: ActionFunction = async ({ request }) => {
   const fd = await request.formData()
@@ -87,19 +88,35 @@ export default function Newsletters() {
                   errorMessage={err}
                 />
 
-                <Select
-                  name={'selectTest'}
-                  options={new Array(4).fill(0).map((a, idx) =>
-                    idx % 15
-                      ? {
-                          show: `item-${idx}`,
-                          value: idx,
-                        }
-                      : {
-                          value: 'abrae gold ffwe f - ' + idx,
-                        },
-                  )}
-                />
+                <Flex>
+                  <Select
+                    name={'selectTest'}
+                    options={new Array(4).fill(0).map((a, idx) =>
+                      idx % 15
+                        ? {
+                            show: `item-${idx}`,
+                            value: idx,
+                          }
+                        : {
+                            value: 'abrae gold ffwe f - ' + idx,
+                          },
+                    )}
+                  />
+
+                  <Select
+                    name={'selectTest2'}
+                    options={new Array(4).fill(0).map((a, idx) =>
+                      idx % 15
+                        ? {
+                            show: `item-${idx}`,
+                            value: idx,
+                          }
+                        : {
+                            value: 'abrae gold ffwe f - ' + idx,
+                          },
+                    )}
+                  />
+                </Flex>
 
                 <Button type={'submit'} text={'Subscribe'} className={'mx-auto'} />
               </Box>

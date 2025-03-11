@@ -176,9 +176,15 @@ export default function Select({
   }
 
   useEffect(() => {
-    document.body?.addEventListener('click', (e: unknown) => {
-      if (!(e as { target: HTMLBodyElement }).target!.closest('.select-opener')) setOpen(false)
-    })
+    const handler = (e: unknown) => {
+      console.log('handler')
+      if (!(e as { target: HTMLBodyElement }).target!.closest(`.select-opener-${name}`))
+        setOpen(false)
+    }
+
+    document.body?.addEventListener('click', handler)
+
+    return () => document.body.removeEventListener('click', handler)
   }, [])
 
   return (
@@ -186,46 +192,49 @@ export default function Select({
       <button
         tabIndex={0}
         type={'button'}
-        className="select-opener btn input input-bordered flex justify-between items-center no-animation"
+        className={`select-opener select-opener-${name} btn input input-bordered flex justify-between items-center no-animation`}
         onClick={handleMenuToggle}
       >
         <span>{selected.show}</span>
         <FaCaretDown />
       </button>
 
-      {open ? <ul className="select-option-list w-full absolute top-14 z-10">
-        <li className={'flex items-center bg-base-100'}>
-          <button
-            className={
-              'focus:bg-darker w-full text-start input input-bordered border-b-0  rounded-t-lg rounded-b-none select-none'
-            }
-            tabIndex={0}
-          >
-            Item 1
-          </button>
-        </li>
-        <li className={'flex items-center bg-base-100'}>
-          <button
-            className={
-              'focus:bg-darker w-full text-start input input-bordered border-y-0 rounded-none select-none'
-            }
-            tabIndex={0}
-          >
-            Item 2
-          </button>
-        </li>
-        <li className={' flex items-center bg-base-100'}>
-          <button
-            className={
-              'focus:bg-darker w-full text-start input input-bordered rounded-b-lg border-t-0 rounded-t-none select-none'
-            }
-            tabIndex={0}
-          >
-            Item 3
-          </button>
-        </li>
-      </ul> : <></>}
-      
+      {open ? (
+        <ul className="select-option-list w-full absolute top-14 z-10">
+          <li className={'flex items-center bg-base-100'}>
+            <button
+              className={
+                'focus:bg-darker w-full text-start input input-bordered border-b-0  rounded-t-lg rounded-b-none select-none'
+              }
+              tabIndex={0}
+            >
+              Item 1
+            </button>
+          </li>
+          <li className={'flex items-center bg-base-100'}>
+            <button
+              className={
+                'focus:bg-darker w-full text-start input input-bordered border-y-0 rounded-none select-none'
+              }
+              tabIndex={0}
+            >
+              Item 2
+            </button>
+          </li>
+          <li className={' flex items-center bg-base-100'}>
+            <button
+              className={
+                'focus:bg-darker w-full text-start input input-bordered rounded-b-lg border-t-0 rounded-t-none select-none'
+              }
+              tabIndex={0}
+            >
+              Item 3
+            </button>
+          </li>
+        </ul>
+      ) : (
+        <></>
+      )}
     </div>
   )
 }
