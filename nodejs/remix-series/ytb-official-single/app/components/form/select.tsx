@@ -1,13 +1,5 @@
-import {
-  HTMLAttributes,
-  KeyboardEvent,
-  MouseEvent,
-  ReactNode,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
-import { FaCaretDown } from 'react-icons/fa'
+import { HTMLAttributes, KeyboardEvent, MouseEvent, useEffect, useRef, useState } from 'react'
+import { FaCaretDown } from 'react-icons/fa6'
 
 export type SelectOption = { show?: string; value: string | number }
 
@@ -137,6 +129,7 @@ export default function Select({
   else options[0].show = options[0].show ?? options[0].value.toString()
 
   const wrapRef = useRef<HTMLDetailsElement>(null)
+  const openCheckRef = useRef<HTMLInputElement>(null)
 
   const [currentFocus, setCurrentFocus] = useState(0)
   const [selected, setSelected] = useState<SelectOption>(defaultValue ?? options[0])
@@ -172,43 +165,67 @@ export default function Select({
     wStyle.width = `${Math.max(...options.map((o) => o.show?.length ?? 0)) * 0.65}em`
   }
 
-  useEffect(() => {
-    if (!wrapRef.current) return
-    document.querySelector('html')?.addEventListener('click', (e: unknown) => {
-      handleBlur(e, name, wrapRef.current as HTMLDetailsElement, setSelected)
-    })
-  }, [name])
-
   const optionLists = options.map((option: SelectOption, idx) => {
     return <Option name={name} key={option.value} option={option} idx={idx} />
   })
 
+  const [open, setOpen] = useState<boolean>(false)
+
+  const handleMenuToggle = (_e: MouseEvent<HTMLButtonElement>) => {
+    setOpen(!open)
+  }
+
+  useEffect(() => {
+    document.body?.addEventListener('click', (e: unknown) => {
+      if (!(e as { target: HTMLBodyElement }).target!.closest('.select-opener')) setOpen(false)
+    })
+  }, [])
+
   return (
-    <details className={`dropdown`} ref={wrapRef} style={{ ...wStyle }}>
-      <summary
+    <div className="select-input custom-select-basic flex flex-col relative w-full">
+      <button
         tabIndex={0}
-        role="button"
-        className={`input input-bordered flex justify-between items-center ${name}-select`}
-        onClick={handleActive}
-        onKeyDown={handleKeyDown}
+        type={'button'}
+        className="select-opener btn input input-bordered flex justify-between items-center no-animation"
+        onClick={handleMenuToggle}
       >
-        <span
-          role={'button'}
-          className={`${name}-select`}
-          style={{ userSelect: 'none', msUserSelect: 'none' }}
-        >
-          {selected.show}
-        </span>
+        <span>{selected.show}</span>
         <FaCaretDown />
-      </summary>
-      <div
-        className="menu dropdown-content bg-base-100 shadowbg-base-100 rounded-b-lg z-[1] w-full p-2 shadow"
-        role="button"
-        tabIndex={0}
-        onKeyDown={handleKeyDown}
-      >
-        {optionLists as ReactNode}
-      </div>
-    </details>
+      </button>
+
+      {open ? <ul className="select-option-list w-full absolute top-14 z-10">
+        <li className={'flex items-center bg-base-100'}>
+          <button
+            className={
+              'focus:bg-darker w-full text-start input input-bordered border-b-0  rounded-t-lg rounded-b-none select-none'
+            }
+            tabIndex={0}
+          >
+            Item 1
+          </button>
+        </li>
+        <li className={'flex items-center bg-base-100'}>
+          <button
+            className={
+              'focus:bg-darker w-full text-start input input-bordered border-y-0 rounded-none select-none'
+            }
+            tabIndex={0}
+          >
+            Item 2
+          </button>
+        </li>
+        <li className={' flex items-center bg-base-100'}>
+          <button
+            className={
+              'focus:bg-darker w-full text-start input input-bordered rounded-b-lg border-t-0 rounded-t-none select-none'
+            }
+            tabIndex={0}
+          >
+            Item 3
+          </button>
+        </li>
+      </ul> : <></>}
+      
+    </div>
   )
 }

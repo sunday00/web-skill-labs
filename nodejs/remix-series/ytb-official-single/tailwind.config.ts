@@ -2,7 +2,7 @@ import type { Config } from 'tailwindcss'
 import daisyui from 'daisyui'
 import * as themes from 'daisyui/src/theming/themes'
 
-const pattReg01 = /^(text-|gap-|w-|h-|font-|mb-|pb-|rounded-)/
+const pattReg01 = /^(text-|gap-|w-|h-|top-|bottom-|font-|mb-|pb-|pt-|rounded-)/
 const pattReg02 = /^(bg-|justify-|items-|btn-|modal-|alert-|hover:)/
 const pattReg03 = /^(truncate)/
 

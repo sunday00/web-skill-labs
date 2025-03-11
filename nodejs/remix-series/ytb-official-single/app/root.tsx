@@ -37,7 +37,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body className={'bg-transparent'}>
+      <body className={'bg-transparent min-h-screen'}>
         <Navigation />
         <main className={'container p-8 mx-auto'}>{children}</main>
         <ScrollRestoration />
