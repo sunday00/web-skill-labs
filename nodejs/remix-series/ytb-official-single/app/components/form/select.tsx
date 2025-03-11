@@ -1,115 +1,7 @@
-import { HTMLAttributes, KeyboardEvent, MouseEvent, useEffect, useRef, useState } from 'react'
+import { HTMLAttributes, MouseEvent, ReactNode, useEffect, useState } from 'react'
 import { FaCaretDown } from 'react-icons/fa6'
-
-export type SelectOption = { show?: string; value: string | number }
-
-const handleMouse = (
-  el: HTMLDetailsElement | undefined | null,
-  name: string,
-  setCurrentFocus: (focus: number) => void,
-) => {
-  if (!el) return
-
-  setCurrentFocus(0)
-
-  if (!el.open) {
-    el.open = true
-
-    // TODO: check default value
-    ;(document.querySelector(`.${name}-option-0`) as HTMLInputElement).focus()
-  } else {
-    el.open = false
-  }
-}
-
-const handleArrowDown = (
-  el: HTMLDetailsElement,
-  name: string,
-  currentFocus: number,
-  setCurrentFocus: (focus: number) => void,
-  options: SelectOption[],
-) => {
-  if (!el.open) {
-    el.open = true
-    ;(document.querySelector(`.${name}-option-0`) as HTMLInputElement).focus()
-    return
-  }
-
-  if (el.open) {
-    const newCurrentIndex = currentFocus >= options.length - 1 ? 0 : currentFocus + 1
-    ;(document.querySelector(`.${name}-option-${newCurrentIndex}`) as HTMLInputElement).focus()
-    setCurrentFocus(newCurrentIndex)
-  }
-}
-
-const handleArrowUp = (
-  el: HTMLDetailsElement,
-  name: string,
-  currentFocus: number,
-  setCurrentFocus: (focus: number) => void,
-  options: SelectOption[],
-) => {
-  if (!el.open) {
-    return
-  }
-
-  const newCurrentIndex = currentFocus <= 0 ? options.length - 1 : currentFocus - 1
-  ;(document.querySelector(`.${name}-option-${newCurrentIndex}`) as HTMLInputElement).focus()
-  setCurrentFocus(newCurrentIndex)
-}
-
-const handleEscape = (
-  el: HTMLDetailsElement,
-  name: string,
-  setCurrentFocus: (focus: number) => void,
-) => {
-  setCurrentFocus(0)
-  el.open = false
-  ;(document.querySelector(`.${name}-select`) as HTMLButtonElement).focus()
-}
-
-const handleTab = (
-  el: HTMLDetailsElement,
-  name: string,
-  setCurrentFocus: (focus: number) => void,
-) => {
-  handleEscape(el, name, setCurrentFocus)
-}
-
-const handleBlur = (
-  e: unknown,
-  name: string,
-  el: HTMLDetailsElement,
-  setSelected: (select: SelectOption) => void,
-) => {
-  ;(e as MouseEvent<HTMLElement>).preventDefault()
-
-  const target = (e as MouseEvent<HTMLInputElement>).target as HTMLInputElement
-
-  if (target.classList?.contains(`${name}-option`)) {
-    setSelected({ show: target.value, value: target.dataset.value! })
-  }
-
-  if (!target.classList.contains(`${name}-select`) && el.open) {
-    ;(document.querySelector(`.${name}-select`) as HTMLButtonElement).focus()
-    el.open = false
-  }
-}
-
-const Option = ({ name, option, idx }: { name: string; option: SelectOption; idx: number }) => {
-  option.show = option.show ?? option.value.toString()
-
-  return (
-    <input
-      type={'button'}
-      value={option.show}
-      className={`input w-full ${name}-option ${name}-option-${idx} text-start focus:outline-none focus:bg-darker hover:bg-darker cursor-pointer`}
-      readOnly={true}
-      data-value={option.value}
-      tabIndex={0}
-    />
-  )
-}
+import Option, { SelectOption } from '@/components/form/select.option'
+import { useSelectHelper } from '@/hooks/select.helper'
 
 export default function Select({
   name,
@@ -128,64 +20,45 @@ export default function Select({
   if (defaultValue) defaultValue.show = defaultValue.show ?? defaultValue.value.toString()
   else options[0].show = options[0].show ?? options[0].value.toString()
 
-  const wrapRef = useRef<HTMLDetailsElement>(null)
-  const openCheckRef = useRef<HTMLInputElement>(null)
-
-  const [currentFocus, setCurrentFocus] = useState(0)
   const [selected, setSelected] = useState<SelectOption>(defaultValue ?? options[0])
-
-  const handleActive = (e: MouseEvent<HTMLElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
-
-    console.log(e.target as unknown as HTMLOrSVGElement)
-
-    handleMouse(wrapRef?.current, name, setCurrentFocus)
-  }
-
-  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (!wrapRef?.current) return
-
-    switch (e.key) {
-      case 'ArrowDown':
-        return handleArrowDown(wrapRef.current, name, currentFocus, setCurrentFocus, options)
-      case 'ArrowUp':
-        return handleArrowUp(wrapRef.current, name, currentFocus, setCurrentFocus, options)
-      case 'Escape':
-        return handleEscape(wrapRef.current, name, setCurrentFocus)
-      case 'Tab':
-        return handleTab(wrapRef.current, name, setCurrentFocus)
-      default:
-        return
-    }
-  }
+  const [open, setOpen] = useState<boolean>(false)
 
   const wStyle = { width: '100%', maxWidth: '100%' }
   if (w === 'fit') {
     wStyle.width = `${Math.max(...options.map((o) => o.show?.length ?? 0)) * 0.65}em`
   }
 
-  const optionLists = options.map((option: SelectOption, idx) => {
-    return <Option name={name} key={option.value} option={option} idx={idx} />
-  })
-
-  const [open, setOpen] = useState<boolean>(false)
-
-  const handleMenuToggle = (_e: MouseEvent<HTMLButtonElement>) => {
-    setOpen(!open)
-  }
-
   useEffect(() => {
     const handler = (e: unknown) => {
-      console.log('handler')
-      if (!(e as { target: HTMLBodyElement }).target!.closest(`.select-opener-${name}`))
+      const target = (e as { target: HTMLBodyElement }).target
+      if (!target!.closest(`.select-opener-${name}`) && !target!.closest(`.${name}-select-option`))
         setOpen(false)
     }
 
     document.body?.addEventListener('click', handler)
 
     return () => document.body.removeEventListener('click', handler)
-  }, [])
+  }, [name])
+
+  const handleMenuToggle = (_e: MouseEvent<HTMLButtonElement>) => {
+    setOpen(!open)
+  }
+
+  const handleKeyDown = useSelectHelper(name, setOpen)
+
+  const optionLists = options.map((option: SelectOption, idx) => {
+    return (
+      <Option
+        key={option.value}
+        name={name}
+        option={option}
+        idx={idx}
+        optionsLen={options.length}
+        setOpen={setOpen}
+        setSelected={setSelected}
+      />
+    )
+  })
 
   return (
     <div className="select-input custom-select-basic flex flex-col relative w-full">
@@ -194,43 +67,17 @@ export default function Select({
         type={'button'}
         className={`select-opener select-opener-${name} btn input input-bordered flex justify-between items-center no-animation`}
         onClick={handleMenuToggle}
+        onKeyDown={handleKeyDown}
       >
         <span>{selected.show}</span>
         <FaCaretDown />
       </button>
 
+      <input type="hidden" name={name} value={selected.value} />
+
       {open ? (
         <ul className="select-option-list w-full absolute top-14 z-10">
-          <li className={'flex items-center bg-base-100'}>
-            <button
-              className={
-                'focus:bg-darker w-full text-start input input-bordered border-b-0  rounded-t-lg rounded-b-none select-none'
-              }
-              tabIndex={0}
-            >
-              Item 1
-            </button>
-          </li>
-          <li className={'flex items-center bg-base-100'}>
-            <button
-              className={
-                'focus:bg-darker w-full text-start input input-bordered border-y-0 rounded-none select-none'
-              }
-              tabIndex={0}
-            >
-              Item 2
-            </button>
-          </li>
-          <li className={' flex items-center bg-base-100'}>
-            <button
-              className={
-                'focus:bg-darker w-full text-start input input-bordered rounded-b-lg border-t-0 rounded-t-none select-none'
-              }
-              tabIndex={0}
-            >
-              Item 3
-            </button>
-          </li>
+          {optionLists as ReactNode}
         </ul>
       ) : (
         <></>
