@@ -1,7 +1,12 @@
-import { LoaderFunction } from '@remix-run/node'
-import { useLoaderData } from '@remix-run/react'
-
-export type Article = {}
+import { ActionFunction, LoaderFunction } from '@remix-run/node'
+import { Form, useActionData, useLoaderData, useNavigation } from '@remix-run/react'
+import { CommonListPage, CommonRes, CommonSuccess } from '@/common/common.entity'
+import { Article } from '@/entities/board.entity'
+import { ReactNode, useEffect } from 'react'
+import Fieldset from '@/components/form/fieldset'
+import Box from '@/components/layouts/box'
+import Input from '@/components/form/input'
+import Button from '@/components/form/button'
 
 export const loader: LoaderFunction = async () => {
   const url = 'http://localhost:3031/api/v1/board?page=1&size=40'
@@ -12,23 +17,84 @@ export const loader: LoaderFunction = async () => {
       'Content-Type': 'application/json',
       Authorization:
         'Bearer ' +
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyOGRlYzY5LTZjZTctNDA4Ni1iNzk1LTkwNjMzNjNjMDg5ZiIsInJvbGUiOjQsIm5hbWUiOiJncmF5bWFuIiwiZW1haWwiOiJzdW5kYXkwMDAwQG5hdGUuY29tIiwiaWF0IjoxNzQxNzQ3MzMwLCJleHAiOjE3NDE3NTgxMzB9.rvqnufDEu0lKH7GzHn1VOApevQxBLI611Zbcv9aJi70',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyOGRlYzY5LTZjZTctNDA4Ni1iNzk1LTkwNjMzNjNjMDg5ZiIsInJvbGUiOjQsIm5hbWUiOiJncmF5bWFuIiwiZW1haWwiOiJzdW5kYXkwMDAwQG5hdGUuY29tIiwiaWF0IjoxNzQxNzcyOTgzLCJleHAiOjE3NDE3ODM3ODN9.egB2Em6motVIecaLv8_uN5bc2kWOnDvLjVMnZes4RA8',
     },
   })
 
   return raw.json()
 }
 
-export default function Articles() {
-  const articles = useLoaderData()
+export const action: ActionFunction = async ({ request }) => {
+  const fd = await request.formData()
 
-  const list = []
+  const raw = await fetch(`http://localhost:3031/api/v1/board`, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      Authorization:
+        'Bearer ' +
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyOGRlYzY5LTZjZTctNDA4Ni1iNzk1LTkwNjMzNjNjMDg5ZiIsInJvbGUiOjQsIm5hbWUiOiJncmF5bWFuIiwiZW1haWwiOiJzdW5kYXkwMDAwQG5hdGUuY29tIiwiaWF0IjoxNzQxNzcyOTgzLCJleHAiOjE3NDE3ODM3ODN9.egB2Em6motVIecaLv8_uN5bc2kWOnDvLjVMnZes4RA8',
+    },
+    body: JSON.stringify({
+      title: fd.get('title'),
+      content: fd.get('content'),
+      type: fd.get('type'),
+      category: fd.get('category'),
+    }),
+  })
+
+  return raw.json()
+}
+
+export default function Articles() {
+  const articles = useLoaderData<CommonRes<CommonListPage<Article>>>()
+
+  const raw = 'data' in articles ? articles.data.items : []
+  const list = raw.map((article: Article) => {
+    return <li key={article.id}>{article.title}</li>
+  })
+
+  const actionData = useActionData<CommonSuccess<unknown>>()
+
+  const loading = useNavigation()
+
+  useEffect(() => {
+    console.log(actionData?.statusCode)
+  }, [actionData?.statusCode])
 
   return (
     <section className={''}>
       <h1>ARTICLES</h1>
 
-      <ul></ul>
+      <Form method={'post'} className={'bg-base-200 p-4'}>
+        {/*<Form reloadDocument method={'post'} className={'bg-base-200 p-4'}>*/}
+        <input type="hidden" name={'type'} value={'APP_COMMUNITY'} />
+        <input type="hidden" name={'category'} value={'USER_NORMAL'} />
+        <Box>
+          <Fieldset>
+            <Input label={'title'} name={'title'} />
+          </Fieldset>
+
+          <Fieldset disabled={loading.state === 'submitting'}>
+            <textarea
+              className="textarea textarea-bordered w-full"
+              name={'content'}
+              placeholder="make something surprise"
+              rows={5}
+            ></textarea>
+          </Fieldset>
+
+          <Button
+            type={'submit'}
+            text={loading.state === 'submitting' ? 'loading......' : 'Write'}
+            className={'mx-auto'}
+            // disabled={loading.state === 'submitting'}
+          />
+        </Box>
+      </Form>
+
+      <ul>{list as ReactNode}</ul>
     </section>
   )
 }
