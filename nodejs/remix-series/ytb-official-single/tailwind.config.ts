@@ -28,6 +28,9 @@ export default {
           'Noto Color Emoji',
         ],
       },
+      spacing: {
+        '22': '5.5rem',
+      },
     },
   },
   plugins: [daisyui],

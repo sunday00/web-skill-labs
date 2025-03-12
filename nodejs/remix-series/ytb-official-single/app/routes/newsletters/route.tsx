@@ -102,6 +102,13 @@ export default function Newsletters() {
                             value: 'abrae golsdfewgfdsjhfjkdskd - ' + idx,
                           },
                     )}
+                    optionClassName={'text-2xl'}
+                    label={'something'}
+                    defaultSelect={{
+                      show: `item-3`,
+                      value: 3,
+                    }}
+                    errorMessage={'ooooo'}
                   />
 
                   <Select

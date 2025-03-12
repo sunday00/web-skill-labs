@@ -2,25 +2,33 @@ import { HTMLAttributes, MouseEvent, ReactNode, useEffect, useState } from 'reac
 import { FaCaretDown } from 'react-icons/fa6'
 import Option, { SelectOption } from '@/components/form/select.option'
 import { useSelectHelper } from '@/hooks/select.helper'
+import { InputAdditional } from '@/components/form/input'
 
 export default function Select({
   name,
   className,
+  label,
   optionClassName,
   options,
-  defaultValue,
+  defaultSelect,
+  description,
+  errorMessage,
   w = 'fit',
-}: HTMLAttributes<HTMLDivElement> & {
-  name: string
-  optionClassName?: string
-  options: SelectOption[]
-  defaultValue?: SelectOption
-  w?: string
-}) {
-  if (defaultValue) defaultValue.show = defaultValue.show ?? defaultValue.value.toString()
+}: HTMLAttributes<HTMLDivElement> &
+  InputAdditional & {
+    name: string
+    label?: ReactNode
+    optionClassName?: string
+    options: SelectOption[]
+    defaultSelect?: SelectOption
+    description?: string
+    errorMessage?: string
+    w?: string
+  }) {
+  if (defaultSelect) defaultSelect.show = defaultSelect.show ?? defaultSelect.value.toString()
   else options[0].show = options[0].show ?? options[0].value.toString()
 
-  const [selected, setSelected] = useState<SelectOption>(defaultValue ?? options[0])
+  const [selected, setSelected] = useState<SelectOption>(defaultSelect ?? options[0])
   const [open, setOpen] = useState<boolean>(false)
 
   const wStyle: { width: string | number; maxWidth: string | number; flex?: number } = {
@@ -58,6 +66,7 @@ export default function Select({
     return (
       <Option
         key={option.value}
+        className={`${option.value === selected.value ? 'bg-primary text-primary-content' : ''} ${optionClassName}`}
         name={name}
         option={option}
         idx={idx}
@@ -70,10 +79,18 @@ export default function Select({
 
   return (
     <div
-      className="select-input custom-select-basic flex flex-col relative w-full"
+      className={`select-input custom-select-basic flex flex-col relative w-full ${className}`}
       style={{ ...wStyle }}
     >
+      {label ? (
+        <label htmlFor={`select-${name}`} className={'mb-2'}>
+          {label}
+        </label>
+      ) : (
+        <></>
+      )}
       <button
+        id={`select-${name}`}
         tabIndex={0}
         type={'button'}
         className={`select-opener select-opener-${name} btn input input-bordered flex justify-between items-center no-animation`}
@@ -86,8 +103,12 @@ export default function Select({
 
       <input type="hidden" name={name} value={selected.value} />
 
+      <InputAdditional description={description} errorMessage={errorMessage} />
+
       {open ? (
-        <ul className="select-option-list w-full py-2 absolute bg-base-100 top-14 z-10 max-h-[14rem] border-2 overflow-scroll show-scroll-bar">
+        <ul
+          className={`select-option-list w-full py-2 absolute bg-base-100 ${label ? 'top-22' : 'top-14'} z-10 max-h-[14rem] border-2 overflow-scroll show-scroll-bar`}
+        >
           {optionLists as ReactNode}
         </ul>
       ) : (

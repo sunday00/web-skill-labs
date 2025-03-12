@@ -1,15 +1,16 @@
-import { KeyboardEvent, MouseEvent } from 'react'
+import { HTMLAttributes, KeyboardEvent, MouseEvent } from 'react'
 
 export type SelectOption = { show?: string; value: string | number }
 
 export default function Option({
   name,
+  className,
   option,
   idx,
   optionsLen,
   setOpen,
   setSelected,
-}: {
+}: HTMLAttributes<HTMLButtonElement> & {
   name: string
   option: SelectOption
   idx: number
@@ -59,7 +60,7 @@ export default function Option({
     <li className={'flex items-center bg-base-100'}>
       <button
         type={'button'}
-        className={`focus:bg-darker hover:bg-darker w-full px-4 py-2 text-start select-none ${name}-select-option ${name}-select-option-${idx}`}
+        className={`focus:bg-darker hover:bg-darker focus:text-base-content hover:text-base-content w-full px-4 py-2 text-start select-none ${name}-select-option ${name}-select-option-${idx} ${className}`}
         tabIndex={0}
         onKeyDown={handleOptionKeyDown}
         onClick={handleOptionClick}

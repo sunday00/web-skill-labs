@@ -1,6 +1,20 @@
-import { ReactNode } from 'react'
+import { InputHTMLAttributes, ReactNode } from 'react'
 
-export default function Input({
+export type InputAdditional = {
+  description?: string
+  errorMessage?: string
+}
+
+export const InputAdditional = ({ description, errorMessage }: InputAdditional) => {
+  return (
+    <>
+      {description ? <p className={'label-text-alt mt-1 ml-1'}>{description}</p> : null}
+      <p className="label-text-alt mt-1 ml-1 text-error">{errorMessage}</p>
+    </>
+  )
+}
+
+export default function Input<T>({
   label,
   icon,
   type,
@@ -11,18 +25,11 @@ export default function Input({
   className,
   description,
   errorMessage,
-}: {
-  label?: string
-  icon?: ReactNode
-  type: string
-  name: string
-  autoComplete?: string
-  placeholder?: string
-  required?: boolean
-  className?: string
-  description?: string
-  errorMessage?: string
-}) {
+}: InputHTMLAttributes<T> &
+  InputAdditional & {
+    label?: string
+    icon?: ReactNode
+  }) {
   return (
     <div>
       <label className="input input-bordered flex items-center gap-2">
@@ -39,8 +46,8 @@ export default function Input({
           style={{ border: 'none' }}
         />
       </label>
-      {description ? <p className={'label-text-alt mt-1 ml-1'}>{description}</p> : null}
-      <p className="label-text-alt mt-1 ml-1 text-error">{errorMessage}</p>
+
+      <InputAdditional description={description} errorMessage={errorMessage} />
     </div>
   )
 }
