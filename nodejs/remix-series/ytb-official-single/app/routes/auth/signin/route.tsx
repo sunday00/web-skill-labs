@@ -44,6 +44,7 @@ export const action: ActionFunction = async ({ request }) => {
     'Set-Cookie',
     await generateCookie('now', new Date().getTime() + 1000, new Date().toString()),
   )
+  headers.append('Set-Cookie', await generateCookie('another', resPayload.exp, 'this is another'))
 
   return redirect('/articles', {
     headers,

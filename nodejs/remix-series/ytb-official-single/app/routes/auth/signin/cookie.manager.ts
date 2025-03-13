@@ -1,9 +1,18 @@
 import { UserRole } from '@/entities/user.entity'
 import { createCookie } from '@remix-run/node'
 
-export const COOKIE_SECRET = process.env.COOKIE_SECRET || ''
+export const COOKIE_SECRET = process?.env.COOKIE_SECRET || ''
 if (!COOKIE_SECRET.length) {
   console.warn('🚨 Cookie secret should set fot security.')
+}
+
+export type JWTPayload = {
+  id: string
+  role: UserRole
+  name: string
+  email: string
+  iat: number
+  exp: number
 }
 
 export function parseJwt(token: string) {
@@ -14,14 +23,7 @@ export function parseJwt(token: string) {
   json['iat'] = json['iat'] * 1000
   json['exp'] = json['exp'] * 1000
 
-  return json as {
-    id: string
-    role: UserRole
-    name: string
-    email: string
-    iat: number
-    exp: number
-  }
+  return json as JWTPayload
 }
 
 export const generateCookie = async (name: string, exp: number, value: string) => {
@@ -34,4 +36,31 @@ export const generateCookie = async (name: string, exp: number, value: string) =
   })
 
   return cookie.serialize(value, { expires: new Date(exp) })
+}
+
+export const getCookie = async (name: string, request: Request) => {
+  const cookieString = request.headers.get('Cookie')
+  return createCookie(name, { secrets: [COOKIE_SECRET] }).parse(cookieString)
+}
+
+export const clearCookie = async (request: Request) => {
+  const cookieString = request.headers.get('Cookie')?.split(';') ?? []
+
+  const headers = new Headers()
+
+  await Promise.all(
+    cookieString.map(async (c) => {
+      const nameValue = c.split('=')
+
+      headers.append(
+        'Set-Cookie',
+        await createCookie(nameValue[0], { secrets: [COOKIE_SECRET] }).serialize('', {
+          expires: new Date(),
+          maxAge: 1,
+        }),
+      )
+    }),
+  )
+
+  return headers
 }

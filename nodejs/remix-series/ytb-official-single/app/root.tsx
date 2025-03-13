@@ -1,4 +1,4 @@
-import { Links, Meta, Outlet, Scripts, ScrollRestoration } from '@remix-run/react'
+import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from '@remix-run/react'
 import { LinksFunction, LoaderFunction } from '@remix-run/node'
 
 import './tailwind.css'
@@ -6,6 +6,7 @@ import { ReactNode } from 'react'
 import Navigation from '@/components/navigation'
 import { Providers } from '@/providers/global.context.provider'
 import '@/css/scrollbar.css'
+import { getCookie, parseJwt } from '@/routes/auth/signin/cookie.manager'
 
 export const links: LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -20,12 +21,14 @@ export const links: LinksFunction = () => [
   },
 ]
 
-export const loader: LoaderFunction = async ({ request: _ }) => {
-  return {}
+export const loader: LoaderFunction = async ({ request }) => {
+  const accessToken = await getCookie('access-token', request)
+  return accessToken ? { accessToken, user: parseJwt(accessToken) } : {}
+  // return {}
 }
 
 export function Layout({ children }: { children: ReactNode }) {
-  // const data = useLoaderData<typeof loader>()
+  const data = useLoaderData<typeof loader>()
 
   return (
     <html lang="en" data-theme={'winter'}>
@@ -37,7 +40,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <Links />
       </head>
       <body className={'bg-transparent min-h-screen'}>
-        <Navigation />
+        <Navigation user={data?.user} />
         <main className={'container p-8 mx-auto'}>{children}</main>
         <ScrollRestoration />
         <Scripts />

@@ -60,7 +60,7 @@ export default function Articles() {
   const loading = useNavigation()
 
   useEffect(() => {
-    console.log(actionData?.statusCode)
+    if (actionData) console.log(actionData?.statusCode)
   }, [actionData?.statusCode])
 
   return (
