@@ -23,7 +23,7 @@ export default function Button({
     >
       {children ? (
         <>
-          children <span>{text}</span>
+          {children} <span>{text}</span>
         </>
       ) : (
         <>{text}</>
