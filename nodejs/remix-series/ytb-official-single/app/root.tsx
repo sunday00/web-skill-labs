@@ -43,7 +43,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <main className={'container p-8 mx-auto'}>{children}</main>
         <ScrollRestoration />
         <script
-          dangerouslySetInnerHTML={{ __html: `window.ENV = ${JSON.stringify(data.ENV)}` }}
+          dangerouslySetInnerHTML={{ __html: `window.ENV = ${JSON.stringify(data?.ENV ?? {})}` }}
         ></script>
         <Scripts />
       </body>
