@@ -22,6 +22,7 @@ export default defineConfig({
         return defineRoutes((R) => {
           R('auth', 'routes/auth/route.tsx', () => {
             R('signup', 'routes/auth/signup/route.tsx')
+            R('signin', 'routes/auth/signin/route.tsx')
           })
         })
       },

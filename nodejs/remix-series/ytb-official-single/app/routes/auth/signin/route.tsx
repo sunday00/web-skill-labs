@@ -1,32 +1,23 @@
 import Fieldset from '@/components/form/fieldset'
-import { Form, useActionData } from '@remix-run/react'
+import { Form, redirect, useActionData } from '@remix-run/react'
 import Box from '@/components/layouts/box'
 import Input from '@/components/form/input'
-import { FaEnvelope, FaFly, FaLock, FaUser } from 'react-icons/fa6'
+import { FaEnvelope, FaFly, FaLock } from 'react-icons/fa6'
 import Button from '@/components/form/button'
 import { ActionFunction } from '@remix-run/node'
 import { CommonRes } from '@/common/common.entity'
 import { formData } from '@/utils/form.data'
 import { useFormError } from '@/hooks/error.message'
 import { useEffect } from 'react'
+import { generateCookie, parseJwt } from '@/routes/auth/signin/cookie.manager'
 
 export const action: ActionFunction = async ({ request }) => {
-  const url = `${process.env.API_HOST}/api/v1/auth/register`
+  const url = `${process.env.API_HOST}/api/v1/auth/login`
   const fd = await formData(request)
 
   const payload = {
     email: fd.get<string>('email'),
-    name: fd.get<string>('name'),
     password: fd.get<string>('password'),
-  }
-
-  if (payload.password.length < 4) {
-    return {
-      errorData: {
-        error: 'tooShortPassword',
-        message: 'Password must be longer than 4 characters',
-      },
-    }
   }
 
   const res = await fetch(url, {
@@ -37,12 +28,31 @@ export const action: ActionFunction = async ({ request }) => {
     },
   })
 
-  return res.json()
+  const raw = await res.json()
+
+  if ('errorData' in raw) {
+    return raw
+  }
+
+  const resPayload = parseJwt(raw.data.accessToken)
+  const headers = new Headers()
+  headers.append(
+    'Set-Cookie',
+    await generateCookie('access-token', resPayload.exp, raw.data.accessToken),
+  )
+  headers.append(
+    'Set-Cookie',
+    await generateCookie('now', new Date().getTime() + 1000, new Date().toString()),
+  )
+
+  return redirect('/articles', {
+    headers,
+  })
 }
 
-export default function Signup() {
+export default function SignIn() {
   const actionRes = useActionData<CommonRes<unknown>>()
-  const [formError, setFormError] = useFormError({ email: '', password: '', name: '' })
+  const [formError, setFormError] = useFormError({ email: '', password: '' })
 
   useEffect(() => {
     if (actionRes && 'data' in actionRes) {
@@ -54,7 +64,7 @@ export default function Signup() {
 
   return (
     <section>
-      <Fieldset legend={'signup'}>
+      <Fieldset legend={'sign in'}>
         <Form method={'post'}>
           <Box>
             <div className={'form-control form-control-signup form-control-signup-email'}>
@@ -70,25 +80,12 @@ export default function Signup() {
               />
             </div>
 
-            <div className={'form-control form-control-signup form-control-signup-name'}>
-              <Input
-                label={'name'}
-                name={'name'}
-                type={'name'}
-                autoComplete={'name'}
-                icon={<FaUser />}
-                placeholder={'doctor_spider'}
-                required={true}
-                errorMessage={formError.name}
-              />
-            </div>
-
             <div className={'form-control form-control-signup form-control-signup-password'}>
               <Input
                 label={'password'}
                 name={'password'}
                 type={'password'}
-                autoComplete={'new-password'}
+                autoComplete={'current-password'}
                 icon={<FaLock />}
                 placeholder={'* * * * * *'}
                 required={true}
