@@ -5,20 +5,33 @@ import Input from '@/components/form/input'
 import { FaEnvelope, FaFly, FaLock, FaUser } from 'react-icons/fa6'
 import Button from '@/components/form/button'
 import { ActionFunction } from '@remix-run/node'
-import { useEffect } from 'react'
 import { CommonRes } from '@/common/common.entity'
+import { formData } from '@/utils/form.data'
+import { useFormError } from '@/hooks/error.message'
+import { useEffect } from 'react'
 
 export const action: ActionFunction = async ({ request }) => {
   const url = `${process.env.API_HOST}/api/v1/auth/register`
-  const fd = await request.formData()
+  const fd = await formData(request)
+
+  const payload = {
+    email: fd.get<string>('email'),
+    name: fd.get<string>('name'),
+    password: fd.get<string>('password'),
+  }
+
+  if (payload.password.length < 4) {
+    return {
+      errorData: {
+        error: 'tooShortPassword',
+        message: 'Password must be longer than 4 characters',
+      },
+    }
+  }
 
   const res = await fetch(url, {
     method: 'POST',
-    body: JSON.stringify({
-      email: fd.get('email'),
-      name: fd.get('name'),
-      password: fd.get('password'),
-    }),
+    body: JSON.stringify(payload),
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
     },
@@ -29,14 +42,15 @@ export const action: ActionFunction = async ({ request }) => {
 
 export default function Signup() {
   const actionRes = useActionData<CommonRes<unknown>>()
+  const [formError, setFormError] = useFormError({ email: '', password: '', name: '' })
 
   useEffect(() => {
     if (actionRes && 'data' in actionRes) {
       console.log('success')
     } else if (actionRes?.errorData) {
-      console.error(actionRes?.errorData)
+      setFormError(actionRes.errorData.error)
     }
-  }, [actionRes, actionRes?.statusCode])
+  }, [actionRes, setFormError])
 
   return (
     <section>
@@ -52,6 +66,7 @@ export default function Signup() {
                 icon={<FaEnvelope />}
                 placeholder={'abc@def.com'}
                 required={true}
+                errorMessage={formError.email}
               />
             </div>
 
@@ -64,6 +79,7 @@ export default function Signup() {
                 icon={<FaUser />}
                 placeholder={'doctor_spider'}
                 required={true}
+                errorMessage={formError.name}
               />
             </div>
 
@@ -76,6 +92,7 @@ export default function Signup() {
                 icon={<FaLock />}
                 placeholder={'* * * * * *'}
                 required={true}
+                errorMessage={formError.password}
               />
             </div>
 
