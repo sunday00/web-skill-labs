@@ -1,80 +1,40 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect } from 'react'
 import Title from '@/components/texts/title'
 import Box from '@/components/layouts/box'
 import Flex from '@/components/layouts/flex'
 import { IoMdCloseCircle } from 'react-icons/io'
 import CloseBtn from '@/components/form/close.btn'
+import { ToastProps } from '@/providers/global.toast.provider'
 
-export type ToastProps = {
-  status: 'success' | 'error' | 'info' | 'warning'
-  title: string
-  message?: string
-  duration: number
-}
-
-export const Toast = ({ attr }: { attr: ToastProps }) => {
-  const [show, setShow] = useState(true)
-
+export const Toast = ({ attr, onDismiss }: { attr: ToastProps; onDismiss: () => void }) => {
   useEffect(() => {
-    if (show) {
-      const st = setTimeout(() => {
-        setShow(false)
-      }, 1000 * attr.duration)
+    if (attr.duration! > 0 && onDismiss) {
+      const timer = setTimeout(() => {
+        onDismiss()
+      }, attr.duration! * 1000)
 
-      return () => clearTimeout(st)
+      return () => clearTimeout(timer)
     }
-  }, [attr, show])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
-  return show ? (
+  const handleCloseClick = () => {
+    onDismiss()
+  }
+
+  return (
     <div className={`alert alert-${attr.status} block`}>
       <Box gap={1}>
         <Flex>
           <Title as={4} text={attr.title} />
 
-          <CloseBtn onClick={() => setShow(false)}>
+          <CloseBtn onClick={handleCloseClick}>
             <IoMdCloseCircle />
           </CloseBtn>
         </Flex>
         {attr.message && attr.message !== '' && <div className="divider my-0" />}
         <span>{attr.message}</span>
       </Box>
-    </div>
-  ) : (
-    <></>
-  )
-}
-
-export const ToastsWrap = () => {
-  // const global = useContext(GlobalContext)
-  // const [toasts, setToasts] = useState(global.toasts)
-  const toastWrapRef = useRef<HTMLDivElement>(null)
-  //
-  // useEffect(() => {
-  //   if (global.toasts.length) {
-  //     const toast = global.toasts.pop()
-  //     setToasts([...toasts, toast!])
-  //     global.update(global)
-  //   }
-  //
-  //   if (toasts.length) {
-  //     const dur = Math.max(...toasts.map((t) => t.duration))
-  //     const st = setInterval(() => {
-  //       if (!toastWrapRef.current?.querySelectorAll('.alert').length) {
-  //         setToasts([])
-  //       }
-  //     }, dur * 800)
-  //
-  //     return () => clearInterval(st)
-  //   }
-  // }, [global, toasts])
-
-  // const list = toasts.map((t, index) => {
-  //   return <Toast key={`toast-${new Date().getTime()}-${Math.random()}-${index}`} attr={t} />
-  // })
-
-  return (
-    <div className="toast toast-end" ref={toastWrapRef}>
-      {/*{list as ReactNode}*/}
     </div>
   )
 }

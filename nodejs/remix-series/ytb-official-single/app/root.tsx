@@ -7,7 +7,7 @@ import Navigation from '@/components/navigation'
 import { Providers } from '@/providers/global.context.provider'
 import '@/css/scrollbar.css'
 import { getCookie, getToasts, parseJwt } from '@/routes/auth/signin/cookie.manager'
-import { ToastsWrap } from '@/components/feedbacks/toast'
+import ToastProvider, { ToastProps } from '@/providers/global.toast.provider'
 
 export const links: LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -62,14 +62,13 @@ export function Layout({ children }: { children: ReactNode }) {
 }
 
 export default function App() {
-  const data = useLoaderData<typeof loader>()
-
-  console.log(data)
+  const { toasts } = useLoaderData<{ toasts?: ToastProps[] }>()
 
   return (
     <Providers>
-      <Outlet />
-      <ToastsWrap />
+      <ToastProvider initialToasts={toasts}>
+        <Outlet />
+      </ToastProvider>
     </Providers>
   )
 }

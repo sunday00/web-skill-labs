@@ -6,14 +6,12 @@ import EmailIcon from '@/components/icons/email.icon'
 import Button from '@/components/form/button'
 import { ActionFunction } from '@remix-run/node'
 import { Form, useActionData } from '@remix-run/react'
-import { useContext, useEffect, useState } from 'react'
-import { GlobalContext } from '@/providers/global.context.provider'
+import { useEffect, useState } from 'react'
 import Select from '@/components/form/select'
 import Flex from '@/components/layouts/flex'
 import { formData } from '@/utils/form.data'
 import { setToast } from '@/routes/auth/signin/cookie.manager'
-import { Toast } from '@/components/feedbacks/toast'
-import { createPortal } from 'react-dom'
+import { useToast } from '@/hooks/useToast'
 
 export const action: ActionFunction = async ({ request }) => {
   const fd = await formData(request)
@@ -55,34 +53,18 @@ export default function Newsletters() {
   const afterAction = useActionData<[number, { error?: string; message?: string }]>()
   const [err, setErr] = useState<string>('')
 
-  const global = useContext(GlobalContext)
+  // const global = useContext(GlobalContext)
+  const { addAlert } = useToast()
 
-  useEffect(() => {}, [afterAction, global])
+  useEffect(() => {}, [afterAction])
 
   const testToast = () => {
-    // global.toasts.push({
-    //   status: 'success',
-    //   duration: 5,
-    //   title: 'success!!',
-    //   message: 'successfully subscribe',
-    // })
-    // global.update(global)
-    const wrap = document.createElement('div')
-    wrap.id = `toast-wrap-test-${Date.now()}-${Math.ceil(Math.random() * 1000000)}-${Math.ceil(Math.random() * 1000000)}`
-    const parent = document.querySelector('#toast-outer-wrap')
-    parent?.appendChild(wrap)
-
-    createPortal(
-      <Toast
-        attr={{
-          status: 'success',
-          duration: 5,
-          title: 'success!!',
-          message: 'successfully subscribe',
-        }}
-      />,
-      wrap,
-    )
+    addAlert({
+      status: 'success',
+      duration: 5,
+      title: 'success!!',
+      message: 'successfully subscribe',
+    })
   }
 
   return (
