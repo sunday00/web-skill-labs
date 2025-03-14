@@ -1,3 +1,5 @@
+import { time } from '@/utils/time'
+
 export type CommonListPage<T> = {
   items: T[]
   page: number
@@ -5,13 +7,12 @@ export type CommonListPage<T> = {
   total: number
   lastPage: number
   nextPage: number
-  refreshToken?: string
 }
 
 export type CommonSuccess<T> = {
   statusCode: number
   message: string
-  data: T
+  data: T & { refreshToken?: string }
 }
 
 export type CommonError = {
@@ -25,3 +26,12 @@ export type CommonError = {
 }
 
 export type CommonRes<T> = CommonSuccess<T> | CommonError
+
+export const ManualError = ({ statusCode, message }: { statusCode: number; message?: string }) => {
+  return {
+    statusCode,
+    message,
+    errorData: { error: message ?? '', path: '' },
+    timestamp: time().toISOString(),
+  }
+}

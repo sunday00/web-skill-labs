@@ -7,32 +7,13 @@ import Fieldset from '@/components/form/fieldset'
 import Box from '@/components/layouts/box'
 import Input from '@/components/form/input'
 import Button from '@/components/form/button'
-import { getCookie } from '@/routes/auth/signin/cookie.manager'
 import { useToast } from '@/hooks/useToast'
+import { METHOD, refreshableFetch } from '@/common/refreshable.fetch'
 
 export const loader: LoaderFunction = async ({ request }) => {
-  const url = 'http://localhost:3031/api/v1/board?page=1&size=40'
-  const accessToken = await getCookie('access-token', request)
+  const url = `/board`
 
-  if (!accessToken) {
-    // const headers = new Headers()
-    // headers.append('Set-Cookie', await setToast({ title: 'needToLogin', status: 'error' }, request))
-    //
-    // return redirect('/auth/signin', { headers })
-
-    return { statusCode: 401 }
-  }
-
-  const raw = await fetch(url, {
-    method: 'GET',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      Authorization: 'Bearer ' + accessToken,
-    },
-  })
-
-  return raw.json()
+  return refreshableFetch({ request, method: METHOD.GET, url, data: { page: 1, size: 10 } })
 }
 
 export const action: ActionFunction = async ({ request }) => {
@@ -65,7 +46,7 @@ export default function Articles() {
   const navigate = useNavigate()
   const { addAlert } = useToast()
 
-  const articles = useLoaderData<CommonRes<CommonListPage<Article>>>()
+  const articles: CommonRes<CommonListPage<Article>> = JSON.parse(useLoaderData<typeof loader>())
 
   const raw = 'data' in articles ? articles.data.items : []
   const list = raw.map((article: Article) => {

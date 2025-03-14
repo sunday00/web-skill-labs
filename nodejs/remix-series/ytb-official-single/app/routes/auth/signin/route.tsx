@@ -9,7 +9,8 @@ import { CommonRes } from '@/common/common.entity'
 import { formData } from '@/utils/form.data'
 import { useFormError } from '@/hooks/error.message'
 import { useEffect } from 'react'
-import { generateCookie, parseJwt } from '@/routes/auth/signin/cookie.manager'
+import { generateCookie } from '@/routes/auth/signin/cookie.manager'
+import { time } from '@/utils/time'
 
 export const action: ActionFunction = async ({ request }) => {
   const url = `${process.env.API_HOST}/api/v1/auth/login`
@@ -34,17 +35,29 @@ export const action: ActionFunction = async ({ request }) => {
     return raw
   }
 
-  const resPayload = parseJwt(raw.data.accessToken)
+  // const resPayload = parseJwt(raw.data.accessToken)
   const headers = new Headers()
   headers.append(
     'Set-Cookie',
-    await generateCookie('access-token', resPayload.exp, raw.data.accessToken),
+    await generateCookie(
+      'access-token',
+      // resPayload.exp,
+      time().add(1, 'weeks').unix() * 1000,
+      raw.data.accessToken,
+    ),
   )
+
+  // test
   headers.append(
     'Set-Cookie',
     await generateCookie('now', new Date().getTime() + 1000, new Date().toString()),
   )
-  headers.append('Set-Cookie', await generateCookie('another', resPayload.exp, 'this is another'))
+
+  // test
+  headers.append(
+    'Set-Cookie',
+    await generateCookie('another', time().add(1, 'weeks').unix(), 'this is another'),
+  )
 
   return redirect('/articles', {
     headers,
