@@ -1,7 +1,5 @@
 import { UserRole } from '@/entities/user.entity'
 import { createCookie } from '@remix-run/node'
-import { ToastProps } from '@/components/feedbacks/toast'
-import { time } from '@/utils/time'
 
 export const COOKIE_SECRET = process?.env.COOKIE_SECRET || ''
 if (!COOKIE_SECRET.length) {
@@ -65,18 +63,4 @@ export const clearCookie = async (request: Request) => {
   )
 
   return headers
-}
-
-export async function getToasts(request: Request) {
-  const exists = await getCookie('toasts', request)
-  if (!exists) return [] as ToastProps[]
-
-  return JSON.parse(exists) as ToastProps[]
-}
-
-export async function setToast(toast: ToastProps, request: Request) {
-  const toasts = await getToasts(request)
-  toasts.push(toast)
-
-  return generateCookie('toasts', time().add(1, 'years').unix() * 1000, JSON.stringify(toasts))
 }

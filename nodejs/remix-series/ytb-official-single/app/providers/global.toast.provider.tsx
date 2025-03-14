@@ -1,10 +1,10 @@
 import { createContext, ReactNode, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Toast } from '@/components/feedbacks/toast'
+import { generateRandomKey } from '@/utils/random'
 
 interface ToastProviderProps {
   children: ReactNode
-  initialToasts?: ToastProps[]
 }
 
 export type ToastContextType = {
@@ -21,12 +21,11 @@ export type ToastProps = {
 
 export const ToastContext = createContext<ToastContextType | null>(null)
 
-export default function ToastProvider({ children, initialToasts }: ToastProviderProps) {
-  const [alerts, setAlerts] = useState<ToastProps[]>(initialToasts ?? [])
+export default function ToastProvider({ children }: ToastProviderProps) {
+  const [alerts, setAlerts] = useState<ToastProps[]>([])
 
   const addAlert = (prop: ToastProps) => {
-    const idHash =
-      (Math.random() + 1).toString(36).substring(7) + (Math.random() + 1).toString(36).substring(7)
+    const idHash = generateRandomKey()
     const id = `toast-${new Date().getTime()}-${Math.random()}-${idHash}`
 
     const toast: ToastProps = {

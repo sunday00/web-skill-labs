@@ -2,22 +2,25 @@ import { ActionFunction, LoaderFunction } from '@remix-run/node'
 import { Form, useActionData, useLoaderData, useNavigate, useNavigation } from '@remix-run/react'
 import { CommonListPage, CommonRes, CommonSuccess } from '@/common/common.entity'
 import { Article } from '@/entities/board.entity'
-import { ReactNode, useEffect } from 'react'
+import { ReactNode, useCallback, useEffect, useState } from 'react'
 import Fieldset from '@/components/form/fieldset'
 import Box from '@/components/layouts/box'
 import Input from '@/components/form/input'
 import Button from '@/components/form/button'
 import { getCookie } from '@/routes/auth/signin/cookie.manager'
+import { useToast } from '@/hooks/useToast'
 
 export const loader: LoaderFunction = async ({ request }) => {
   const url = 'http://localhost:3031/api/v1/board?page=1&size=40'
-  const accessToken = await getCookie('accessToken', request)
+  const accessToken = await getCookie('access-token', request)
 
   if (!accessToken) {
-    // TODO set Toasts
-    return {
-      statusCode: 401,
-    }
+    // const headers = new Headers()
+    // headers.append('Set-Cookie', await setToast({ title: 'needToLogin', status: 'error' }, request))
+    //
+    // return redirect('/auth/signin', { headers })
+
+    return { statusCode: 401 }
   }
 
   const raw = await fetch(url, {
@@ -56,6 +59,12 @@ export const action: ActionFunction = async ({ request }) => {
 }
 
 export default function Articles() {
+  const [checked, setChecked] = useState(false)
+
+  const loading = useNavigation()
+  const navigate = useNavigate()
+  const { addAlert } = useToast()
+
   const articles = useLoaderData<CommonRes<CommonListPage<Article>>>()
 
   const raw = 'data' in articles ? articles.data.items : []
@@ -65,19 +74,19 @@ export default function Articles() {
 
   const actionData = useActionData<CommonSuccess<unknown>>()
 
-  const loading = useNavigation()
-  const navigate = useNavigate()
-
-  useEffect(() => {
-    if (articles.statusCode === 401) {
-      // TODO set toast
+  const initialLoads = useCallback(() => {
+    if (articles.statusCode === 401 && !checked) {
+      addAlert({ title: 'needToLogin', status: 'error', duration: 5 })
       navigate('/auth/signin')
 
       return
     }
+  }, [addAlert, articles.statusCode, checked, navigate])
 
-    if (actionData) console.log(actionData?.statusCode)
-  }, [actionData, actionData?.statusCode, articles.statusCode, global, navigate])
+  useEffect(() => {
+    setChecked(true)
+    initialLoads()
+  }, [initialLoads])
 
   return (
     <section className={''}>
@@ -105,7 +114,6 @@ export default function Articles() {
             type={'submit'}
             text={loading.state === 'submitting' ? 'loading......' : 'Write'}
             className={'mx-auto'}
-            // disabled={loading.state === 'submitting'}
           />
         </Box>
       </Form>
