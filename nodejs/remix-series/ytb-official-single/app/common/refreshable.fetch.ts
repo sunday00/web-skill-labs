@@ -62,6 +62,7 @@ export const refreshableFetch = async <T>({ request, method, url, data }: Props)
   }
 
   if (method !== METHOD.GET && method !== METHOD.DELETE) {
+    options.headers['Content-Type'] = 'application/json'
     options.body = JSON.stringify(data)
   }
 

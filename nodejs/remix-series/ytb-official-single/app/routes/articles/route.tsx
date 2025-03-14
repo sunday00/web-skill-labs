@@ -18,25 +18,38 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 export const action: ActionFunction = async ({ request }) => {
   const fd = await request.formData()
+  const url = `/board`
 
-  const raw = await fetch(`http://localhost:3031/api/v1/board`, {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      Authorization:
-        'Bearer ' +
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyOGRlYzY5LTZjZTctNDA4Ni1iNzk1LTkwNjMzNjNjMDg5ZiIsInJvbGUiOjQsIm5hbWUiOiJncmF5bWFuIiwiZW1haWwiOiJzdW5kYXkwMDAwQG5hdGUuY29tIiwiaWF0IjoxNzQxNzcyOTgzLCJleHAiOjE3NDE3ODM3ODN9.egB2Em6motVIecaLv8_uN5bc2kWOnDvLjVMnZes4RA8',
-    },
-    body: JSON.stringify({
+  // const raw = await fetch(`http://localhost:3031/api/v1`, {
+  //   method: 'POST',
+  //   headers: {
+  //     Accept: 'application/json',
+  //     'Content-Type': 'application/json',
+  //     Authorization:
+  //       'Bearer ' +
+  //       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyOGRlYzY5LTZjZTctNDA4Ni1iNzk1LTkwNjMzNjNjMDg5ZiIsInJvbGUiOjQsIm5hbWUiOiJncmF5bWFuIiwiZW1haWwiOiJzdW5kYXkwMDAwQG5hdGUuY29tIiwiaWF0IjoxNzQxNzcyOTgzLCJleHAiOjE3NDE3ODM3ODN9.egB2Em6motVIecaLv8_uN5bc2kWOnDvLjVMnZes4RA8',
+  //   },
+  //   body: JSON.stringify({
+  //     title: fd.get('title'),
+  //     content: fd.get('content'),
+  //     type: fd.get('type'),
+  //     category: fd.get('category'),
+  //   }),
+  // })
+  //
+  // return raw.json()
+
+  return refreshableFetch({
+    request,
+    method: METHOD.POST,
+    url,
+    data: {
       title: fd.get('title'),
       content: fd.get('content'),
       type: fd.get('type'),
       category: fd.get('category'),
-    }),
+    },
   })
-
-  return raw.json()
 }
 
 export default function Articles() {
@@ -95,6 +108,8 @@ export default function Articles() {
             type={'submit'}
             text={loading.state === 'submitting' ? 'loading......' : 'Write'}
             className={'mx-auto'}
+            name={'_action'}
+            value={'createArticle'}
           />
         </Box>
       </Form>
