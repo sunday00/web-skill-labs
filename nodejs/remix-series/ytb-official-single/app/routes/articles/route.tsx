@@ -1,14 +1,14 @@
 import { ActionFunction, LoaderFunction } from '@remix-run/node'
-import { Form, useActionData, useLoaderData, useNavigate, useNavigation } from '@remix-run/react'
-import { CommonListPage, CommonRes } from '@/common/common.entity'
+import { Form, useNavigation } from '@remix-run/react'
+import { CommonListPage } from '@/common/common.entity'
 import { Article } from '@/entities/board.entity'
-import { ReactNode, useCallback, useEffect, useState } from 'react'
+import { ReactNode } from 'react'
 import Fieldset from '@/components/form/fieldset'
 import Box from '@/components/layouts/box'
 import Input from '@/components/form/input'
 import Button from '@/components/form/button'
-import { useToast } from '@/hooks/useToast'
 import { METHOD, refreshableFetch } from '@/common/refreshable.fetch'
+import { useRefreshableAction, useRefreshableLoad } from '@/hooks/use.refreshable'
 
 export const loader: LoaderFunction = async ({ request }) => {
   const url = `/board`
@@ -19,25 +19,6 @@ export const loader: LoaderFunction = async ({ request }) => {
 export const action: ActionFunction = async ({ request }) => {
   const fd = await request.formData()
   const url = `/board`
-
-  // const raw = await fetch(`http://localhost:3031/api/v1`, {
-  //   method: 'POST',
-  //   headers: {
-  //     Accept: 'application/json',
-  //     'Content-Type': 'application/json',
-  //     Authorization:
-  //       'Bearer ' +
-  //       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyOGRlYzY5LTZjZTctNDA4Ni1iNzk1LTkwNjMzNjNjMDg5ZiIsInJvbGUiOjQsIm5hbWUiOiJncmF5bWFuIiwiZW1haWwiOiJzdW5kYXkwMDAwQG5hdGUuY29tIiwiaWF0IjoxNzQxNzcyOTgzLCJleHAiOjE3NDE3ODM3ODN9.egB2Em6motVIecaLv8_uN5bc2kWOnDvLjVMnZes4RA8',
-  //   },
-  //   body: JSON.stringify({
-  //     title: fd.get('title'),
-  //     content: fd.get('content'),
-  //     type: fd.get('type'),
-  //     category: fd.get('category'),
-  //   }),
-  // })
-  //
-  // return raw.json()
 
   return refreshableFetch({
     request,
@@ -53,48 +34,16 @@ export const action: ActionFunction = async ({ request }) => {
 }
 
 export default function Articles() {
-  const [checked, setChecked] = useState(false)
-  const [posted, setPosted] = useState(false)
-
   const loading = useNavigation()
-  const navigate = useNavigate()
-  const { addAlert } = useToast()
 
-  const articles: CommonRes<CommonListPage<Article>> = JSON.parse(useLoaderData<typeof loader>())
+  const articles = useRefreshableLoad<CommonListPage<Article>>()
 
   const raw = 'data' in articles ? articles.data.items : []
   const list = raw.map((article: Article) => {
     return <li key={article.id}>{article.title}</li>
   })
 
-  const actionData = JSON.parse(useActionData<typeof action>() ?? '{}')
-
-  const initialLoads = useCallback(() => {
-    if (articles.statusCode === 401 && !checked) {
-      setChecked(true)
-
-      addAlert({ title: 'needToLogin', status: 'error', duration: 5 })
-      navigate('/auth/signin')
-
-      return
-    }
-  }, [addAlert, articles.statusCode, checked, navigate])
-
-  const actionPosted = useCallback(() => {
-    if (actionData.statusCode === 401 && !posted) {
-      setPosted(true)
-
-      addAlert({ title: 'needToLogin', status: 'error', duration: 5 })
-      navigate('/auth/signin')
-
-      return
-    }
-  }, [actionData.statusCode, addAlert, navigate, posted])
-
-  useEffect(() => {
-    initialLoads()
-    actionPosted()
-  }, [actionPosted, initialLoads])
+  const action = useRefreshableAction<Article>()
 
   return (
     <section className={''}>
