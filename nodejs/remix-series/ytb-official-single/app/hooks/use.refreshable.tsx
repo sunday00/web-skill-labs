@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { CommonRes } from '@/common/common.entity'
 import { useActionData, useLoaderData, useNavigate } from '@remix-run/react'
-import { loader } from '@/routes/articles/route'
 import { useToast } from '@/hooks/useToast'
 
 export function useRefreshableLoad<T>() {
@@ -9,9 +8,9 @@ export function useRefreshableLoad<T>() {
   const { addAlert } = useToast()
   const navigate = useNavigate()
 
-  const data: CommonRes<T> = JSON.parse(useLoaderData<typeof loader>())
+  const data: CommonRes<T> = JSON.parse(useLoaderData())
 
-  const load = useCallback(() => {
+  const cb = useCallback(() => {
     if (data.statusCode === 401 && !checked) {
       setChecked(true)
 
@@ -23,33 +22,33 @@ export function useRefreshableLoad<T>() {
   }, [addAlert, data.statusCode, checked, navigate])
 
   useEffect(() => {
-    load()
-  }, [load])
+    cb()
+  }, [cb])
 
   return data
 }
 
 export function useRefreshableAction<T>() {
-  const [posted, setPosted] = useState(false)
+  const [checked, setChecked] = useState(false)
   const { addAlert } = useToast()
   const navigate = useNavigate()
 
-  const data: CommonRes<T> = JSON.parse(useActionData<typeof action>() ?? '{}')
+  const data: CommonRes<T> = JSON.parse(useActionData() ?? '{}')
 
-  const action = useCallback(() => {
-    if (data.statusCode === 401 && !posted) {
-      setPosted(true)
+  const cb = useCallback(() => {
+    if (data.statusCode === 401 && !checked) {
+      setChecked(true)
 
       addAlert({ title: 'needToLogin', status: 'error', duration: 5 })
       navigate('/auth/signin')
 
       return
     }
-  }, [addAlert, data.statusCode, posted, navigate])
+  }, [addAlert, data.statusCode, checked, navigate])
 
   useEffect(() => {
-    action()
-  }, [action])
+    cb()
+  }, [cb])
 
   return data
 }
