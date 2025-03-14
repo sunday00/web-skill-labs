@@ -1,5 +1,4 @@
 import { createContext, ReactNode, useEffect, useState } from 'react'
-import { ToastProps, ToastsWrap } from '@/components/feedbacks/toast'
 
 const initialState: {
   // eslint-disable-next-line
@@ -8,7 +7,6 @@ const initialState: {
     isLogin: boolean
     // user: User | null
   }
-  toasts: ToastProps[]
 } = {
   // eslint-disable-next-line
   update: (data: any) => {},
@@ -16,7 +14,6 @@ const initialState: {
     isLogin: false,
     // user: null,
   },
-  toasts: [],
 }
 
 export const GlobalContext = createContext(initialState)
@@ -42,10 +39,5 @@ export const Providers = ({ children }: { children: ReactNode }) => {
     setState(Object.assign({}, state, data))
   }
 
-  return (
-    <GlobalContext.Provider value={state}>
-      {children}
-      <ToastsWrap />
-    </GlobalContext.Provider>
-  )
+  return <GlobalContext.Provider value={state}>{children}</GlobalContext.Provider>
 }

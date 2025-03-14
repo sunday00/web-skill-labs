@@ -5,13 +5,17 @@ export default function Button({
   className,
   type = 'button',
   variant = 'outline',
+  name,
   text,
+  value,
   w,
   disabled = false,
 }: HTMLAttributes<HTMLButtonElement> & {
   type?: 'submit' | 'button' | 'reset' | undefined
   variant?: 'solid' | 'outline' | 'ghost' | string
+  name?: string
   text?: string
+  value?: string
   w?: string
   disabled?: boolean
 }) {
@@ -19,6 +23,8 @@ export default function Button({
     <button
       className={`btn btn-${variant} btn-primary ${w ? w : 'w-28'} ${className}`}
       type={type}
+      name={name}
+      value={value}
       disabled={disabled}
     >
       {children ? (

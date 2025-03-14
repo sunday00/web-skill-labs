@@ -13,6 +13,10 @@ export type ErrorAt = {
 export const ERROR_MESSAGE: {
   [k: string]: ErrorAt
 } = {
+  needToLogin: {
+    at: 'toast',
+    lo: '로그인이 필요합니다.',
+  },
   duplicatedEmail: {
     at: 'email',
     lo: '이미 가입된 이메일입니다.',

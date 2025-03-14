@@ -1,5 +1,4 @@
-import { ReactNode, useContext, useEffect, useRef, useState } from 'react'
-import { GlobalContext } from '@/providers/global.context.provider'
+import { useEffect, useRef, useState } from 'react'
 import Title from '@/components/texts/title'
 import Box from '@/components/layouts/box'
 import Flex from '@/components/layouts/flex'
@@ -11,7 +10,6 @@ export type ToastProps = {
   title: string
   message?: string
   duration: number
-  key: string
 }
 
 export const Toast = ({ attr }: { attr: ToastProps }) => {
@@ -47,36 +45,36 @@ export const Toast = ({ attr }: { attr: ToastProps }) => {
 }
 
 export const ToastsWrap = () => {
-  const global = useContext(GlobalContext)
-  const [toasts, setToasts] = useState(global.toasts)
+  // const global = useContext(GlobalContext)
+  // const [toasts, setToasts] = useState(global.toasts)
   const toastWrapRef = useRef<HTMLDivElement>(null)
+  //
+  // useEffect(() => {
+  //   if (global.toasts.length) {
+  //     const toast = global.toasts.pop()
+  //     setToasts([...toasts, toast!])
+  //     global.update(global)
+  //   }
+  //
+  //   if (toasts.length) {
+  //     const dur = Math.max(...toasts.map((t) => t.duration))
+  //     const st = setInterval(() => {
+  //       if (!toastWrapRef.current?.querySelectorAll('.alert').length) {
+  //         setToasts([])
+  //       }
+  //     }, dur * 800)
+  //
+  //     return () => clearInterval(st)
+  //   }
+  // }, [global, toasts])
 
-  useEffect(() => {
-    if (global.toasts.length) {
-      const toast = global.toasts.pop()
-      setToasts([...toasts, toast!])
-      global.update(global)
-    }
-
-    if (toasts.length) {
-      const dur = Math.max(...toasts.map((t) => t.duration))
-      const st = setInterval(() => {
-        if (!toastWrapRef.current?.querySelectorAll('.alert').length) {
-          setToasts([])
-        }
-      }, dur * 800)
-
-      return () => clearInterval(st)
-    }
-  }, [global, toasts])
-
-  const list = toasts.map((t) => {
-    return <Toast key={`toast-${t.key}`} attr={t} />
-  })
+  // const list = toasts.map((t, index) => {
+  //   return <Toast key={`toast-${new Date().getTime()}-${Math.random()}-${index}`} attr={t} />
+  // })
 
   return (
     <div className="toast toast-end" ref={toastWrapRef}>
-      {list as ReactNode}
+      {/*{list as ReactNode}*/}
     </div>
   )
 }

@@ -6,7 +6,8 @@ import { ReactNode } from 'react'
 import Navigation from '@/components/navigation'
 import { Providers } from '@/providers/global.context.provider'
 import '@/css/scrollbar.css'
-import { getCookie, parseJwt } from '@/routes/auth/signin/cookie.manager'
+import { getCookie, getToasts, parseJwt } from '@/routes/auth/signin/cookie.manager'
+import { ToastsWrap } from '@/components/feedbacks/toast'
 
 export const links: LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -22,9 +23,20 @@ export const links: LinksFunction = () => [
 ]
 
 export const loader: LoaderFunction = async ({ request }) => {
+  const res: { [k: string]: unknown } = {}
   const accessToken = await getCookie('access-token', request)
-  return accessToken ? { accessToken, user: parseJwt(accessToken) } : {}
-  // return {}
+  const toasts = await getToasts(request)
+
+  if (accessToken) {
+    res['accessToken'] = accessToken
+    res['user'] = parseJwt(accessToken)
+  }
+
+  if (toasts) {
+    res['toasts'] = toasts
+  }
+
+  return res
 }
 
 export function Layout({ children }: { children: ReactNode }) {
@@ -50,9 +62,14 @@ export function Layout({ children }: { children: ReactNode }) {
 }
 
 export default function App() {
+  const data = useLoaderData<typeof loader>()
+
+  console.log(data)
+
   return (
     <Providers>
       <Outlet />
+      <ToastsWrap />
     </Providers>
   )
 }
