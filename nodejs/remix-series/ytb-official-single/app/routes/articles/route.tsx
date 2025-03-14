@@ -1,6 +1,6 @@
 import { ActionFunction, LoaderFunction } from '@remix-run/node'
 import { Form, useActionData, useLoaderData, useNavigate, useNavigation } from '@remix-run/react'
-import { CommonListPage, CommonRes, CommonSuccess } from '@/common/common.entity'
+import { CommonListPage, CommonRes } from '@/common/common.entity'
 import { Article } from '@/entities/board.entity'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 import Fieldset from '@/components/form/fieldset'
@@ -54,6 +54,7 @@ export const action: ActionFunction = async ({ request }) => {
 
 export default function Articles() {
   const [checked, setChecked] = useState(false)
+  const [posted, setPosted] = useState(false)
 
   const loading = useNavigation()
   const navigate = useNavigate()
@@ -66,10 +67,12 @@ export default function Articles() {
     return <li key={article.id}>{article.title}</li>
   })
 
-  const actionData = useActionData<CommonSuccess<unknown>>()
+  const actionData = JSON.parse(useActionData<typeof action>() ?? '{}')
 
   const initialLoads = useCallback(() => {
     if (articles.statusCode === 401 && !checked) {
+      setChecked(true)
+
       addAlert({ title: 'needToLogin', status: 'error', duration: 5 })
       navigate('/auth/signin')
 
@@ -77,10 +80,21 @@ export default function Articles() {
     }
   }, [addAlert, articles.statusCode, checked, navigate])
 
+  const actionPosted = useCallback(() => {
+    if (actionData.statusCode === 401 && !posted) {
+      setPosted(true)
+
+      addAlert({ title: 'needToLogin', status: 'error', duration: 5 })
+      navigate('/auth/signin')
+
+      return
+    }
+  }, [actionData.statusCode, addAlert, navigate, posted])
+
   useEffect(() => {
-    setChecked(true)
     initialLoads()
-  }, [initialLoads])
+    actionPosted()
+  }, [actionPosted, initialLoads])
 
   return (
     <section className={''}>

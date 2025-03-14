@@ -1,5 +1,5 @@
 import { generateCookie, getCookie } from '@/routes/auth/signin/cookie.manager'
-import { CommonRes, ManualError } from '@/common/common.entity'
+import { CommonError, CommonRes, ManualError } from '@/common/common.entity'
 import { time } from '@/utils/time'
 
 export enum METHOD {
@@ -90,6 +90,13 @@ export const refreshableFetch = async <T>({ request, method, url, data }: Props)
     return new Response(JSON.stringify(json), {
       headers: resHeaders,
     })
+  }
+
+  if (json.statusCode === 401 && !(json as CommonError).errorData.refreshToken?.length) {
+    return new Response(
+      JSON.stringify(ManualError({ statusCode: 401, message: 'needToLogin' })),
+      {},
+    )
   }
 
   return new Response(JSON.stringify(json), { headers: {} as Headers })
