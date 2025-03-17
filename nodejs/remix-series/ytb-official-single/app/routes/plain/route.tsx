@@ -11,6 +11,7 @@ export default function Plain() {
         }}
       >
         <div
+          draggable
           className={'bg-yellow-300 w-1/3 mx-auto'}
           style={{
             height: '60em',

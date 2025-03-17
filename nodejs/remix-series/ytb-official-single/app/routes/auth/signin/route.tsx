@@ -1,16 +1,26 @@
 import Fieldset from '@/components/form/fieldset'
-import { Form, redirect, useActionData } from '@remix-run/react'
+import { Form, redirect, useActionData, useLoaderData, useNavigate } from '@remix-run/react'
 import Box from '@/components/layouts/box'
 import Input from '@/components/form/input'
 import { FaEnvelope, FaFly, FaLock } from 'react-icons/fa6'
 import Button from '@/components/form/button'
-import { ActionFunction } from '@remix-run/node'
+import { ActionFunction, LoaderFunction } from '@remix-run/node'
 import { CommonRes } from '@/common/common.entity'
 import { formData } from '@/utils/form.data'
 import { useFormError } from '@/hooks/error.message'
-import { useEffect } from 'react'
-import { generateCookie } from '@/routes/auth/signin/cookie.manager'
+import { useCallback, useEffect, useState } from 'react'
+import { generateCookie, getCookie } from '@/routes/auth/signin/cookie.manager'
 import { time } from '@/utils/time'
+import { useToast } from '@/hooks/useToast'
+
+export const loader: LoaderFunction = async ({ request }) => {
+  const credential = await getCookie('access-token', request)
+  if (credential) {
+    return { statusCode: 200, title: 'alreadyLogged' }
+  }
+
+  return {}
+}
 
 export const action: ActionFunction = async ({ request }) => {
   const url = `${process.env.API_HOST}/api/v1/auth/login`
@@ -65,16 +75,36 @@ export const action: ActionFunction = async ({ request }) => {
 }
 
 export default function SignIn() {
+  const [loaded, setLoaded] = useState<boolean>(false)
+  const { addAlert } = useToast()
+  const navigate = useNavigate()
+
+  const loadData = useLoaderData<{ title?: string }>()
   const actionRes = useActionData<CommonRes<unknown>>()
   const [formError, setFormError] = useFormError({ email: '', password: '' })
 
+  const load = useCallback(() => {
+    if (!loaded && loadData) {
+      setLoaded(true)
+
+      if (loadData.title === 'alreadyLogged') {
+        addAlert({ title: 'alreadyLogged', status: 'warning', duration: 5 })
+        navigate('/', { replace: true })
+
+        return
+      }
+    }
+  }, [addAlert, loadData, loaded, navigate])
+
   useEffect(() => {
+    load()
+
     if (actionRes && 'data' in actionRes) {
       console.log('success')
     } else if (actionRes?.errorData) {
       setFormError(actionRes.errorData.error)
     }
-  }, [actionRes, setFormError])
+  }, [actionRes, load, setFormError])
 
   return (
     <section>

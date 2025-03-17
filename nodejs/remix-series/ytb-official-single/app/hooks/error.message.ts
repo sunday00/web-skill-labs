@@ -17,6 +17,10 @@ export const ERROR_MESSAGE: {
     at: 'toast',
     lo: '로그인이 필요합니다.',
   },
+  alreadyLogged: {
+    at: 'toast',
+    lo: '이미 로그인한 사용자입니다.',
+  },
   duplicatedEmail: {
     at: 'email',
     lo: '이미 가입된 이메일입니다.',
