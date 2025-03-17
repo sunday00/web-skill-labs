@@ -2,7 +2,7 @@ import { ActionFunction, LoaderFunction } from '@remix-run/node'
 import { Form, useNavigation } from '@remix-run/react'
 import { CommonListPage } from '@/common/common.entity'
 import { Article } from '@/entities/board.entity'
-import { ReactNode, useRef } from 'react'
+import { ReactNode, useEffect, useRef } from 'react'
 import Fieldset from '@/components/form/fieldset'
 import Box from '@/components/layouts/box'
 import Input from '@/components/form/input'
@@ -55,6 +55,13 @@ export default function Articles() {
       }
     }
   }
+
+  useEffect(() => {
+    if (action && loading.state === 'idle') {
+      formRef.current?.reset()
+      formRef.current?.querySelector<HTMLInputElement>('[name="title"]')?.focus()
+    }
+  }, [action, loading.state])
 
   return (
     <section className={''}>
