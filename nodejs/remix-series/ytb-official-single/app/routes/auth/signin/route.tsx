@@ -59,7 +59,7 @@ export const action: ActionFunction = async ({ request }) => {
     await generateCookie('another', time().add(1, 'weeks').unix(), 'this is another'),
   )
 
-  return redirect('/articles', {
+  return redirect('/', {
     headers,
   })
 }
