@@ -10,6 +10,7 @@ export default function Button({
   value,
   w,
   disabled = false,
+  pending = false,
 }: HTMLAttributes<HTMLButtonElement> & {
   type?: 'submit' | 'button' | 'reset' | undefined
   variant?: 'solid' | 'outline' | 'ghost' | string
@@ -18,6 +19,7 @@ export default function Button({
   value?: string
   w?: string
   disabled?: boolean
+  pending?: boolean
 }) {
   return (
     <button
@@ -25,14 +27,16 @@ export default function Button({
       type={type}
       name={name}
       value={value}
-      disabled={disabled}
+      disabled={disabled || pending}
     >
-      {children ? (
+      {pending ? (
+        <span className="loading loading-spinner" />
+      ) : children ? (
         <>
           {children} {text ? <span>{text}</span> : <></>}
         </>
       ) : (
-        <>{text}</>
+        text
       )}
     </button>
   )

@@ -2,7 +2,7 @@ import { ActionFunction, LoaderFunction } from '@remix-run/node'
 import { Form, useNavigation } from '@remix-run/react'
 import { CommonListPage } from '@/common/common.entity'
 import { Article } from '@/entities/board.entity'
-import { ReactNode } from 'react'
+import { ReactNode, useRef } from 'react'
 import Fieldset from '@/components/form/fieldset'
 import Box from '@/components/layouts/box'
 import Input from '@/components/form/input'
@@ -35,6 +35,7 @@ export const action: ActionFunction = async ({ request }) => {
 
 export default function Articles() {
   const loading = useNavigation()
+  const formRef = useRef<HTMLFormElement>(null)
 
   const articles = useRefreshableLoad<CommonListPage<Article>>()
 
@@ -45,11 +46,21 @@ export default function Articles() {
 
   const action = useRefreshableAction<Article>()
 
+  if (action.statusCode === 200) {
+    const ks = loading.formData?.keys()
+
+    if (ks) {
+      for (const k of ks) {
+        console.log(k)
+      }
+    }
+  }
+
   return (
     <section className={''}>
       <h1>ARTICLES</h1>
 
-      <Form method={'post'} className={'bg-base-200 p-4'}>
+      <Form method={'post'} className={'bg-base-200 p-4'} ref={formRef}>
         {/*<Form reloadDocument method={'post'} className={'bg-base-200 p-4'}>*/}
         <input type="hidden" name={'type'} value={'APP_COMMUNITY'} />
         <input type="hidden" name={'category'} value={'USER_NORMAL'} />
@@ -69,10 +80,13 @@ export default function Articles() {
 
           <Button
             type={'submit'}
-            text={loading.state === 'submitting' ? 'loading......' : 'Write'}
+            text={'Write'}
             className={'mx-auto'}
             name={'_action'}
             value={'createArticle'}
+            pending={
+              loading.state === 'submitting' && loading.formData?.get('_action') === 'createArticle'
+            }
           />
         </Box>
       </Form>
