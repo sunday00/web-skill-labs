@@ -48,8 +48,8 @@ export function Layout({ children }: { children: ReactNode }) {
       </head>
       <body className={'bg-transparent min-h-screen'}>
         <Navigation user={data?.user} />
-        <main className={'container p-8 mx-auto'}>{children}</main>
-        <ScrollRestoration />
+        <main className={'container mt-16 p-8 mx-auto'}>{children}</main>
+        <ScrollRestoration getKey={(l) => l.pathname} />
         <Scripts />
       </body>
     </html>

@@ -15,13 +15,15 @@ export default function Navigation({ user }: { user?: JWTPayload }) {
   const menus = dirs.map((d) => {
     return (
       <li key={d} className={pathname === '/' + d ? 'font-bold' : ''}>
-        <Link to={`/${d}`}>{d}</Link>
+        <Link to={`/${d}`} preventScrollReset={true}>
+          {d}
+        </Link>
       </li>
     )
   })
 
   return (
-    <nav className="navbar bg-base-100 shadow-sm">
+    <nav className="navbar bg-base-100 shadow-sm fixed top-0">
       <div className="navbar-start">
         <a href={'/'} className="btn btn-ghost text-xl">
           daisyUI

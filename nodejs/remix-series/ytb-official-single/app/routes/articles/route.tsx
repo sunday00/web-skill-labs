@@ -1,5 +1,5 @@
 import { ActionFunction, LoaderFunction } from '@remix-run/node'
-import { Form, useNavigation } from '@remix-run/react'
+import { useFetcher, useNavigation } from '@remix-run/react'
 import { CommonListPage } from '@/common/common.entity'
 import { Article } from '@/entities/board.entity'
 import { ReactNode, useEffect, useRef } from 'react'
@@ -35,6 +35,7 @@ export const action: ActionFunction = async ({ request }) => {
 
 export default function Articles() {
   const loading = useNavigation()
+  const fetcher = useFetcher()
   const formRef = useRef<HTMLFormElement>(null)
 
   const articles = useRefreshableLoad<CommonListPage<Article>>()
@@ -47,7 +48,7 @@ export default function Articles() {
   const action = useRefreshableAction<Article>()
 
   if (action.statusCode === 200) {
-    const ks = loading.formData?.keys()
+    const ks = fetcher.formData?.keys()
 
     if (ks) {
       for (const k of ks) {
@@ -67,7 +68,7 @@ export default function Articles() {
     <section className={''}>
       <h1>ARTICLES</h1>
 
-      <Form method={'post'} className={'bg-base-200 p-4'} ref={formRef}>
+      <fetcher.Form method={'post'} className={'bg-base-200 p-4'} ref={formRef}>
         {/*<Form reloadDocument method={'post'} className={'bg-base-200 p-4'}>*/}
         <input type="hidden" name={'type'} value={'APP_COMMUNITY'} />
         <input type="hidden" name={'category'} value={'USER_NORMAL'} />
@@ -92,11 +93,11 @@ export default function Articles() {
             name={'_action'}
             value={'createArticle'}
             pending={
-              loading.state === 'submitting' && loading.formData?.get('_action') === 'createArticle'
+              fetcher.state === 'submitting' && fetcher.formData?.get('_action') === 'createArticle'
             }
           />
         </Box>
-      </Form>
+      </fetcher.Form>
 
       <ul>{list as ReactNode}</ul>
     </section>
