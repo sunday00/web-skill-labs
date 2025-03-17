@@ -29,7 +29,7 @@ export default function Button({
     >
       {children ? (
         <>
-          {children} <span>{text}</span>
+          {children} {text ? <span>{text}</span> : <></>}
         </>
       ) : (
         <>{text}</>
