@@ -10,4 +10,4 @@ else
   cp ./_.env.dev ./.env
 fi
 
-NODE_ENV=development remix vite:dev
+NODE_ENV=development remix vite:dev --host=ex-mac-98.local
