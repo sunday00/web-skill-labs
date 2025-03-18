@@ -9,6 +9,12 @@ import '@/css/scrollbar.css'
 import { getCookie, parseJwt } from '@/routes/auth/signin/cookie.manager'
 import ToastProvider from '@/providers/global.toast.provider'
 
+declare global {
+  export interface Window {
+    env: { [k: string]: string }
+  }
+}
+
 export const links: LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
   {
@@ -23,7 +29,10 @@ export const links: LinksFunction = () => [
 ]
 
 export const loader: LoaderFunction = async ({ request }) => {
-  const res: { [k: string]: unknown } = {}
+  const res: { [k: string]: unknown } = {
+    env: process.env,
+  }
+
   const accessToken = await getCookie('access-token', request)
 
   if (accessToken) {
@@ -49,6 +58,9 @@ export function Layout({ children }: { children: ReactNode }) {
       <body className={'bg-transparent min-h-screen'}>
         <Navigation user={data?.user} />
         <main className={'container mt-16 p-8 mx-auto'}>{children}</main>
+        <script
+          dangerouslySetInnerHTML={{ __html: `window.env = ${JSON.stringify(data.env)}` }}
+        ></script>
         <ScrollRestoration getKey={(l) => l.pathname} />
         <Scripts />
       </body>

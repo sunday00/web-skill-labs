@@ -4,7 +4,7 @@ import { JWTPayload } from '@/routes/auth/signin/cookie.manager'
 import { FaSignInAlt, FaSignOutAlt } from 'react-icons/fa'
 import Button from '@/components/form/button'
 import ThemeBtn from '@/components/func/theme.btn'
-import { FaUser } from 'react-icons/fa6'
+import { FaTwitter, FaUser } from 'react-icons/fa6'
 
 const dirs = ['articles', 'newsletters', 'plain']
 
@@ -73,9 +73,14 @@ export default function Navigation({ user }: { user?: JWTPayload }) {
               </ul>
             </div>
           ) : (
-            <Link to={'/auth/signin'}>
-              <FaSignInAlt className="h-8 w-8" />
-            </Link>
+            <>
+              <Link to={'/auth/signin'}>
+                <FaSignInAlt className="h-8 w-8" />
+              </Link>
+              <Link to={'/auth/sns'}>
+                <FaTwitter className="h-8 w-8" />
+              </Link>
+            </>
           )}
         </div>
 

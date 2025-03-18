@@ -21,6 +21,8 @@ export default defineConfig({
       routes(defineRoutes) {
         return defineRoutes((R) => {
           R('auth', 'routes/auth/route.tsx', () => {
+            R('sns', 'routes/auth/sns/route.tsx')
+            R('sns/:provider/callback', 'routes/auth/sns/callback.tsx')
             R('signup', 'routes/auth/signup/route.tsx')
             R('signin', 'routes/auth/signin/route.tsx')
             R('signout', 'routes/auth/signout/route.tsx')
