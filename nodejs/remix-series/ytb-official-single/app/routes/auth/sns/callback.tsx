@@ -1,6 +1,6 @@
 import { LoaderFunction } from '@remix-run/node'
 
-export const loader: LoaderFunction = async ({ request }) => {
+export const loader: LoaderFunction = async ({ request, params }) => {
   const currentUrl = new URL(request.url)
   const code = currentUrl.searchParams.get('code')
 
@@ -12,7 +12,7 @@ export const loader: LoaderFunction = async ({ request }) => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      provider: 'google',
+      provider: params.provider,
       code: code,
     }),
   })
