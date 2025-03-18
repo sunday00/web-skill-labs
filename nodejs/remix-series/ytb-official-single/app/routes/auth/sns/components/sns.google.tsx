@@ -1,5 +1,5 @@
 import { Link } from '@remix-run/react'
-import { GoogleSnsIcon } from '@/components/icons/google.sns'
+import { GoogleSnsIcon } from '@/components/icons/google.sns.icon'
 
 export default function SnsGoogle() {
   const redirectUrl = encodeURI(window.env.SNS_GG_RD ?? '')

@@ -19,7 +19,7 @@ export default function SnsKakao() {
   return (
     <Link
       to={href}
-      className={`border border-1 border-gray-400 flex justify-center items-center w-[40px] h-[40px] bg-[#ffd43b] rounded rounded-md`}
+      className={`border border-1 border-gray-400 flex justify-center items-center w-[40px] h-[40px] bg-[#ffd43b] rounded-md`}
     >
       <FaComment className={'text-[#2c2e33] text-xl'} />
     </Link>
