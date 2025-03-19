@@ -12,6 +12,9 @@ export const routes = {
     },
     "_list": {
       "path": "/articles"
+    },
+    "create": {
+      "path": "/articles/create"
     }
   },
   "auth": {
