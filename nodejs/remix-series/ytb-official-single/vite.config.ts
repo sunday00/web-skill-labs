@@ -11,6 +11,8 @@ declare module '@remix-run/node' {
   }
 }
 
+const routesObject: { [k: string]: unknown } = {}
+
 export default defineConfig({
   server: {
     allowedHosts: ['0.0.0.0', 'localhost', '127.0.0.1', 'ex-mac-98.local'],
@@ -28,7 +30,11 @@ export default defineConfig({
       },
       routes(defineRoutes) {
         return defineRoutes(async (R) => {
-          const generateNestedRoutes = async (routePath: string, nested: string[]) => {
+          const generateNestedRoutes = async (
+            parent: { [k: string]: unknown },
+            routePath: string,
+            nested: string[],
+          ) => {
             await Promise.all(
               nested.map(async (routeNs) => {
                 if (routeNs.endsWith('.ts')) return () => {}
@@ -48,11 +54,22 @@ export default defineConfig({
                     return n !== 'route.tsx' && !n.endsWith('.ts') && n !== 'components'
                   })
 
+                if (!Object.keys(parent).includes(routeNs)) {
+                  parent[routeNs] = {
+                    path: parent.path + `${pathParam !== '' ? '/' + pathParam : ''}`,
+                  }
+                }
+
                 if (nested.length) {
                   return R(
                     pathParam,
                     `${curRoutePath}/route.tsx`,
-                    async () => await generateNestedRoutes(curRoutePath, nested),
+                    async () =>
+                      await generateNestedRoutes(
+                        parent[routeNs] as { [k: string]: object },
+                        curRoutePath,
+                        nested,
+                      ),
                   )
                 }
 
@@ -73,38 +90,46 @@ export default defineConfig({
                 const hasLayout = fs.existsSync(
                   path.join(process.cwd(), 'app', 'routes', route, 'route.tsx'),
                 )
-                const nested = fs.readdirSync(path.join(process.cwd(), 'app', 'routes', route))
+                const nested = fs
+                  .readdirSync(path.join(process.cwd(), 'app', 'routes', route))
+                  .filter((n) => {
+                    return n !== 'route.tsx' && !n.endsWith('.ts') && n !== 'components'
+                  })
 
-                if (nested[0] === 'route.tsx' && nested.length === 0) {
-                  return () => {}
+                const routePath = `routes/${route}`
+                routesObject[route] = { path: '/' + route }
+
+                // @comment
+                // only single page has this routes
+                if (nested.length === 0) {
+                  R(route, routePath + '/route.tsx')
+                  return
                 }
 
                 if (!hasLayout) {
                   return () => {}
                 }
 
-                const routePath = `routes/${route}`
-
                 R(
                   route,
                   routePath + '/route.tsx',
-                  async () => await generateNestedRoutes(routePath, nested),
+                  // @comment: generate child route automatic by folder tree
+                  async () =>
+                    await generateNestedRoutes(
+                      routesObject[route] as {
+                        [k: string]: unknown
+                      },
+                      routePath,
+                      nested,
+                    ),
                 )
               }),
           )
 
-          // R('auth', 'routes/auth/route.tsx', () => {
-          //   R('sns', 'routes/auth/sns/route.tsx')
-          //   R('sns/:provider/callback', 'routes/auth/sns/callback.tsx')
-          //   R('signup', 'routes/auth/signup/route.tsx')
-          //   R('signin', 'routes/auth/signin/route.tsx')
-          //   R('signout', 'routes/auth/signout/route.tsx')
-          // })
-          //
-          // R('articles', 'routes/articles/route.tsx', () => {
-          //   R('', 'routes/articles/list/route.tsx', { index: true })
-          //   R(':id', 'routes/articles/id/route.tsx')
-          // })
+          fs.writeFileSync(
+            path.join(process.cwd(), 'app', 'common', 'routes.tsx'),
+            'export const routes = ' + JSON.stringify(routesObject, null, 2),
+          )
         })
       },
     }),
