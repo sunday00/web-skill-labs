@@ -33,6 +33,11 @@ export default defineConfig({
             R('signin', 'routes/auth/signin/route.tsx')
             R('signout', 'routes/auth/signout/route.tsx')
           })
+
+          R('articles', 'routes/articles/route.tsx', () => {
+            R('', 'routes/articles/list/route.tsx', { index: true })
+            R(':id', 'routes/articles/id/route.tsx')
+          })
         })
       },
     }),
