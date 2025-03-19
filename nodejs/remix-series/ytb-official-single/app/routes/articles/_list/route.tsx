@@ -9,7 +9,7 @@ import Input from '@/components/form/input'
 import Button from '@/components/form/button'
 import { METHOD, refreshableFetch } from '@/common/refreshable.fetch'
 import { useRefreshableAction, useRefreshableLoad } from '@/hooks/use.refreshable'
-import ArticleListItem from '@/routes/articles/list/components/list.item'
+import ArticleListItem from '@/routes/articles/_list/components/list.item'
 
 export const loader: LoaderFunction = async ({ request }) => {
   const url = `/board`
