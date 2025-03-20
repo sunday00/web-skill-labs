@@ -17,4 +17,5 @@ export type Attend = {
   canceledAt: string
   status: AttendStatus
   createdAt: string
+  updatedAt: string
 }

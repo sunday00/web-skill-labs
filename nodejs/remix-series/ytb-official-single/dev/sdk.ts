@@ -3,6 +3,8 @@ import * as path from 'node:path'
 import { config } from 'dotenv'
 
 config({ path: path.join(process.cwd(), '_.env.local') })
+// TODO config here
+const gitRepo = `sunday00/iq-golf-temporary`
 const token = process.env.DEV_GIT_TOKEN
 
 async function download(info: {
@@ -15,7 +17,8 @@ async function download(info: {
 
   const folder = path.join(process.cwd(), 'app', 'entities')
   const files = await fetch(
-    `https://api.github.com/repos/sunday00/iq-golf-temporary/contents/src/domains/${info.name}/struct`,
+    // TODO config here
+    `https://api.github.com/repos/${gitRepo}/contents/src/domains/${info.name}/struct`,
     {
       method: 'GET',
       headers: {
@@ -31,7 +34,8 @@ async function download(info: {
   for (const file of files) {
     if (!file.name.includes('.entity.ts')) continue
 
-    const rawUrl = `https://raw.githubusercontent.com/sunday00/iq-golf-temporary/main/src/domains/${info.name}/struct/${file.name}`
+    // TODO config here
+    const rawUrl = `https://raw.githubusercontent.com/${gitRepo}/dev/src/domains/${info.name}/struct/${file.name}`
     let content = await fetch(rawUrl, {
       method: 'GET',
       headers: {
@@ -63,8 +67,8 @@ async function download(info: {
 }
 
 async function main() {
-  const root_dir_url =
-    'https://api.github.com/repos/sunday00/iq-golf-temporary/contents/src/domains'
+  // TODO config here
+  const root_dir_url = `https://api.github.com/repos/${gitRepo}/contents/src/domains`
   const root_result = await fetch(root_dir_url, {
     method: 'GET',
     headers: {
