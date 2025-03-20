@@ -8,18 +8,30 @@ import ArticleListItem from '@/routes/articles/_list/components/list.item'
 import Flex from '@/components/layouts/flex'
 import { Link } from '@remix-run/react'
 import { routes } from '@/common/routes'
+import Paginate from '@/components/func/page'
+import { CommonUncaughtMessageShow } from '@/common/excetions'
 
 export const loader: LoaderFunction = async ({ request }) => {
   const url = `/board`
+  const qs = new URL(request.url).searchParams
 
-  return refreshableFetch({ request, method: METHOD.GET, url, data: { page: 1, size: 10 } })
+  return refreshableFetch({
+    request,
+    method: METHOD.GET,
+    url,
+    data: { page: Number(qs.get('page') ?? 1), size: Number(qs.get('size') ?? 20) },
+  })
 }
 
 export default function Articles() {
-  const articles = useRefreshableLoad<CommonListPage<Article>>()
+  const raw = useRefreshableLoad<CommonListPage<Article>>()
 
-  const raw = 'data' in articles ? articles.data.items : []
-  const list = raw.map((article: Article) => {
+  if (!('data' in raw)) {
+    return <CommonUncaughtMessageShow error={raw} />
+  }
+
+  const articles = raw.data
+  const list = articles.items.map((article: Article) => {
     return <ArticleListItem key={article.id} entity={article} />
   })
 
@@ -27,8 +39,10 @@ export default function Articles() {
     <section>
       <ul>{list as ReactNode}</ul>
 
+      <Paginate bulk={articles} />
+
       <Flex className="mt-4 justify-end">
-        <Link to={routes.articles.create.path} className={'btn'}>
+        <Link to={routes.articles.create.path} className={'btn btn-secondary'}>
           create
         </Link>
       </Flex>
