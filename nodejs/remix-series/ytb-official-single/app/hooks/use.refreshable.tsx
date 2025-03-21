@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { CommonRes } from '@/common/common.entity'
 import { useActionData, useLoaderData, useNavigate } from '@remix-run/react'
 import { useToast } from '@/hooks/useToast'
+import { ERROR_MESSAGE } from '@/hooks/error.message'
 
 export function useRefreshableLoad<T>() {
   const [checked, setChecked] = useState(false)
@@ -14,7 +15,7 @@ export function useRefreshableLoad<T>() {
     if (data.statusCode === 401 && !checked) {
       setChecked(true)
 
-      addAlert({ title: 'needToLogin', status: 'error', duration: 5 })
+      addAlert({ title: ERROR_MESSAGE['needToLogin'].lo, status: 'error', duration: 5 })
       navigate('/auth/signin')
 
       return
@@ -39,7 +40,7 @@ export function useRefreshableAction<T>() {
     if (data.statusCode === 401 && !checked) {
       setChecked(true)
 
-      addAlert({ title: 'needToLogin', status: 'error', duration: 5 })
+      addAlert({ title: ERROR_MESSAGE['needToLogin'].lo, status: 'error', duration: 5 })
       navigate('/auth/signin')
 
       return

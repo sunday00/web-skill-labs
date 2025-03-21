@@ -58,7 +58,7 @@ export default function Navigation({ user }: { user?: JWTPayload }) {
                   <Form
                     name={'auth.logout'}
                     method={'post'}
-                    action={'/auth/signout'}
+                    action={routes.auth.signout.path}
                     className={'block p-0'}
                   >
                     <Button

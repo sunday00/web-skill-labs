@@ -1,5 +1,3 @@
-import '@/css/scrollbar.css'
-
 export default function Plain() {
   return (
     <>

@@ -2,10 +2,10 @@ import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from '
 import { LinksFunction, LoaderFunction } from '@remix-run/node'
 
 import './tailwind.css'
+import '@/css/scrollbar.css'
 import { ReactNode } from 'react'
 import Navigation from '@/components/navigation'
 import { Providers } from '@/providers/global.context.provider'
-import '@/css/scrollbar.css'
 import { getCookie, parseJwt } from '@/routes/auth/signin/cookie.manager'
 import ToastProvider from '@/providers/global.toast.provider'
 
