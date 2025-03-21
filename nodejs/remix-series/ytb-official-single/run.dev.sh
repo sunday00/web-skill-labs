@@ -1,7 +1,8 @@
 #!/bin/zsh
 
 mode=$1;
-echo $mode
+host=$2;
+echo "$mode : $host"
 
 rm -rf ./.env
 if [ $mode = 'local' ]; then
@@ -10,4 +11,4 @@ else
   cp ./_.env.dev ./.env
 fi
 
-NODE_ENV=development remix vite:dev --host=ex-mac-98.local
+NODE_ENV=development remix vite:dev --host=$host

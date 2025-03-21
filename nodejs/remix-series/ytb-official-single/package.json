@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "remix vite:build",
-    "dev:local": "./run.dev.sh local",
-    "dev": "remix vite:dev",
+    "dev:local": "./run.dev.sh local ex-mac-98.local",
+    "dev": "./run.dev.sh local 0.0.0.0",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
     "start": "remix-serve ./build/server/index.js",
     "typecheck": "tsc",

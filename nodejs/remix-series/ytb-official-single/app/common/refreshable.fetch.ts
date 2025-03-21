@@ -93,10 +93,11 @@ export const refreshableFetch = async <T>({ request, method, url, data }: Props)
   }
 
   if (json.statusCode === 401 && !(json as CommonError).errorData.refreshToken?.length) {
-    return new Response(
-      JSON.stringify(ManualError({ statusCode: 401, message: 'needToLogin' })),
-      {},
-    )
+    return new Response(JSON.stringify(ManualError({ statusCode: 401, message: 'needToLogin' })), {
+      headers: {
+        'Set-Cookie': await generateCookie('access-token', 1, ''),
+      },
+    })
   }
 
   return new Response(JSON.stringify(json), { headers: {} as Headers })
