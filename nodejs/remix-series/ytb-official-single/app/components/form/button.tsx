@@ -11,6 +11,7 @@ export default function Button({
   w,
   disabled = false,
   pending = false,
+  onClick,
 }: HTMLAttributes<HTMLButtonElement> & {
   type?: 'submit' | 'button' | 'reset' | undefined
   variant?: 'solid' | 'outline' | 'ghost' | string
@@ -28,6 +29,7 @@ export default function Button({
       name={name}
       value={value}
       disabled={disabled || pending}
+      onClick={onClick}
     >
       {pending ? (
         <span className="loading loading-spinner" />

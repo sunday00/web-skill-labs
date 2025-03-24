@@ -6,10 +6,11 @@ import Button from '@/components/form/button'
 import ThemeBtn from '@/components/func/theme.btn'
 import { FaTwitter, FaUser } from 'react-icons/fa6'
 import { routes } from '@/common/routes'
+import { useEnv } from '@/hooks/useEnv'
 
 const dirs = ['articles', 'newsletters', 'plain']
 
-export default function Navigation({ user }: { user?: JWTPayload }) {
+export default function Navigation({ user, token }: { user?: JWTPayload; token?: string }) {
   const location = useLocation()
   const pathname = location.pathname
 
@@ -22,6 +23,14 @@ export default function Navigation({ user }: { user?: JWTPayload }) {
       </li>
     )
   })
+
+  const env = useEnv()
+
+  const handleShowDevInfo = () => {
+    console.log('token: ', token)
+    console.log(window.env)
+    console.log({ payload: user })
+  }
 
   return (
     <nav className="navbar bg-base-100 shadow-sm fixed top-0">
@@ -71,6 +80,18 @@ export default function Navigation({ user }: { user?: JWTPayload }) {
                     </Button>
                   </Form>
                 </li>
+                {env['NODE_ENV'] === 'development' && (
+                  <li>
+                    <Button
+                      onClick={handleShowDevInfo}
+                      type={'button'}
+                      variant={'ghost'}
+                      w={'w-full'}
+                    >
+                      Show Dev Info
+                    </Button>
+                  </li>
+                )}
               </ul>
             </div>
           ) : (

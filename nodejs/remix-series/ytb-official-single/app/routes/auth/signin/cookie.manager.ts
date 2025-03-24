@@ -10,7 +10,6 @@ export type JWTPayload = {
   id: string
   role: UserRole
   name: string
-  email: string
   iat: number
   exp: number
 }

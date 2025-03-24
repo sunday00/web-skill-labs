@@ -56,7 +56,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <Links />
       </head>
       <body className={'bg-transparent min-h-screen'}>
-        <Navigation user={data?.user} />
+        <Navigation user={data?.user} token={data?.accessToken} />
         <main className={'container mt-16 p-8 mx-auto'}>{children}</main>
         <script
           dangerouslySetInnerHTML={{ __html: `window.env = ${JSON.stringify(data.env)}` }}
