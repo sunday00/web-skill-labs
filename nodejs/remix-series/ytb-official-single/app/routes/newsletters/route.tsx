@@ -10,29 +10,11 @@ import { useEffect, useState } from 'react'
 import Select from '@/components/form/select'
 import Flex from '@/components/layouts/flex'
 import { formData } from '@/utils/form.data'
-import { setToast } from '@/routes/auth/signin/cookie.manager'
 import { useToast } from '@/hooks/useToast'
 
 export const action: ActionFunction = async ({ request }) => {
   const fd = await formData(request)
   const email = fd.get<string>('email')
-  const action = fd.get<'testToast' | 'submit'>('_action')
-
-  if (action && action === 'testToast') {
-    return {
-      headers: {
-        'Set-Cookie': await setToast(
-          {
-            status: 'success',
-            duration: 5,
-            title: 'success!!',
-            message: 'successfully subscribe',
-          },
-          request,
-        ),
-      },
-    }
-  }
 
   const key = process.env.KIT_KEY
   const url = process.env.KIT_URL
@@ -51,7 +33,7 @@ export const action: ActionFunction = async ({ request }) => {
 
 export default function Newsletters() {
   const afterAction = useActionData<[number, { error?: string; message?: string }]>()
-  const [err, setErr] = useState<string>('')
+  const [err, _setErr] = useState<string>('')
 
   // const global = useContext(GlobalContext)
   const { addAlert } = useToast()

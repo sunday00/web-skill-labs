@@ -1,7 +1,9 @@
 import { LoaderFunction } from '@remix-run/node'
 import { generateCookie } from '@/routes/auth/signin/cookie.manager'
 import { time } from '@/utils/time'
-import { redirect } from '@remix-run/react'
+import { redirect, useLoaderData, useNavigate } from '@remix-run/react'
+import { useEffect, useState } from 'react'
+import { useToast } from '@/hooks/useToast'
 
 export const loader: LoaderFunction = async ({ request, params }) => {
   const currentUrl = new URL(request.url)
@@ -26,6 +28,14 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     return raw
   }
 
+  if (!raw.data.di) {
+    // TODO
+    // THIS IS INSANE
+    // once store cookie first/
+    console.warn({ error: 'missingPhoneVerified' })
+    return { error: 'missingPhoneVerified' }
+  }
+
   const headers = new Headers()
   headers.append(
     'Set-Cookie',
@@ -42,5 +52,24 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 }
 
 export default function AuthSnsCallback() {
+  const [loaded, setLoaded] = useState(false)
+  const { addAlert } = useToast()
+  const navigate = useNavigate()
+
+  const load = useLoaderData<{ error: string }>()
+
+  useEffect(() => {
+    if (!loaded && load) {
+      setLoaded(true)
+
+      if (load.error === 'missingPhoneVerified') {
+        // TODO: real redirect to verifiable page.
+        addAlert({ status: 'warning', title: 'NeedPhoneVerify' })
+
+        navigate('/')
+      }
+    }
+  }, [addAlert, load, loaded, navigate])
+
   return <></>
 }
