@@ -1,0 +1,18 @@
+{
+	"type": "module",
+	"dependencies": {
+		"@remix-run/node": "^2.15.3",
+		"@remix-run/react": "^2.15.3",
+		"@remix-run/serve": "^2.15.3",
+		"isbot": "4",
+		"react": "^18",
+		"react-dom": "^18",
+		"vite-tsconfig-paths": "^5.1.4"
+	},
+	"devDependencies": {
+		"@remix-run/dev": "^2.15.3",
+		"@types/react": "^18",
+		"@types/react-dom": "^18",
+		"vite": "^5.1.4"
+	}
+}

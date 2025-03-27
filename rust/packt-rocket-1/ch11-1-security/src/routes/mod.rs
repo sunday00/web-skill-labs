@@ -6,6 +6,7 @@ use std::path::{Path, PathBuf};
 
 pub mod post;
 pub mod user;
+pub mod session;
 
 type HtmlResponse = Result<Template, Status>;
 

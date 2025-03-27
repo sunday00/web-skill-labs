@@ -39,15 +39,25 @@ impl User {
         )
     }
 
-    pub async fn find_from_pool(pool:&Pool<Sqlite>, uuid: &str) -> Result<Self, OurError> {
-        let query = "SELECT * FROM users WHERE uuid = $1";
-        Ok(
-            sqlx::query_as::<_, Self>(query)
-                .bind(uuid)
-                .fetch_one(pool.inner())
-                .await
-                .map_err(OurError::from_sqlx_error)?
-        )
+    // pub async fn find_from_pool(pool: &rocket::State<SqlitePool>, uuid: &str) -> Result<Self, OurError> {
+    //     let query = "SELECT * FROM users WHERE uuid = $1";
+    //     Ok(
+    //         sqlx::query_as::<_, Self>(query)
+    //             .bind(uuid)
+    //             .fetch_one(pool.inner())
+    //             .await
+    //             .map_err(OurError::from_sqlx_error)?
+    //     )
+    // }
+
+    pub async fn find_by_login<'r> (pool: &rocket::State<SqlitePool>, login: &'r Login<'r>) -> Result<Self, OurError> {
+        let query_str = "SELECT * FROM users WHERE username = $1";
+        let user = sqlx::query_as::<_, Self>(query_str)
+            .bind(&login.username).fetch_one(pool.inner()).await.map_err(OurError::from_sqlx_error)?;
+        let argon2 = Argon2::default();
+        verify_password(&argon2, &user.password_hash, &login.password)?;
+
+        Ok(user)
     }
 
     pub async fn find_all(pool: &rocket::State<SqlitePool>, pagination: Option<Pagination>) -> Result<(Vec<Self>, Option<Pagination>), OurError> {
@@ -145,13 +155,14 @@ impl User {
                     )
                 })?;
             let argon2 = Argon2::default();
-            argon2.verify_password(user.old_password.as_bytes(), &old_password_hash)
-                .map_err(|e| {
-                    OurError::new_internal_server_error(
-                        String::from("Cannot confirm old password"),
-                        Some(Box::new(e)),
-                    )
-                })?;
+            // argon2.verify_password(user.old_password.as_bytes(), &old_password_hash)
+            //     .map_err(|e| {
+            //         OurError::new_internal_server_error(
+            //             String::from("Cannot confirm old password"),
+            //             Some(Box::new(e)),
+            //         )
+            //     })?;
+            verify_password(&argon2, &old_user.password_hash, user.old_password)?;
             let salt = SaltString::generate(&mut OsRng);
             let new_hash = argon2.hash_password(user.password.as_bytes(), &salt)
                 .map_err(|e| {
@@ -271,4 +282,25 @@ fn skip_validate_password<'v>(password: &'v str, old_password: &'v str, password
 pub struct GetUser {
     pub user: User,
     pub flash: Option<String>,
+}
+
+
+fn verify_password(ag: &Argon2, reference: &str, password: &str) -> Result<(), OurError> {
+    let reference_hash = PasswordHash::new(reference).map_err(|e| {
+        OurError::new_internal_server_error(String::from("Input error"), Some(Box::new(e)))
+    })?;
+
+    Ok(ag.verify_password(password.as_bytes(), &reference_hash).map_err(|e| {
+        OurError::new_internal_server_error(
+            String::from("Cannot verify password"),
+            Some(Box::new(e)),
+        )
+    })?)
+}
+
+#[derive(FromForm)]
+pub struct Login<'r> {
+    pub username: &'r str,
+    pub password: &'r str,
+    pub authenticity_token: &'r str,
 }

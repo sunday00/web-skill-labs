@@ -1,0 +1,23 @@
+{
+  "status": 200,
+  "data": [
+    {
+      "movieId": 950396,
+      "id": 1,
+      "createdAt": "2024-01-01 13:09:03",
+      "message": "Oh, that's great"
+    },
+    {
+      "movieId": 950396,
+      "id": 2,
+      "createdAt": "2024-01-03 14:19:43",
+      "message": "interesting..."
+    },
+    {
+      "movieId": 950396,
+      "id": 3,
+      "createdAt": "2024-02-22 06:10:35",
+      "message": "Lorem ipsum dolor sit amet"
+    }
+  ]
+}
