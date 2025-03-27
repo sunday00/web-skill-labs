@@ -5,8 +5,8 @@ export default function SnsApple() {
   const redirectUrl = encodeURI(window.env.SNS_AP_RD ?? '')
   const clientId = window.env.SNS_AP_ID ?? ''
 
-  // const scope = 'email name'
-  const scope = ''
+  const scope = 'email name'
+  // const scope = ''
 
   const href =
     'https://appleid.apple.com/auth/authorize' +
@@ -16,7 +16,8 @@ export default function SnsApple() {
     `redirect_uri=${redirectUrl}&` +
     `client_id=${clientId}&` +
     `response_type=code` +
-    '&response_mode=query'
+    // '&response_mode=query'
+    '&response_mode=form_post'
 
   return (
     <Link
