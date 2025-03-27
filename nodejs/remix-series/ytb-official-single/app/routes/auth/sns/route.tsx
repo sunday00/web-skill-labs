@@ -4,6 +4,7 @@ import SnsGoogle from '@/routes/auth/sns/components/sns.google'
 import SnsKakao from '@/routes/auth/sns/components/sns.kakao'
 import SnsNaver from '@/routes/auth/sns/components/sns.naver'
 import { Outlet } from '@remix-run/react'
+import SnsApple from '@/routes/auth/sns/components/sns.apple'
 
 export default function AuthSns() {
   return (
@@ -12,6 +13,7 @@ export default function AuthSns() {
         <SnsGoogle />
         <SnsKakao />
         <SnsNaver />
+        <SnsApple />
         <Outlet />
       </Flex>
     </Box>
