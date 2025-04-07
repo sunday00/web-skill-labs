@@ -10,4 +10,17 @@ class MyStream extends Readable {
 
 const stream = new MyStream()
 
-stream.on('data', chunk => console.log(chunk.toString()))
+stream.on('data', chunk => {
+  console.log(chunk.toString())
+
+  stream.pause()
+
+  setTimeout(() => {
+    stream.resume()
+  }, 1000)
+})
+
+stream.on('end', chunk => {
+  // ...
+})
+
