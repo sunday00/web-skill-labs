@@ -1,0 +1,14 @@
+version: '3.8'
+
+name: empty-alpine
+
+services:
+  fcm-consumer:
+    container_name: fcm-consumer
+    hostname: fcm-consumer
+    image: alpine:latest
+    ports:
+      - "3536:3536"
+    volumes:
+      - ./:/var/www/html
+    tty: true
