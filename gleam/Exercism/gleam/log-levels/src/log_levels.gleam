@@ -1,8 +1,9 @@
-import gleam/iterator
-import gleam/list
-import gleam/option
+// import gleam/iterator
+// import gleam/list
+// import gleam/option
 import gleam/pair
-import gleam/regex
+
+// import gleam/regex
 import gleam/result
 import gleam/string
 
