@@ -1,3 +1,5 @@
+import gleam/float
+import gleam/list
 import gleam/order.{type Order}
 
 pub type City {
@@ -10,13 +12,26 @@ pub type Temperature {
 }
 
 pub fn fahrenheit_to_celsius(f: Float) -> Float {
-  todo
+  { f -. 32.0 } /. 1.8
+}
+
+fn sure_celisius(t: Temperature) -> Float {
+  case t {
+    Celsius(f) -> f
+    Fahrenheit(f) -> fahrenheit_to_celsius(f)
+  }
 }
 
 pub fn compare_temperature(left: Temperature, right: Temperature) -> Order {
-  todo
+  let l = sure_celisius(left)
+  let r = sure_celisius(right)
+
+  l |> float.compare(r)
 }
 
 pub fn sort_cities_by_temperature(cities: List(City)) -> List(City) {
-  todo
+  cities
+  |> list.sort(by: fn(c1: City, c2: City) {
+    compare_temperature(c1.temperature, c2.temperature)
+  })
 }
