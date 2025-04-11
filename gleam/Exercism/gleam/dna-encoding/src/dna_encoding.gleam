@@ -1,4 +1,4 @@
-import gleam/bit_array
+// import gleam/bit_array
 import gleam/list
 
 pub type Nucleotide {

@@ -39,5 +39,5 @@ pub fn update_score(
 }
 
 pub fn apply_monday_bonus(score_board: ScoreBoard) -> ScoreBoard {
-  score_board |> dict.map_values(fn(k, v) { v + 100 })
+  score_board |> dict.map_values(fn(_k, v) { v + 100 })
 }
