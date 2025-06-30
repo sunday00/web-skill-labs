@@ -1,0 +1,14 @@
+{
+  "devDependencies": {
+    "eslint": "^9.30.0",
+    "nodemon": "^3.1.10",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "dev": "tsc-watch --onSuccess \"node out/p01.class.js\""
+  },
+  "dependencies": {
+    "tsc-watch": "^7.1.1"
+  }
+}
