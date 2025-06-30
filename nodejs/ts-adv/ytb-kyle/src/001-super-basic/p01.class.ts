@@ -10,10 +10,8 @@ interface C extends A, B {
   canBark: boolean
 }
 
-const human: C = {
+export const human: C = {
   name: 'k',
-  age: 2,
+  age: 22,
   canBark: false,
 }
-
-console.log(human.name)

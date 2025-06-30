@@ -3,10 +3,12 @@
     "eslint": "^9.30.0",
     "nodemon": "^3.1.10",
     "prettier": "^3.6.2",
+    "tsc-alias": "^1.8.16",
     "typescript": "^5.8.3"
   },
   "scripts": {
-    "dev": "tsc-watch --onSuccess \"node out/p01.class.js\""
+    "dev": "rm -rf out && tsc --project tsconfig.json && tsc-alias -p tsconfig.json && node out/main.js",
+    "watch": "nodemon --watch src/* --exec \"npm run dev\""
   },
   "dependencies": {
     "tsc-watch": "^7.1.1"
