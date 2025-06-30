@@ -1,7 +1,11 @@
-import { human } from '@/001-super-basic/p01.class'
+import { runP05 } from '@/001-super-basic/p05.extends2'
 
 async function main() {
-  console.log(human)
+  // runP01()
+  // runP02()
+  // runP03()
+  // runP04()
+  runP05()
 }
 
 main().then((_) => {
