@@ -1,11 +1,14 @@
-import { runP05 } from '@/001-super-basic/p05.extends2'
+import { run13 } from '@/002-infer/p13.return'
 
 async function main() {
   // runP01()
   // runP02()
   // runP03()
   // runP04()
-  runP05()
+  // runP05()
+
+  // run11()
+  run13()
 }
 
 main().then((_) => {
