@@ -8,10 +8,7 @@ pub fn largest_product(digits: String, span: Int) -> Result(Int, Nil) {
 
   case span {
     n if n == 0 -> Ok(1)
-    n if n < 0 -> {
-      Error(Nil)
-    }
-    n if n > digits_len -> {
+    n if n < 0 || n > digits_len -> {
       Error(Nil)
     }
     _ -> {
@@ -34,8 +31,7 @@ fn reducer(max: Int, remains: String, span: Int) {
     chunk
     |> string.to_graphemes()
     |> list.map(fn(n) { n |> int.parse |> result.unwrap(0) })
-    |> list.reduce(fn(acc, x) { acc * x })
-    |> result.unwrap(0)
+    |> int.product
     |> int.max(max)
 
   let new_remains = remains |> string.drop_start(1)
