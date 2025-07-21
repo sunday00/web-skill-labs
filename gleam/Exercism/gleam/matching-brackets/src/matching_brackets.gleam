@@ -1,49 +1,27 @@
 import gleam/list
 import gleam/regexp
 import gleam/result
+import gleam/string
 
 pub fn is_paired(value: String) -> Bool {
-  let a = regexp.scan(patt(), value)
-
-  a
-  |> list.map(reduceer)
-  |> list.reduce(fn(acc, l) { acc && l })
-  |> result.unwrap(False)
-}
-
-fn reduceer(v: regexp.Match) {
-  let inner = regexp.scan(patt(), v.content)
-
-  echo inner
-
-  case inner |> list.length() {
-    n if n > 0 -> {
-      inner
-      |> list.map(reduceer)
-      |> list.reduce(fn(acc, l) { acc && l })
-      |> result.unwrap(False)
-    }
-    _ -> {
-      !regexp.check(single_patt(), v.content)
-    }
-  }
-}
-
-fn patt() {
-  let assert Ok(patt) =
-    regexp.from_string(
-      "(?<=\\[)(.+)(?=\\])|(?<=\\{)(.+)(?=\\})|(?<=\\()(.+)(?=\\))",
-    )
-
-  patt
-}
-
-fn single_patt() {
   let assert Ok(patt) = regexp.from_string("\\[|\\]|\\{|\\}|\\(|\\)")
 
-  patt
+  let summaries = regexp.match_map(patt, value, fn(m) { m.content })
+
+  let res = [True]
+
+  let _ =
+    summaries
+    |> string.to_graphemes()
+
+  // TODO
+  // insert list opposite }, ], ) 
+  // loop values then meet }, ], ) , compare pop char from above list
+  // if flasy -> result is false.
+
+  res |> list.reduce(fn(acc, b) { acc && b }) |> result.unwrap(True)
 }
 
 pub fn main() {
-  echo is_paired("([{}({}[])])")
+  echo is_paired("{)()")
 }
