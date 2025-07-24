@@ -26,7 +26,9 @@ fn get_allergen_by_n(n: Int) {
 }
 
 pub fn allergic_to(allergen: Allergen, score: Int) -> Bool {
-  todo
+  let l = list(score)
+
+  l |> list.contains(allergen)
 }
 
 pub fn list(score: Int) -> List(Allergen) {
@@ -55,7 +57,6 @@ fn get_max_powers(max: Int, cur: Int) {
     _ -> get_max_powers(max, cur * 2)
   }
 }
-
-pub fn main() {
-  echo list(248)
-}
+// pub fn main() {
+//   echo list(248)
+// }
