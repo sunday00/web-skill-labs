@@ -34,17 +34,12 @@ fn reducing_sort(acc: List(Int), data: Tree) {
   case data {
     Nil -> acc
     Node(d, l, r) -> {
-      case l, d, r {
-        Node(_, _, _), dd, _ -> {
-          reducing_sort()
-        }
-        Nil, d, _ -> reducing_sort(acc, d)
-        _, _, Node(_, _, _) -> todo
-      }
+      reducing_sort(acc, l)
+      |> list.append([d])
+      |> list.append(reducing_sort(acc, r))
     }
   }
 }
-
-pub fn main() {
-  echo to_tree([2, 1, 3, 6, 7, 5])
-}
+// pub fn main() {
+//   echo sorted_data([2, 1, 3, 6, 7, 5])
+// }
