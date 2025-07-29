@@ -28,36 +28,34 @@ pub fn convert(input: String) -> Result(Output, Error) {
     False, False -> {
       let assert Ok(patt) = regexp.from_string("(.{3})")
 
-      let lines =
-        splits
-        |> list.drop(1)
-        |> list.index_map(fn(l, i) { #(i + 1, l) })
+      echo splits
+        |> list.drop(0)
+        |> list.index_map(fn(line, idx) { #(idx, line) })
         |> list.fold([], fn(acc, cur) {
-          let #(i, n) = cur
+          let #(i, l) = cur
 
-          let assert Ok(patt) = regexp.from_string("(.{3})")
+          case i % 4 {
+            0 -> {
+              acc
+              |> list.map(fn(ac) {
+                let #(_k, v) = ac
 
-          let chars =
-            regexp.split(patt, n)
-            |> list.filter(fn(s) { s != "" })
-            |> list.index_map(fn(n, i) { #(i, [n]) })
-
-          chars
-          |> list.fold(acc, fn(acc, cur) {
-            let #(y, m) = cur
-
-            case acc |> list.key_find(y) {
-              Ok(a) -> {
-                acc |> list.key_set(y, a |> list.append(m))
-              }
-              _ -> {
-                acc |> list.append([cur])
-              }
+                #("", v)
+              })
             }
-          })
+            1 -> {
+              acc |> list.append([#("ing", [l])])
+            }
+            _ -> {
+              let assert Ok(target) = acc |> list.key_find("ing")
+              acc |> list.key_set("ing", target |> list.append([l]))
+            }
+          }
         })
-
-      echo lines
+        |> list.map(fn(l) {
+          let #(_, v) = l
+          v
+        })
 
       Ok(Digit(1))
     }
