@@ -153,34 +153,12 @@ fn shift(prev: List(Char), candidates: List(Int)) {
           |> Ok
         }
         [] -> {
-          case shift(r, list.range(0, 9)) {
+          case shift(r, initial_candidates) {
             Ok(head) -> {
-              let hm =
-                head
-                |> list.map(fn(h: Char) { h.cur })
-              let cur =
-                candidates
-                |> list.filter(fn(el) {
-                  case char.zeroable {
-                    True -> {
-                      !{
-                        hm
-                        |> list.contains(el)
-                      }
-                    }
-                    False -> {
-                      !{
-                        hm
-                        |> list.contains(el)
-                        || el == 0
-                      }
-                    }
-                  }
-                })
-                |> list.first
-                |> result.unwrap(0)
-
-              head |> list.prepend(Char(..char, cur: cur, used: [])) |> Ok
+              shift(
+                head |> list.prepend(Char(..char, cur: -1, used: [])),
+                initial_candidates,
+              )
             }
             Error(_) -> Error(Nil)
           }
