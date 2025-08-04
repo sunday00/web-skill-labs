@@ -35,7 +35,8 @@ pub fn solve(puzzle: String) -> Result(Dict(String, Int), Nil) {
     |> list.unique
     |> list.sort(string.compare)
 
-  let chars = generator([], strings, non_zeros, initial_candidates)
+  let chars =
+    generator([], strings, non_zeros, initial_candidates) |> list.reverse
 
   case reducer(Manager(chars: chars, words: words, answer: answer)) {
     Ok(res) ->
@@ -71,7 +72,7 @@ fn generator(
         }
       }
 
-      generator(list.append(acc, [char]), r, non_zeros, rest_candidates)
+      generator(list.prepend(acc, char), r, non_zeros, rest_candidates)
     }
     [] -> acc
   }
@@ -146,7 +147,7 @@ fn shift(prev: List(Char), candidates: List(Int)) {
         [f, ..] -> {
           r
           |> list.prepend(
-            Char(..char, cur: f, used: char.used |> list.append([char.cur])),
+            Char(..char, cur: f, used: char.used |> list.prepend(char.cur)),
           )
           |> Ok
         }
@@ -154,7 +155,7 @@ fn shift(prev: List(Char), candidates: List(Int)) {
           case shift(r, list.range(0, 9)) {
             Ok(head) -> {
               let cur =
-                list.range(0, 9)
+                candidates
                 |> list.filter(fn(el) {
                   case char.zeroable {
                     True -> {
