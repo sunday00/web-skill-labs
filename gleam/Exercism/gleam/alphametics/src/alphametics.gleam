@@ -155,21 +155,22 @@ fn shift(prev: List(Char), candidates: List(Int)) {
         [] -> {
           case shift(r, list.range(0, 9)) {
             Ok(head) -> {
+              let hm =
+                head
+                |> list.map(fn(h: Char) { h.cur })
               let cur =
                 candidates
                 |> list.filter(fn(el) {
                   case char.zeroable {
                     True -> {
                       !{
-                        head
-                        |> list.map(fn(h: Char) { h.cur })
+                        hm
                         |> list.contains(el)
                       }
                     }
                     False -> {
                       !{
-                        head
-                        |> list.map(fn(h: Char) { h.cur })
+                        hm
                         |> list.contains(el)
                         || el == 0
                       }
