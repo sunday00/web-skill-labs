@@ -121,12 +121,13 @@ fn word_to_int(word: String, manager: Manager) {
 fn shift(prev: List(Char), candidates: List(Int)) {
   case prev {
     [char, ..r] -> {
+      let rm = r |> list.map(fn(rc) { rc.cur })
       let remains = case char.zeroable {
         True ->
           candidates
           |> list.filter(fn(c) {
             !{
-              r |> list.map(fn(rc) { rc.cur }) |> list.contains(c)
+              rm |> list.contains(c)
               || char.used |> list.contains(c)
               || c == char.cur
             }
@@ -135,7 +136,7 @@ fn shift(prev: List(Char), candidates: List(Int)) {
           candidates
           |> list.filter(fn(c) {
             !{
-              r |> list.map(fn(rc) { rc.cur }) |> list.contains(c)
+              rm |> list.contains(c)
               || char.used |> list.contains(c)
               || c == char.cur
               || c == 0
