@@ -2,174 +2,212 @@ import gleam/dict.{type Dict}
 import gleam/int
 import gleam/list
 import gleam/result
+import gleam/set.{type Set}
 import gleam/string
 
 type Char {
-  Char(txt: String, cur: Int, used: List(Int), zeroable: Bool)
+  Char(cur: Int, used: Set(Int), zeroable: Bool)
 }
 
 type Manager {
-  Manager(chars: List(Char), words: List(String), answer: String)
+  Manager(
+    puzzle: String,
+    no_zeros: Set(String),
+    available: Set(Int),
+    state: List(#(String, Char)),
+  )
 }
-
-const initial_candidates = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 pub fn solve(puzzle: String) -> Result(Dict(String, Int), Nil) {
-  let assert [state, answer] = puzzle |> string.split(" == ")
-
-  let words =
-    state
+  let assert [left, right] = puzzle |> string.split(" == ")
+  let no_zeros =
+    left
     |> string.split(" + ")
+    |> list.map(fn(l) { l |> string.first |> result.unwrap("") })
+    |> list.prepend(right |> string.first |> result.unwrap(""))
+    |> set.from_list
 
-  let strings =
-    words
-    |> list.append([answer])
-    |> list.flat_map(fn(l) { l |> string.split("") })
+  let all_letters =
+    puzzle
+    |> string.replace(" == ", "")
+    |> string.replace(" + ", "")
+    |> string.to_graphemes
     |> list.unique
     |> list.sort(string.compare)
 
-  let non_zeros =
-    words
-    |> list.append([answer])
-    |> list.map(fn(el) { el |> string.first |> result.unwrap("") })
-    |> list.unique
-    |> list.sort(string.compare)
+  let availables = list.range(0, 9) |> set.from_list
 
-  let chars =
-    generator([], strings, non_zeros, initial_candidates) |> list.reverse
+  let state = init([], all_letters, availables, no_zeros)
 
-  case reducer(Manager(chars: chars, words: words, answer: answer)) {
-    Ok(res) ->
-      Ok(
-        res |> list.map(fn(cha: Char) { #(cha.txt, cha.cur) }) |> dict.from_list,
-      )
-    _ -> Error(Nil)
-  }
+  let r =
+    reducer(Manager(
+      puzzle,
+      no_zeros,
+      availables
+        |> set.difference(set.from_list(
+          state
+          |> list.map(fn(s) {
+            let #(_, cha) = s
+            cha.cur
+          }),
+        )),
+      state |> list.reverse,
+    ))
+
+  // echo r
+
+  Ok(dict.from_list([]))
 }
 
-fn generator(
-  acc: List(Char),
-  strings: List(String),
-  non_zeros: List(String),
-  candidates: List(Int),
+fn init(
+  acc: List(#(String, Char)),
+  letters: List(String),
+  available: Set(Int),
+  no_zeros: Set(String),
 ) {
-  case strings {
+  case letters {
     [f, ..r] -> {
-      let #(char, rest_candidates) = case non_zeros |> list.contains(f) {
+      let char = case set.contains(no_zeros, f) {
         True -> {
-          let assert [min, ..] = candidates |> list.filter(fn(c) { c != 0 })
-          #(
-            Char(f, min, [0], False),
-            candidates |> list.filter(fn(c) { c != min }),
-          )
+          let cur =
+            available
+            |> set.delete(0)
+            |> set.to_list
+            |> list.first
+            |> result.unwrap(1)
+
+          Char(cur, set.from_list([]), False)
         }
         False -> {
-          let assert [min, ..] = candidates
-          #(
-            Char(f, min, [], True),
-            candidates |> list.filter(fn(c) { c != min }),
-          )
+          let cur = available |> set.to_list |> list.first |> result.unwrap(1)
+
+          Char(cur, set.from_list([]), True)
         }
       }
 
-      generator(list.prepend(acc, char), r, non_zeros, rest_candidates)
+      init(
+        acc |> list.prepend(#(f, char)),
+        r,
+        available |> set.delete(char.cur),
+        no_zeros,
+      )
     }
     [] -> acc
   }
 }
 
 fn reducer(manager: Manager) {
-  let sum =
-    manager.words
-    |> list.fold(0, fn(acc, cur) { acc + { cur |> word_to_int(manager) } })
+  let completed =
+    manager.state
+    |> list.fold(manager.puzzle, fn(acc, cur) {
+      let #(txt, char) = cur
+      acc |> string.replace(txt, char.cur |> int.to_string)
+    })
 
-  case sum == manager.answer |> word_to_int(manager) {
-    True -> manager.chars |> Ok
+  let assert [left, right] = completed |> string.split(" == ")
+  case
+    left
+    |> string.split(" + ")
+    |> list.fold(0, fn(acc, cur) {
+      acc + { cur |> int.parse |> result.unwrap(0) }
+    })
+    == right |> int.parse |> result.unwrap(0)
+  {
+    True -> manager.state
     False -> {
-      let usings = manager.chars |> list.map(fn(ch) { ch.cur })
+      let assert Ok(#(txt, cha)) = manager.state |> list.last
+      let assert Ok(#(_, lrs)) = manager.state |> list.key_pop(txt)
 
-      case
-        shift(
-          manager.chars |> list.reverse,
-          initial_candidates
-            |> list.filter(fn(c) { !{ usings |> list.contains(c) } }),
-        )
-      {
-        Ok(chars) -> {
-          // echo chars
-          // process.sleep(1000)
+      let m = shift(Manager(..manager, state: lrs), [#(txt, cha)])
 
-          reducer(Manager(..manager, chars: chars |> list.reverse))
-        }
-        _ -> Error(Nil)
-      }
+      reducer(m)
     }
   }
 }
 
-fn word_to_int(word: String, manager: Manager) {
-  word
-  |> string.to_graphemes
-  |> list.fold("", fn(acc, cur) {
-    let assert Ok(char) = manager.chars |> list.find(fn(cha) { cha.txt == cur })
-    acc <> char.cur |> int.to_string
-  })
-  |> int.parse
-  |> result.unwrap(0)
-}
+fn shift(manager: Manager, letters: List(#(String, Char))) {
+  echo manager.state
+  echo letters
 
-fn shift(prev: List(Char), candidates: List(Int)) {
-  case prev {
-    [char, ..r] -> {
-      let rm = r |> list.map(fn(rc) { rc.cur })
-      let remains = case char.zeroable {
-        True ->
-          candidates
-          |> list.filter(fn(c) {
-            !{
-              rm |> list.contains(c)
-              || char.used |> list.contains(c)
-              || c == char.cur
-            }
-          })
-        False ->
-          candidates
-          |> list.filter(fn(c) {
-            !{
-              rm |> list.contains(c)
-              || char.used |> list.contains(c)
-              || c == char.cur
-              || c == 0
-            }
-          })
-      }
+  case letters {
+    [f, ..r] -> {
+      let #(txt, char) = f
+      let available = manager.available
+      let next_char = reset_char(char, available)
 
-      case remains {
-        [f, ..] -> {
-          r
-          |> list.prepend(
-            Char(..char, cur: f, used: char.used |> list.prepend(char.cur)),
+      case next_char.cur >= 0 {
+        True -> {
+          let new_state =
+            init(
+              [],
+              r
+                |> list.map(fn(el) {
+                  let #(txt, _) = el
+                  txt
+                }),
+              available |> set.delete(next_char.cur),
+              manager.no_zeros,
+            )
+            |> list.prepend(#(txt, next_char))
+
+          Manager(
+            ..manager,
+            state: manager.state |> list.append(new_state),
+            available: manager.available |> set.delete(next_char.cur),
           )
-          |> Ok
         }
-        [] -> {
-          case shift(r, initial_candidates) {
-            Ok(head) -> {
+        False -> {
+          let last_res = manager.state |> list.last
+
+          case last_res {
+            Ok(last) -> {
+              let #(lt, lch) = last
+              let assert Ok(#(_, lrs)) = manager.state |> list.key_pop(lt)
+              let new_avail = manager.available |> set.union(char.used)
+
               shift(
-                head |> list.prepend(Char(..char, cur: -1, used: [])),
-                initial_candidates,
+                Manager(..manager, state: lrs, available: new_avail),
+                init(
+                  [],
+                  letters
+                    |> list.map(fn(rr) {
+                      let #(t, _) = rr
+                      t
+                    }),
+                  new_avail,
+                  manager.no_zeros,
+                )
+                  |> list.prepend(last),
               )
             }
-            Error(_) -> Error(Nil)
+            _ -> {
+              todo
+            }
           }
         }
       }
     }
-    [] -> {
-      Error(Nil)
-    }
+    [] -> manager
   }
 }
-// pub fn main() {
-//   echo solve("SEND + MORE == MONEY")
-// }
+
+fn reset_char(char: Char, available: Set(Int)) {
+  let cur = case char.zeroable {
+    True -> available |> set.delete(char.cur) |> set.to_list |> list.first
+    False ->
+      available
+      |> set.delete(char.cur)
+      |> set.delete(0)
+      |> set.to_list
+      |> list.first
+  }
+
+  case cur {
+    Ok(c) -> Char(..char, cur: c, used: char.used |> set.insert(char.cur))
+    _ -> Char(..char, cur: -1, used: set.new())
+  }
+}
+
+pub fn main() {
+  echo solve("SEND + MORE == MONEY")
+}
