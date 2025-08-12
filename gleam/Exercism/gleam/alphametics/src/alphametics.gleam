@@ -67,11 +67,48 @@ fn track(
 
   let state =
     all_i
-    |> set.map(fn(i) { #() })
+    |> set.fold([], fn(acc, i) {
+      let mid = case targets |> list.length {
+        0 -> []
+        1 -> {
+          let assert [f] = targets
+
+          [dict.from_list([#(f, i)])]
+        }
+        _ -> {
+          let assert [f, ..r] = targets
+
+          map_list_int([dict.from_list([#(f, i)])], r, all_i |> set.delete(i))
+        }
+      }
+
+      acc |> list.append([mid])
+    })
 
   echo state
 
   todo
+}
+
+fn map_list_int(
+  acc: List(Dict(String, Int)),
+  letters: List(String),
+  avails: Set(Int),
+) {
+  case letters {
+    [f, ..r] -> {
+      acc
+      |> list.map(fn(ac) {
+        avails
+        |> set.to_list
+        |> list.map(fn(i) { ac |> dict.insert(f, i) })
+      })
+      |> list.flatten
+    }
+    [] -> {
+      acc
+    }
+  }
 }
 
 pub fn main() {
