@@ -1,9 +1,8 @@
 import gleam/dict.{type Dict}
-import gleam/erlang/process
 import gleam/int
 import gleam/list
 import gleam/result
-import gleam/set.{type Set}
+import gleam/set
 import gleam/string
 
 pub fn solve(puzzle: String) -> Result(Dict(String, Int), Nil) {
@@ -27,13 +26,16 @@ pub fn solve(puzzle: String) -> Result(Dict(String, Int), Nil) {
     |> string.split(" + ")
     |> list.map(fn(el) { el |> string.last |> result.unwrap("") })
 
-  let parsed = resolve([], all_letters, no_zeros, tails, puzzle, right)
+  let parsed =
+    resolve(all_letters, no_zeros |> list.unique, tails, puzzle, right)
 
-  Ok(dict.from_list([]))
+  case parsed |> list.length > 0 {
+    True -> parsed |> list.first
+    False -> Error(Nil)
+  }
 }
 
 fn resolve(
-  acc: List(Dict(String, Int)),
   all_letters: List(String),
   no_zeros: List(String),
   lasts_letters: List(String),
@@ -42,19 +44,33 @@ fn resolve(
 ) {
   let answer_last = right |> string.last |> result.unwrap("")
 
-  let last_combinations =
-    lasts(
-      [],
-      no_zeros,
-      lasts_letters |> list.append([answer_last]),
-      lasts_letters,
-      answer_last,
-    )
+  let zerobles =
+    all_letters |> set.from_list |> set.difference(no_zeros |> set.from_list)
+  let last_combinations = case zerobles |> set.size == 1 {
+    True -> {
+      let assert Ok(z) = zerobles |> set.to_list |> list.first
+      lasts(
+        [dict.from_list([#(z, 0)])],
+        no_zeros,
+        lasts_letters |> list.append([answer_last]),
+        lasts_letters,
+        answer_last,
+      )
+    }
+    False ->
+      lasts(
+        [],
+        no_zeros,
+        lasts_letters |> list.append([answer_last]),
+        lasts_letters,
+        answer_last,
+      )
+  }
 
   let feel_texts =
     all_letters |> set.from_list |> set.difference(set.from_list(lasts_letters))
 
-  echo completer(last_combinations, feel_texts |> set.to_list, no_zeros, puzzle)
+  completer(last_combinations, feel_texts |> set.to_list, no_zeros, puzzle)
 }
 
 fn lasts(
@@ -148,18 +164,23 @@ fn completer(
       let new_acc =
         acc
         |> list.map(fn(ac) {
-          let used = ac |> dict.values() |> set.from_list
-          let rem =
-            case list.contains(no_zeros, ft) {
-              True -> list.range(1, 9)
-              False -> list.range(0, 9)
-            }
-            |> set.from_list
-            |> set.difference(used)
+          case ac |> dict.get(ft) {
+            Ok(_) -> [ac]
+            _ -> {
+              let used = ac |> dict.values() |> set.from_list
+              let rem =
+                case list.contains(no_zeros, ft) {
+                  True -> list.range(1, 9)
+                  False -> list.range(0, 9)
+                }
+                |> set.from_list
+                |> set.difference(used)
 
-          rem
-          |> set.map(fn(i) { ac |> dict.insert(ft, i) })
-          |> set.to_list
+              rem
+              |> set.map(fn(i) { ac |> dict.insert(ft, i) })
+              |> set.to_list
+            }
+          }
         })
         |> list.flatten
 
@@ -187,5 +208,7 @@ fn completer(
 }
 
 pub fn main() {
-  echo solve("SEND + MORE == MONEY")
+  echo solve(
+    "THIS + A + FIRE + THEREFORE + FOR + ALL + HISTORIES + I + TELL + A + TALE + THAT + FALSIFIES + ITS + TITLE + TIS + A + LIE + THE + TALE + OF + THE + LAST + FIRE + HORSES + LATE + AFTER + THE + FIRST + FATHERS + FORESEE + THE + HORRORS + THE + LAST + FREE + TROLL + TERRIFIES + THE + HORSES + OF + FIRE + THE + TROLL + RESTS + AT + THE + HOLE + OF + LOSSES + IT + IS + THERE + THAT + SHE + STORES + ROLES + OF + LEATHERS + AFTER + SHE + SATISFIES + HER + HATE + OFF + THOSE + FEARS + A + TASTE + RISES + AS + SHE + HEARS + THE + LEAST + FAR + HORSE + THOSE + FAST + HORSES + THAT + FIRST + HEAR + THE + TROLL + FLEE + OFF + TO + THE + FOREST + THE + HORSES + THAT + ALERTS + RAISE + THE + STARES + OF + THE + OTHERS + AS + THE + TROLL + ASSAILS + AT + THE + TOTAL + SHIFT + HER + TEETH + TEAR + HOOF + OFF + TORSO + AS + THE + LAST + HORSE + FORFEITS + ITS + LIFE + THE + FIRST + FATHERS + HEAR + OF + THE + HORRORS + THEIR + FEARS + THAT + THE + FIRES + FOR + THEIR + FEASTS + ARREST + AS + THE + FIRST + FATHERS + RESETTLE + THE + LAST + OF + THE + FIRE + HORSES + THE + LAST + TROLL + HARASSES + THE + FOREST + HEART + FREE + AT + LAST + OF + THE + LAST + TROLL + ALL + OFFER + THEIR + FIRE + HEAT + TO + THE + ASSISTERS + FAR + OFF + THE + TROLL + FASTS + ITS + LIFE + SHORTER + AS + STARS + RISE + THE + HORSES + REST + SAFE + AFTER + ALL + SHARE + HOT + FISH + AS + THEIR + AFFILIATES + TAILOR + A + ROOFS + FOR + THEIR + SAFE == FORTRESSES",
+  )
 }
