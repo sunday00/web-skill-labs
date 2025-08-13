@@ -1,6 +1,8 @@
 import gleam/dict.{type Dict}
+import gleam/erlang/process
 import gleam/int
 import gleam/list
+import gleam/option
 import gleam/result
 import gleam/set.{type Set}
 import gleam/string
@@ -37,7 +39,7 @@ fn resolve(puzzle: Puzzle) {
     |> list.unique
     |> list.sort(string.compare)
 
-  let state = do_with_nth_tails(puzzle, #([], ""), 1, 0)
+  let state = do_with_nth_tails(puzzle, #([], ""), dict.new(), dict.new(), 1, 0)
 
   echo state
 }
@@ -45,6 +47,8 @@ fn resolve(puzzle: Puzzle) {
 fn do_with_nth_tails(
   puzzle: Puzzle,
   nth_tail_str: #(List(String), String),
+  cur_sate: Dict(String, Int),
+  used_map: Dict(String, List(Int)),
   col: Int,
   carry: Int,
 ) {
@@ -52,7 +56,14 @@ fn do_with_nth_tails(
 
   case left_tails |> list.length == 0 && right_tails == "" {
     True -> {
-      do_with_nth_tails(puzzle, extract_nth_tails(puzzle, col), col, carry)
+      do_with_nth_tails(
+        puzzle,
+        extract_nth_tails(puzzle, col),
+        cur_sate,
+        used_map,
+        col,
+        carry,
+      )
     }
     False -> {
       let splits =
@@ -61,8 +72,10 @@ fn do_with_nth_tails(
         |> list.map(fn(s) { s |> string.to_graphemes })
         |> list.flatten
 
-      let map = get_next_mapping(dict.new(), splits, puzzle, splits, dict.new())
+      let map = get_next_mapping(cur_sate, splits, puzzle, splits, used_map)
+
       let tmp_left_joins = left_tails |> string.join("|")
+
       let replaced_left_ints =
         map
         |> dict.fold(tmp_left_joins, fn(acc, ch, i) {
@@ -88,8 +101,8 @@ fn do_with_nth_tails(
           // do do_with_nth_tails(.... col + 1)
         }
         False -> {
-          todo
-          // do get_next_mapping(...)
+          // do next number use mapping
+          do_with_nth_tails(puzzle, nth_tail_str, map, used_map, col, carry)
         }
       }
     }
@@ -113,29 +126,68 @@ fn get_next_mapping(
 ) {
   case txt {
     [f, ..r] -> {
-      let prev_used = used_map |> dict.get(f) |> result.unwrap([])
-      let current_other_letter_used = acc |> dict.values
-      let canbe =
-        puzzle.all_i
-        |> set.difference(prev_used |> set.from_list)
-        |> set.difference(current_other_letter_used |> set.from_list)
-        |> set.to_list
-        |> list.first
+      echo #(acc, used_map)
 
-      case canbe {
-        Ok(i) -> {
-          // todo : no zero check
+      case
+        r |> list.length == 0 || acc |> dict.get(f) |> result.unwrap(-1) < 0
+      {
+        True -> {
+          let prev_used = case acc |> dict.get(f) {
+            Ok(v) ->
+              used_map |> dict.get(f) |> result.unwrap([]) |> list.append([v])
+            _ -> used_map |> dict.get(f) |> result.unwrap([])
+          }
 
-          get_next_mapping(
-            acc |> dict.upsert(f, fn(_) { i }),
-            r,
-            puzzle,
-            fixed_text,
-            used_map,
-          )
+          let current_other_letter_used = acc |> dict.values
+          let canbe =
+            puzzle.all_i
+            |> set.difference(prev_used |> set.from_list)
+            |> set.difference(current_other_letter_used |> set.from_list)
+            |> set.to_list
+            |> list.first
+
+          case canbe {
+            Ok(i) -> {
+              // todo : no zero check
+
+              case acc |> dict.get(f) {
+                Ok(v) -> {
+                  let new_used_map =
+                    used_map
+                    |> dict.upsert(f, fn(p) {
+                      case p {
+                        option.Some(l) -> l |> list.prepend(v)
+                        _ -> [v]
+                      }
+                    })
+
+                  get_next_mapping(
+                    acc |> dict.upsert(f, fn(_) { i }),
+                    [f],
+                    puzzle,
+                    fixed_text,
+                    new_used_map,
+                  )
+                }
+                _ -> {
+                  get_next_mapping(
+                    acc |> dict.upsert(f, fn(_) { i }),
+                    r,
+                    puzzle,
+                    fixed_text,
+                    used_map,
+                  )
+                }
+              }
+            }
+            _ -> {
+              echo acc
+              todo
+            }
+          }
         }
-        _ -> {
-          todo
+        False -> {
+          get_next_mapping(acc, r, puzzle, fixed_text, used_map)
         }
       }
     }
