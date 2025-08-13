@@ -39,7 +39,8 @@ fn resolve(puzzle: Puzzle) {
     |> list.unique
     |> list.sort(string.compare)
 
-  let state = do_with_nth_tails(puzzle, #([], ""), dict.new(), dict.new(), 1, 0)
+  let state =
+    do_with_nth_tails(puzzle, #([], ""), dict.new(), dict.new(), [], 1, 0)
 
   echo state
 }
@@ -49,6 +50,7 @@ fn do_with_nth_tails(
   nth_tail_str: #(List(String), String),
   cur_sate: Dict(String, Int),
   used_map: Dict(String, List(Int)),
+  fixed_char: List(String),
   col: Int,
   carry: Int,
 ) {
@@ -62,6 +64,7 @@ fn do_with_nth_tails(
         extract_nth_tails(puzzle, col),
         cur_sate,
         used_map,
+        fixed_char,
         col,
         carry,
       )
@@ -74,8 +77,20 @@ fn do_with_nth_tails(
         |> list.map(fn(s) { s |> string.to_graphemes })
         |> list.flatten
 
+      let rests =
+        splits |> set.from_list |> set.difference(set.from_list(fixed_char))
+
+      // TODO: save last success parts.
+      // TODO: check all failed, back to last set.
+
       let #(map, used_map) =
-        get_next_mapping(cur_sate, splits, puzzle, splits, used_map)
+        get_next_mapping(
+          cur_sate,
+          rests |> set.to_list,
+          puzzle,
+          rests |> set.to_list,
+          used_map,
+        )
 
       let tmp_left_joins = left_tails |> string.join("|")
 
@@ -95,18 +110,41 @@ fn do_with_nth_tails(
         |> int.parse
         |> result.unwrap(0)
 
-      case
+      let left_ints =
         replaced_left_ints |> list.fold(0, fn(acc, cur) { acc + cur })
-        == replaced_right_ints
-      {
+
+      let div = list.repeat(10, col) |> list.fold(1, fn(a, c) { a * c })
+
+      echo #(map, left_tails, right_tails)
+      process.sleep(10)
+
+      case left_ints % div + carry == replaced_right_ints {
         True -> {
           // word last calculated success. more letters add on word cutting.
-          todo
-          // do do_with_nth_tails(.... col + 1)
+          echo map
+          process.sleep(1000)
+
+          do_with_nth_tails(
+            puzzle,
+            #([], ""),
+            map,
+            used_map,
+            map |> dict.keys,
+            col + 1,
+            { left_ints / div } * div,
+          )
         }
         False -> {
           // do next number use mapping
-          do_with_nth_tails(puzzle, nth_tail_str, map, used_map, col, carry)
+          do_with_nth_tails(
+            puzzle,
+            nth_tail_str,
+            map,
+            used_map,
+            fixed_char,
+            col,
+            carry,
+          )
         }
       }
     }
@@ -222,6 +260,8 @@ fn get_next_mapping(
                     False -> list.Continue(list.append(a, [c]))
                   }
                 })
+
+              // TODO: failed with all map all used.
 
               get_next_mapping(
                 acc |> dict.upsert(f, fn(_) { -1 }),
