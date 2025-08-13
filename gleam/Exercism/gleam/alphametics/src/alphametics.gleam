@@ -56,6 +56,7 @@ fn do_with_nth_tails(
 
   case left_tails |> list.length == 0 && right_tails == "" {
     True -> {
+      // no initiated - ignite
       do_with_nth_tails(
         puzzle,
         extract_nth_tails(puzzle, col),
@@ -66,13 +67,15 @@ fn do_with_nth_tails(
       )
     }
     False -> {
+      // ignited
       let splits =
         left_tails
         |> list.append([right_tails])
         |> list.map(fn(s) { s |> string.to_graphemes })
         |> list.flatten
 
-      let map = get_next_mapping(cur_sate, splits, puzzle, splits, used_map)
+      let #(map, used_map) =
+        get_next_mapping(cur_sate, splits, puzzle, splits, used_map)
 
       let tmp_left_joins = left_tails |> string.join("|")
 
@@ -97,6 +100,7 @@ fn do_with_nth_tails(
         == replaced_right_ints
       {
         True -> {
+          // word last calculated success. more letters add on word cutting.
           todo
           // do do_with_nth_tails(.... col + 1)
         }
@@ -125,12 +129,12 @@ fn get_next_mapping(
   used_map: Dict(String, List(Int)),
 ) {
   case txt {
+    // has more texts
     [f, ..r] -> {
-      echo #(acc, used_map)
-
       case
         r |> list.length == 0 || acc |> dict.get(f) |> result.unwrap(-1) < 0
       {
+        // initiallize || last current letter.
         True -> {
           let prev_used = case acc |> dict.get(f) {
             Ok(v) ->
@@ -147,28 +151,56 @@ fn get_next_mapping(
             |> list.first
 
           case canbe {
+            // can replace next int allocate
             Ok(i) -> {
               // todo : no zero check
 
               case acc |> dict.get(f) {
+                // used letter 
                 Ok(v) -> {
-                  let new_used_map =
-                    used_map
-                    |> dict.upsert(f, fn(p) {
-                      case p {
-                        option.Some(l) -> l |> list.prepend(v)
-                        _ -> [v]
+                  let re_rest =
+                    acc
+                    |> dict.to_list
+                    |> list.filter_map(fn(l) {
+                      let #(ch, i) = l
+                      case i == -1 {
+                        True -> Ok(ch)
+                        False -> Error(Nil)
                       }
                     })
 
-                  get_next_mapping(
-                    acc |> dict.upsert(f, fn(_) { i }),
-                    [f],
-                    puzzle,
-                    fixed_text,
-                    new_used_map,
-                  )
+                  case re_rest |> list.length == 0 {
+                    True ->
+                      get_next_mapping(
+                        acc |> dict.upsert(f, fn(_) { i }),
+                        [],
+                        puzzle,
+                        fixed_text,
+                        used_map
+                          |> dict.upsert(f, fn(p) {
+                            case p {
+                              option.Some(l) -> l |> list.prepend(v)
+                              _ -> [v]
+                            }
+                          }),
+                      )
+                    False ->
+                      get_next_mapping(
+                        acc |> dict.upsert(f, fn(_) { i }),
+                        [f, ..re_rest],
+                        puzzle,
+                        fixed_text,
+                        used_map
+                          |> dict.upsert(f, fn(p) {
+                            case p {
+                              option.Some(l) -> l |> list.prepend(v)
+                              _ -> [v]
+                            }
+                          }),
+                      )
+                  }
                 }
+                // no used letter prev
                 _ -> {
                   get_next_mapping(
                     acc |> dict.upsert(f, fn(_) { i }),
@@ -180,18 +212,35 @@ fn get_next_mapping(
                 }
               }
             }
+            // last used number. truncate and re allocate on foward letter.
             _ -> {
-              echo acc
-              todo
+              let new_txt =
+                fixed_text
+                |> list.fold_until([], fn(a, c) {
+                  case c == f {
+                    True -> list.Stop(a)
+                    False -> list.Continue(list.append(a, [c]))
+                  }
+                })
+
+              get_next_mapping(
+                acc |> dict.upsert(f, fn(_) { -1 }),
+                new_txt,
+                puzzle,
+                fixed_text,
+                used_map |> dict.upsert(f, fn(_) { [] }),
+              )
             }
           }
         }
         False -> {
+          // skip already letter
           get_next_mapping(acc, r, puzzle, fixed_text, used_map)
         }
       }
     }
-    [] -> acc
+    [] -> #(acc, used_map)
+    // done with this loop
   }
 }
 
