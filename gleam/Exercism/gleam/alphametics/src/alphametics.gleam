@@ -8,7 +8,13 @@ import gleam/set.{type Set}
 import gleam/string
 
 type Puzzle {
-  Puzzle(puzzle: String, left: List(String), right: String, all_i: Set(Int))
+  Puzzle(
+    puzzle: String,
+    left: List(String),
+    right: String,
+    all_letters: List(String),
+    all_i: Set(Int),
+  )
 }
 
 type Char {
@@ -17,11 +23,22 @@ type Char {
 
 pub fn solve(puzzle: String) -> Result(Dict(String, Int), Nil) {
   let assert [left, right] = puzzle |> string.split(" == ")
+
+  let all_letters =
+    left
+    |> string.split(" + ")
+    |> list.map(fn(l) { l |> string.to_graphemes })
+    |> list.flatten
+    |> list.append(right |> string.to_graphemes)
+    |> list.unique
+    |> list.sort(string.compare)
+
   let puzzle =
     Puzzle(
       puzzle,
       left |> string.split(" + "),
       right,
+      all_letters,
       list.range(0, 9) |> set.from_list,
     )
 
@@ -31,16 +48,18 @@ pub fn solve(puzzle: String) -> Result(Dict(String, Int), Nil) {
 }
 
 fn resolve(puzzle: Puzzle) {
-  let all_letters =
-    puzzle.left
-    |> list.map(fn(l) { l |> string.to_graphemes })
-    |> list.flatten
-    |> list.append(puzzle.right |> string.to_graphemes)
-    |> list.unique
-    |> list.sort(string.compare)
-
   let state =
-    do_with_nth_tails(puzzle, #([], ""), dict.new(), dict.new(), [], 1, 0)
+    do_with_nth_tails(
+      puzzle,
+      #([], ""),
+      dict.new(),
+      dict.new(),
+      [],
+      [],
+      [],
+      1,
+      0,
+    )
 
   echo state
 }
@@ -50,7 +69,9 @@ fn do_with_nth_tails(
   nth_tail_str: #(List(String), String),
   cur_sate: Dict(String, Int),
   used_map: Dict(String, List(Int)),
+  used_maps: List(Dict(String, List(Int))),
   fixed_char: List(String),
+  fixed_chars: List(Dict(String, Int)),
   col: Int,
   carry: Int,
 ) {
@@ -64,7 +85,9 @@ fn do_with_nth_tails(
         extract_nth_tails(puzzle, col),
         cur_sate,
         used_map,
+        used_maps,
         fixed_char,
+        fixed_chars,
         col,
         carry,
       )
@@ -80,7 +103,6 @@ fn do_with_nth_tails(
       let rests =
         splits |> set.from_list |> set.difference(set.from_list(fixed_char))
 
-      // TODO: save last success parts.
       // TODO: check all failed, back to last set.
 
       let #(map, used_map) =
@@ -115,8 +137,8 @@ fn do_with_nth_tails(
 
       let div = list.repeat(10, col) |> list.fold(1, fn(a, c) { a * c })
 
-      echo #(map, left_tails, right_tails)
-      process.sleep(10)
+      // echo #(map, left_tails, right_tails)
+      // process.sleep(10)
 
       case left_ints % div + carry == replaced_right_ints {
         True -> {
@@ -129,22 +151,80 @@ fn do_with_nth_tails(
             #([], ""),
             map,
             used_map,
+            // save last success parts.
+            used_maps |> list.prepend(used_map),
             map |> dict.keys,
+            // save last success parts.
+            fixed_chars |> list.prepend(map),
             col + 1,
             { left_ints / div } * div,
           )
         }
         False -> {
           // do next number use mapping
-          do_with_nth_tails(
-            puzzle,
-            nth_tail_str,
-            map,
-            used_map,
-            fixed_char,
-            col,
-            carry,
-          )
+
+          // echo #(fixed_char, fixed_chars, map, used_map)
+          let fixed_i =
+            fixed_char
+            |> list.map(fn(c) { map |> dict.get(c) |> result.unwrap(-1) })
+
+          let is_there_next =
+            rests
+            |> set.to_list
+            |> list.fold(False, fn(acc, r) {
+              let useds =
+                used_map
+                |> dict.get(r)
+                |> result.unwrap([])
+                |> list.prepend(map |> dict.get(r) |> result.unwrap(-1))
+
+              acc
+              || puzzle.all_i
+              |> set.difference(map |> dict.values |> set.from_list)
+              |> set.difference(fixed_i |> set.from_list)
+              |> set.difference(useds |> set.from_list)
+              |> set.size
+              > 0
+            })
+
+          case is_there_next {
+            True -> {
+              do_with_nth_tails(
+                puzzle,
+                nth_tail_str,
+                map,
+                used_map,
+                used_maps,
+                fixed_char,
+                fixed_chars,
+                col,
+                carry,
+              )
+            }
+            False -> {
+              let #(ll, rr) = nth_tail_str
+              let ll = ll |> list.map(fn(l) { l |> string.drop_start(1) })
+              let rr = rr |> string.drop_start(1)
+
+              let new_used_maps =
+                used_maps |> list.first |> result.unwrap(dict.new())
+
+              do_with_nth_tails(
+                puzzle,
+                #(ll, rr),
+                fixed_chars |> list.first |> result.unwrap(dict.new()),
+                new_used_maps,
+                used_maps |> list.drop(1),
+                fixed_chars
+                  |> list.first
+                  |> result.unwrap(dict.new())
+                  |> dict.keys,
+                fixed_chars,
+                col - 1,
+                0,
+              )
+            }
+          }
         }
       }
     }
@@ -261,6 +341,17 @@ fn get_next_mapping(
                   }
                 })
 
+              // echo #(
+              //   puzzle.all_letters,
+              //   new_txt,
+              //   acc,
+              //   f,
+              //   fixed_text,
+              //   txt,
+              //   used_map,
+              // )
+              // process.sleep(800)
+
               // TODO: failed with all map all used.
 
               get_next_mapping(
@@ -279,7 +370,12 @@ fn get_next_mapping(
         }
       }
     }
-    [] -> #(acc, used_map)
+    [] -> {
+      // echo #(puzzle.all_letters, acc, fixed_text, txt, used_map)
+      // process.sleep(800)
+
+      #(acc, used_map)
+    }
     // done with this loop
   }
 }
