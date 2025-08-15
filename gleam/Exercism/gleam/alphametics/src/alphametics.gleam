@@ -1,5 +1,4 @@
 import gleam/dict.{type Dict}
-import gleam/erlang/process
 import gleam/float
 import gleam/int
 import gleam/list
@@ -18,6 +17,7 @@ type Puzzle {
     all_chars: Set(String),
     no_zeros: List(String),
     max_word_len: Int,
+    max_left_len: Int,
   )
 }
 
@@ -46,37 +46,112 @@ pub fn solve(puzzle: String) -> Result(Dict(String, Int), Nil) {
       no_zeros,
       max_word_len: all_words
         |> list.fold(0, fn(acc, cur) { acc |> int.max(cur |> string.length) }),
+      max_left_len: left
+        |> string.split(" + ")
+        |> list.fold(0, fn(acc, el) { int.max(acc, el |> string.length) }),
     )
 
-  let res = resolve(puzzle)
-
-  Ok(dict.new())
+  resolve(puzzle)
 }
 
 fn resolve(puzzle: Puzzle) {
-  let res = processing(puzzle, dict.new(), [], 1)
+  case processing(puzzle, dict.new(), option.None, [], 1) {
+    Ok(p) -> {
+      Ok(p |> dict.map_values(fn(_, v) { v.0 }))
+    }
+    _ -> Error(Nil)
+  }
 }
 
 fn processing(
   puzzle: Puzzle,
   fixed_dict: Dict(String, #(Int, List(Int))),
-  snap_shots: List(Dict(String, #(Int, List(Int)))),
+  snap_shot: option.Option(Dict(String, #(Int, List(Int)))),
+  snap_shots: List(#(Dict(String, #(Int, List(Int))), Int)),
   col: Int,
 ) {
-  let parts = extract_tail(puzzle, col)
-
-  let indexd_map = map_idx_unq(parts, fixed_dict)
-
-  let state =
-    get_next_state(puzzle, parts, indexd_map, dict.new(), fixed_dict, col, 0)
-
-  case state {
-    Ok(s) -> {
-      processing(puzzle, s, snap_shots |> list.prepend(s), col + 1)
+  case puzzle.max_word_len < col {
+    True -> {
+      Ok(fixed_dict)
     }
-    Error(_) -> {
-      echo snap_shots
-      todo
+    False -> {
+      let parts = extract_tail(puzzle, col)
+
+      let indexd_map = map_idx_unq(parts, fixed_dict)
+
+      let state = case snap_shot {
+        option.Some(s) -> {
+          get_next_state(
+            puzzle,
+            parts,
+            indexd_map,
+            s |> dict.drop(fixed_dict |> dict.keys),
+            fixed_dict,
+            col,
+            { { s |> dict.drop(fixed_dict |> dict.keys) } |> dict.size } - 1,
+          )
+        }
+        option.None -> {
+          case indexd_map.0 |> list.length == 0 {
+            True -> {
+              let paragraph = map_i_to_parts(parts, fixed_dict)
+
+              case is_correct_parts(paragraph, col) {
+                True -> Ok(fixed_dict)
+                False -> Error(Nil)
+              }
+            }
+            False -> {
+              get_next_state(
+                puzzle,
+                parts,
+                indexd_map,
+                dict.new(),
+                fixed_dict,
+                col,
+                0,
+              )
+            }
+          }
+        }
+      }
+
+      case state {
+        Ok(s) -> {
+          processing(
+            puzzle,
+            s,
+            option.None,
+            snap_shots |> list.prepend(#(s, col)),
+            col + 1,
+          )
+        }
+        Error(_) -> {
+          case snap_shots {
+            [ls] -> {
+              let #(fixed_dict, col) = ls
+
+              processing(puzzle, dict.new(), option.Some(fixed_dict), [], col)
+            }
+            [ls, ls2, ..r] -> {
+              let #(fixed_dict, col) = ls
+              let #(fixed_dict2, _col2) = ls2
+
+              processing(
+                puzzle,
+                fixed_dict2,
+                option.Some(fixed_dict),
+                [ls2, ..r],
+                col,
+              )
+            }
+
+            _ -> {
+              Error(Nil)
+            }
+          }
+        }
+      }
     }
   }
 }
@@ -125,7 +200,13 @@ fn get_next_state(
 fn extract_tail(puzzle: Puzzle, col: Int) {
   let left_tails =
     puzzle.left
-    |> list.map(fn(el) { el |> string.slice(col * -1, col) })
+    |> list.map(fn(el) {
+      let col = case col > string.length(el) {
+        True -> string.length(el)
+        False -> col
+      }
+      el |> string.slice(col * -1, col)
+    })
 
   #(left_tails, puzzle.right |> string.slice(col * -1, col))
 }
@@ -164,6 +245,7 @@ fn get_avail_remains_ints(
   state: Dict(String, #(Int, List(Int))),
   fixed_dict: Dict(String, #(Int, List(Int))),
   cur_ch: String,
+  after: List(String),
 ) {
   let used = case state |> dict.get(cur_ch) {
     Ok(#(_, used)) -> used
@@ -172,6 +254,7 @@ fn get_avail_remains_ints(
 
   let allocated_others =
     state
+    |> dict.filter(fn(k, _v) { !{ after |> list.contains(k) } })
     |> dict.values
     |> list.map(fn(el) {
       let #(ch, _used) = el
@@ -236,7 +319,20 @@ fn allocate_next_num(
     id if id >= 0 -> {
       let assert Ok(cur_ch) = i_ch |> list.key_find(id)
 
-      let remains = get_avail_remains_ints(puzzle, state, fixed_dict, cur_ch)
+      let remains =
+        get_avail_remains_ints(
+          puzzle,
+          state,
+          fixed_dict,
+          cur_ch,
+          i_ch
+            |> list.filter_map(fn(el) {
+              case el.0 > id {
+                True -> Ok(el.1)
+                False -> Error(Nil)
+              }
+            }),
+        )
 
       // remains number exists check.
       case remains |> set.size > 0 {
@@ -274,7 +370,10 @@ fn allocate_next_num(
           }
         }
         False -> {
-          allocate_next_num(id - 1, state, fixed_dict, map, puzzle)
+          case id == 0 {
+            True -> Error(Nil)
+            False -> allocate_next_num(id - 1, state, fixed_dict, map, puzzle)
+          }
         }
       }
     }
@@ -284,7 +383,6 @@ fn allocate_next_num(
     }
   }
 }
-
-pub fn main() {
-  echo solve("SEND + MORE == MONEY")
-}
+// pub fn main() {
+//   echo solve("HE + SEES + THE == LIGHT")
+// }
