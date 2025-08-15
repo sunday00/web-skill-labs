@@ -54,15 +54,31 @@ pub fn solve(puzzle: String) -> Result(Dict(String, Int), Nil) {
 }
 
 fn resolve(puzzle: Puzzle) {
-  let res = processing(puzzle, 2)
+  let res = processing(puzzle, dict.new(), [], 1)
 }
 
-fn processing(puzzle: Puzzle, col: Int) {
+fn processing(
+  puzzle: Puzzle,
+  fixed_dict: Dict(String, #(Int, List(Int))),
+  snap_shots: List(Dict(String, #(Int, List(Int)))),
+  col: Int,
+) {
   let parts = extract_tail(puzzle, col)
 
-  let indexd_map = map_idx_unq(parts)
+  let indexd_map = map_idx_unq(parts, fixed_dict)
 
-  let state = get_next_state(puzzle, parts, indexd_map, dict.new(), col, 0)
+  let state =
+    get_next_state(puzzle, parts, indexd_map, dict.new(), fixed_dict, col, 0)
+
+  case state {
+    Ok(s) -> {
+      processing(puzzle, s, snap_shots |> list.prepend(s), col + 1)
+    }
+    Error(_) -> {
+      echo snap_shots
+      todo
+    }
+  }
 }
 
 fn get_next_state(
@@ -70,29 +86,38 @@ fn get_next_state(
   parts: #(List(String), String),
   indexd_map: #(List(#(Int, String)), List(#(String, Int))),
   state: Dict(String, #(Int, List(Int))),
+  fixed_dict: Dict(String, #(Int, List(Int))),
   col: Int,
   id: Int,
 ) {
   let #(i_ch, _) = indexd_map
-  let state = allocate_next_num(id, state, indexd_map, puzzle)
-  echo state
-  process.sleep(1000)
-  let paragraph = map_i_to_parts(parts, state)
+  let state = allocate_next_num(id, state, fixed_dict, indexd_map, puzzle)
 
-  case is_correct_parts(paragraph, col) {
-    True -> {
-      echo paragraph
-      todo
+  case state {
+    Ok(s) -> {
+      let ms = dict.merge(s, fixed_dict)
+
+      let paragraph = map_i_to_parts(parts, ms)
+
+      case is_correct_parts(paragraph, col) {
+        True -> {
+          Ok(ms)
+        }
+        False -> {
+          get_next_state(
+            puzzle,
+            parts,
+            indexd_map,
+            s,
+            fixed_dict,
+            col,
+            list.length(i_ch) - 1,
+          )
+        }
+      }
     }
-    False -> {
-      get_next_state(
-        puzzle,
-        parts,
-        indexd_map,
-        state,
-        col,
-        list.length(i_ch) - 1,
-      )
+    Error(_) -> {
+      Error(Nil)
     }
   }
 }
@@ -105,7 +130,10 @@ fn extract_tail(puzzle: Puzzle, col: Int) {
   #(left_tails, puzzle.right |> string.slice(col * -1, col))
 }
 
-fn map_idx_unq(parts: #(List(String), String)) {
+fn map_idx_unq(
+  parts: #(List(String), String),
+  fixed_dict: Dict(String, #(Int, List(Int))),
+) {
   let #(ll, r) = parts
   let unique_all_chars =
     ll
@@ -113,6 +141,16 @@ fn map_idx_unq(parts: #(List(String), String)) {
     |> list.flatten
     |> list.append(r |> string.to_graphemes)
     |> list.unique
+
+  let unique_all_chars =
+    unique_all_chars
+    |> set.from_list
+    |> set.difference(
+      fixed_dict
+      |> dict.keys
+      |> set.from_list,
+    )
+    |> set.to_list
     |> list.sort(string.compare)
 
   #(
@@ -124,6 +162,7 @@ fn map_idx_unq(parts: #(List(String), String)) {
 fn get_avail_remains_ints(
   puzzle: Puzzle,
   state: Dict(String, #(Int, List(Int))),
+  fixed_dict: Dict(String, #(Int, List(Int))),
   cur_ch: String,
 ) {
   let used = case state |> dict.get(cur_ch) {
@@ -139,6 +178,7 @@ fn get_avail_remains_ints(
       ch
     })
     |> list.append(used)
+    |> list.append(fixed_dict |> dict.values |> list.map(fn(v) { v.0 }))
 
   let allocated_others = case puzzle.no_zeros |> list.contains(cur_ch) {
     True -> allocated_others |> list.prepend(0)
@@ -185,52 +225,62 @@ fn is_correct_parts(parts: #(List(String), String), col: Int) {
 fn allocate_next_num(
   id: Int,
   state: Dict(String, #(Int, List(Int))),
+  fixed_dict: Dict(String, #(Int, List(Int))),
   map: #(List(#(Int, String)), List(#(String, Int))),
   puzzle: Puzzle,
 ) {
-  let #(i_ch, ch_i) = map
-  let assert Ok(cur_ch) = i_ch |> list.key_find(id)
+  let #(i_ch, _) = map
+  let letters_len = list.length(i_ch)
 
-  let remains = get_avail_remains_ints(puzzle, state, cur_ch)
+  case id {
+    id if id >= 0 -> {
+      let assert Ok(cur_ch) = i_ch |> list.key_find(id)
 
-  // remains number exists check.
-  case remains |> set.size > 0 {
-    True -> {
-      let n = remains |> set.to_list |> list.first |> result.unwrap(-1)
+      let remains = get_avail_remains_ints(puzzle, state, fixed_dict, cur_ch)
 
-      let new_state =
-        state
-        |> dict.upsert(cur_ch, fn(x) {
-          case x {
-            option.Some(xx) -> {
-              let #(prev, used) = xx
-              #(n, used |> list.prepend(prev))
-            }
-            option.None -> #(n, [])
-          }
-        })
-
-      // next char next number mapping if next char exists
-      case list.length(i_ch) - 1 > id {
+      // remains number exists check.
+      case remains |> set.size > 0 {
         True -> {
+          let n = remains |> set.to_list |> list.first |> result.unwrap(-1)
+
           let new_state =
-            i_ch
-            |> list.fold(new_state, fn(acc, el) {
-              let #(i, ch) = el
-              case i > id {
-                False -> acc
-                True -> acc |> dict.delete(ch)
+            state
+            |> dict.upsert(cur_ch, fn(x) {
+              case x {
+                option.Some(xx) -> {
+                  let #(prev, used) = xx
+                  #(n, used |> list.prepend(prev))
+                }
+                option.None -> #(n, [])
               }
             })
 
-          allocate_next_num(id + 1, new_state, map, puzzle)
+          // next char next number mapping if next char exists
+          case list.length(i_ch) - 1 > id {
+            True -> {
+              let new_state =
+                i_ch
+                |> list.fold(new_state, fn(acc, el) {
+                  let #(i, ch) = el
+                  case i > id {
+                    False -> acc
+                    True -> acc |> dict.delete(ch)
+                  }
+                })
+
+              allocate_next_num(id + 1, new_state, fixed_dict, map, puzzle)
+            }
+            False -> Ok(new_state)
+          }
         }
-        False -> new_state
+        False -> {
+          allocate_next_num(id - 1, state, fixed_dict, map, puzzle)
+        }
       }
     }
-    False -> {
-      // no avail number, back to prev number reset.
-      todo
+    id if id > letters_len -> Ok(state)
+    _ -> {
+      Error(Nil)
     }
   }
 }
