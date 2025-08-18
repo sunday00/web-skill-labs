@@ -1,6 +1,8 @@
 import gleam/dict.{type Dict}
+import gleam/int
 import gleam/list
 import gleam/option
+import gleam/result
 
 pub type Tree(a) {
   Tree(label: a, children: List(Tree(a)))
@@ -29,7 +31,22 @@ pub fn path_to(
   from from: a,
   to to: a,
 ) -> Result(List(a), Nil) {
-  todo
+  let map = make_map(#(dict.new(), dict.new()), tree)
+
+  case
+    map.0 |> dict.get(from),
+    map.1 |> dict.get(from),
+    map.0 |> dict.get(to),
+    map.1 |> dict.get(to)
+  {
+    Error(_), Error(_), _, _ -> Error(Nil)
+    _, _, Error(_), Error(_) -> Error(Nil)
+    _, _, _, _ -> {
+      let res = search([from], map, from, to)
+
+      Ok(res)
+    }
+  }
 }
 
 fn make_map(acc: #(Dict(a, List(a)), Dict(a, a)), tree: Tree(a)) {
@@ -109,19 +126,68 @@ fn make_tree(acc: Tree(a), map: #(Dict(a, List(a)), Dict(a, a))) {
   }
 }
 
+fn search(acc: List(a), map: #(Dict(a, List(a)), Dict(a, a)), tree: a, fin: a) {
+  case tree == fin {
+    True -> acc
+    False -> {
+      let p = map.1 |> dict.get(tree)
+
+      let pass_parent_acc = case p {
+        Ok(pa) -> {
+          // parent exists. filter alreay passed
+          case acc |> list.contains(pa) {
+            True -> {
+              acc
+            }
+            False -> {
+              // go upper parent
+              search(acc |> list.append([pa]), map, pa, fin)
+            }
+          }
+        }
+        _ -> {
+          // no parent. search child direct
+          acc
+        }
+      }
+
+      case pass_parent_acc |> list.contains(fin) {
+        True -> pass_parent_acc
+        False -> {
+          let children = map.0 |> dict.get(tree) |> result.unwrap([])
+
+          case children |> list.filter(fn(ch) { !{ list.contains(acc, ch) } }) {
+            [] -> {
+              pass_parent_acc
+            }
+            children -> {
+              children
+              |> list.map(fn(el) {
+                search(acc |> list.append([el]), map, el, fin)
+              })
+              |> list.filter(fn(el) { el |> list.contains(fin) })
+              |> list.sort(fn(a, b) {
+                int.compare(list.length(a), list.length(b))
+              })
+              |> list.first
+              |> result.unwrap([])
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 pub fn main() {
-  from_pov(
-    Tree(label: "grandparent", children: [
-      Tree(label: "parent", children: [
-        Tree(label: "x", children: [Tree("kid-0", []), Tree("kid-1", [])]),
-        Tree("sibling-0", []),
-        Tree("sibling-1", []),
-      ]),
-      Tree(label: "uncle", children: [
-        Tree("cousin-0", []),
-        Tree("cousin-1", []),
-      ]),
+  path_to(
+    tree: Tree(label: "parent", children: [
+      Tree("a", []),
+      Tree("x", []),
+      Tree("b", []),
+      Tree("c", []),
     ]),
-    "x",
+    from: "a",
+    to: "c",
   )
 }
