@@ -1,5 +1,6 @@
 import gleam/dict.{type Dict}
 import gleam/list
+import gleam/option
 
 pub type Tree(a) {
   Tree(label: a, children: List(Tree(a)))
@@ -12,9 +13,12 @@ pub fn from_pov(tree: Tree(a), from: a) -> Result(Tree(a), Nil) {
 
   case new_root_tree_el {
     Ok(_) -> {
-      echo make_tree(Tree(from, []), map)
+      let map_1 = filter_map1(dict.new(), map.1, from)
+      let map_0 = filter_map0(map.0, map_1, from)
 
-      todo
+      let res = make_tree(Tree(from, []), #(map_0, map_1))
+
+      Ok(res)
     }
     _ -> Error(Nil)
   }
@@ -46,6 +50,34 @@ fn make_map(acc: #(Dict(a, List(a)), Dict(a, a)), tree: Tree(a)) {
   }
 }
 
+fn filter_map1(acc: Dict(a, a), map: Dict(a, a), tree: a) {
+  case map |> dict.get(tree) {
+    Ok(p) -> {
+      filter_map1(acc |> dict.insert(tree, p), map, p)
+    }
+    _ -> acc
+  }
+}
+
+fn filter_map0(acc: Dict(a, List(a)), map1: Dict(a, a), tree: a) {
+  case map1 |> dict.size > 0 {
+    True -> {
+      let assert Ok(p) = map1 |> dict.get(tree)
+      let new_acc =
+        acc
+        |> dict.upsert(p, fn(li) {
+          case li {
+            option.Some(el) -> el |> list.filter(fn(e) { e != tree })
+            option.None -> []
+          }
+        })
+      let new_map1 = map1 |> dict.delete(tree)
+      filter_map0(new_acc, new_map1, p)
+    }
+    _ -> acc
+  }
+}
+
 fn make_tree(acc: Tree(a), map: #(Dict(a, List(a)), Dict(a, a))) {
   let acc = case map.0 |> dict.get(acc.label) {
     Ok(children) -> {
@@ -54,7 +86,9 @@ fn make_tree(acc: Tree(a), map: #(Dict(a, List(a)), Dict(a, a))) {
         children
           |> list.fold([], fn(ac, cu) {
             ac
-            |> list.prepend(make_tree(Tree(cu, []), map))
+            |> list.prepend(
+              make_tree(Tree(cu, []), #(map.0, map.1 |> dict.delete(cu))),
+            )
             |> list.reverse
           }),
       )
