@@ -6,13 +6,13 @@ pub type Tree(a) {
 }
 
 pub fn from_pov(tree: Tree(a), from: a) -> Result(Tree(a), Nil) {
-  let acc = make_map(#(dict.new(), dict.new()), tree)
+  let map = make_map(#(dict.new(), dict.new()), tree)
 
-  let new_root_tree_el = acc.0 |> dict.get(from)
+  let new_root_tree_el = map.0 |> dict.get(from)
 
   case new_root_tree_el {
     Ok(_) -> {
-      echo make_tree(Tree(from, []), acc)
+      echo make_tree(Tree(from, []), map)
 
       todo
     }
@@ -52,8 +52,11 @@ fn make_tree(acc: Tree(a), map: #(Dict(a, List(a)), Dict(a, a))) {
       Tree(
         acc.label,
         children
-          |> list.fold([], fn(ac, cu) { ac |> list.prepend(Tree(cu, [])) })
-          |> list.reverse,
+          |> list.fold([], fn(ac, cu) {
+            ac
+            |> list.prepend(make_tree(Tree(cu, []), map))
+            |> list.reverse
+          }),
       )
     }
     _ -> {
@@ -64,7 +67,8 @@ fn make_tree(acc: Tree(a), map: #(Dict(a, List(a)), Dict(a, a))) {
   case map.1 |> dict.get(acc.label) {
     Ok(parent_label) -> {
       let children =
-        acc.children |> list.append([make_tree(Tree(parent_label, []), map)])
+        acc.children
+        |> list.append([make_tree(Tree(parent_label, []), map)])
       Tree(acc.label, children)
     }
     _ -> acc
