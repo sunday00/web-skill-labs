@@ -1,7 +1,5 @@
-import gleam/dict.{type Dict}
 import gleam/int
 import gleam/list
-import gleam/result
 import gleam/string
 
 pub fn rectangles(input: String) -> Int {
@@ -19,7 +17,7 @@ pub fn rectangles(input: String) -> Int {
       case lines |> list.length < 2 {
         True -> 0
         False -> {
-          let assert map =
+          let map =
             lines
             |> list.drop(1)
             |> list.index_fold([], fn(acc, l, i) {
@@ -46,16 +44,13 @@ pub fn rectangles(input: String) -> Int {
 
 fn reducer(acc: Int, map: List(#(Int, Int)), max_l: Int, max_c: Int) {
   case map {
-    [] -> {
-      todo
-    }
+    [] -> acc
     [f, ..r] -> {
-      echo get_cur_cnt(0, f, 1, 1, map, max_l, max_c)
-      // do next el
+      let ac = get_cur_cnt(0, f, 1, 1, map, max_l, max_c)
+
+      reducer(acc + ac, r, max_l, max_c)
     }
   }
-
-  2
 }
 
 fn get_cur_cnt(
@@ -67,11 +62,7 @@ fn get_cur_cnt(
   max_l: Int,
   max_c: Int,
 ) {
-  echo #(map, #(cur.0, cur.1 + nc), #(cur.0 + nl, cur.1), #(
-    cur.0 + nl,
-    cur.1 + nc,
-  ))
-  case cur.0 + nl >= max_l || cur.1 + nc >= max_c {
+  case cur.0 + nl >= max_l {
     True -> acc
     False -> {
       let new_acc = case
@@ -87,11 +78,10 @@ fn get_cur_cnt(
         }
       }
 
-      let ac = get_cur_cnt(new_acc, cur, nc + 1, nl, map, max_l, max_c)
-      let ac = get_cur_cnt(ac, cur, nc, nl + 1, map, max_l, max_c)
-      let ac = get_cur_cnt(ac, cur, nc + 1, nl + 1, map, max_l, max_c)
-
-      new_acc + ac
+      case cur.1 + nc >= max_c {
+        True -> get_cur_cnt(new_acc, cur, 1, nl + 1, map, max_l, max_c)
+        False -> get_cur_cnt(new_acc, cur, nc + 1, nl, map, max_l, max_c)
+      }
     }
   }
 }
