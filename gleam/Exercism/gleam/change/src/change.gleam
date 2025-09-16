@@ -14,7 +14,7 @@ pub fn find_fewest_coins(
     _ -> {
       let coins = coins |> list.filter(fn(el) { el < target }) |> list.reverse
 
-      reducer([], [], coins, target)
+      reducer([], [], coins, target, coins)
 
       todo
     }
@@ -26,6 +26,7 @@ fn reducer(
   acc: List(Int),
   rem: List(Int),
   target: Int,
+  initial_coins: List(Int),
 ) {
   echo #(total_res, acc, rem)
   case rem {
@@ -33,17 +34,38 @@ fn reducer(
       let sum = acc |> list.reduce(fn(ac, cu) { ac + cu }) |> result.unwrap(0)
       case sum {
         s if s > target -> {
-          todo
+          reducer(
+            total_res,
+            acc |> list.reverse |> list.drop(1) |> list.reverse,
+            r,
+            target,
+            initial_coins,
+          )
         }
         s if s == target -> {
           todo
         }
         _ -> {
-          reducer(total_res, acc |> list.append([f]), r, target)
+          reducer(
+            total_res,
+            acc |> list.append([f]),
+            rem,
+            target,
+            initial_coins,
+          )
         }
       }
     }
-    [] -> total_res
+    [] -> {
+      case acc {
+        [_af, ..ar] -> {
+          todo
+        }
+        [] -> {
+          todo
+        }
+      }
+    }
   }
 }
 
