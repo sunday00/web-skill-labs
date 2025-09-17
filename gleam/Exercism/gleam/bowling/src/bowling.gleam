@@ -19,7 +19,7 @@ pub type Error {
 
 pub fn roll(game: Game, knocked_pins: Int) -> Result(Game, Error) {
   // echo #(game, knocked_pins)
-  case knocked_pins > 10 {
+  case knocked_pins > 10 || knocked_pins < 0 {
     True -> Error(InvalidPinCount)
     False -> {
       case game.frames |> list.length < 10 {
@@ -55,6 +55,7 @@ pub fn roll(game: Game, knocked_pins: Int) -> Result(Game, Error) {
                     ]),
                   ))
                 }
+                [f] if f + knocked_pins > 10 -> Error(InvalidPinCount)
                 [f] if f < 10 -> {
                   let new_frames =
                     game.frames
@@ -67,7 +68,6 @@ pub fn roll(game: Game, knocked_pins: Int) -> Result(Game, Error) {
                     |> list.reverse
                   Ok(Game(new_frames))
                 }
-                [f] if f + knocked_pins > 10 -> Error(InvalidPinCount)
                 _ -> {
                   case knocked_pins == 10 && game.frames |> list.length < 9 {
                     True -> {
@@ -192,19 +192,27 @@ pub fn score(game: Game) -> Result(Int, Error) {
   case game.frames |> list.length {
     l if l < 10 -> Error(GameNotComplete)
     _ -> {
-      game.frames
-      |> list.fold(0, fn(acc, cur) {
-        acc
-        + {
-          cur.rolls
-          |> list.fold(0, fn(ac, cu) { ac + cu })
+      let last = game.frames |> list.last |> result.unwrap(Frame([], []))
+      case last.rolls {
+        [f] if f == 10 -> Error(GameNotComplete)
+        [f, s] if f + s == 10 -> Error(GameNotComplete)
+        [f, s] if f + s == 20 -> Error(GameNotComplete)
+        _ -> {
+          game.frames
+          |> list.fold(0, fn(acc, cur) {
+            acc
+            + {
+              cur.rolls
+              |> list.fold(0, fn(ac, cu) { ac + cu })
+            }
+            + {
+              cur.bonus
+              |> list.fold(0, fn(ac, cu) { ac + cu })
+            }
+          })
+          |> Ok
         }
-        + {
-          cur.bonus
-          |> list.fold(0, fn(ac, cu) { ac + cu })
-        }
-      })
-      |> Ok
+      }
     }
   }
 }
@@ -212,9 +220,14 @@ pub fn score(game: Game) -> Result(Int, Error) {
 pub fn main() {
   // let rolls = [6, 4, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
   // let rolls = [0, 0]
-  let rolls = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 3, 2]
+  // let rolls = Game([Frame([5], [])])
+  let rolls = Game(list.repeat(Frame([10], []), 11))
+  // echo roll(rolls, 6)
+  // echo rolls |> rolling()
 
-  echo rolls |> rolling()
+  let rolls = roll(rolls, 10)
+  echo rolls
+  echo score(rolls |> result.unwrap(Game([Frame([], [])])))
 }
 
 fn rolling(rolls: List(Int)) {
