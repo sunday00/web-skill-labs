@@ -22,6 +22,13 @@ pub fn roll(game: Game, knocked_pins: Int) -> Result(Game, Error) {
   case knocked_pins > 10 || knocked_pins < 0 {
     True -> Error(InvalidPinCount)
     False -> {
+      let rolled_current = case
+        knocked_pins == 10 && game.frames |> list.length < 9
+      {
+        True -> [10, 0]
+        False -> [knocked_pins]
+      }
+
       case game.frames |> list.length < 10 {
         True -> {
           case game.frames |> list.last {
@@ -30,16 +37,18 @@ pub fn roll(game: Game, knocked_pins: Int) -> Result(Game, Error) {
                 game.frames |> list.reverse |> list.drop(1) |> list.first
               let strike_bonus = case old_last {
                 Ok(ol) -> {
-                  case ol.rolls, last.rolls, game.frames |> list.length < 10 {
-                    [10, 0], [f], True -> f + knocked_pins
-                    _, _, _ -> 0
+                  case ol.rolls, game.frames |> list.length < 10 {
+                    [10, 0], True -> knocked_pins
+                    _, _ -> 0
                   }
                 }
                 Error(_) -> 0
               }
 
+              // echo strike_bonus
+
               case last.rolls {
-                [f, s] if f + s == 10 -> {
+                [f, s] if f + s == 10 && f != 10 -> {
                   Ok(Game(
                     game.frames
                     |> list.append([
@@ -47,11 +56,11 @@ pub fn roll(game: Game, knocked_pins: Int) -> Result(Game, Error) {
                     ]),
                   ))
                 }
-                [10, 0] -> {
+                [f, s] if f == 10 && s == 0 -> {
                   Ok(Game(
                     game.frames
                     |> list.append([
-                      Frame([knocked_pins], [knocked_pins, strike_bonus]),
+                      Frame(rolled_current, [knocked_pins, strike_bonus]),
                     ]),
                   ))
                 }
@@ -87,19 +96,33 @@ pub fn roll(game: Game, knocked_pins: Int) -> Result(Game, Error) {
               }
             }
             Error(_) -> {
-              let nf = Frame([knocked_pins], [])
+              let nf = Frame(rolled_current, [])
               Ok(Game([nf]))
             }
           }
         }
         False -> {
+          let old_last =
+            game.frames
+            |> list.reverse
+            |> list.drop(1)
+            |> list.first
+            |> result.unwrap(Frame([], []))
+          let ol_bonus = case old_last.rolls {
+            [10, 0] -> knocked_pins
+            _ -> 0
+          }
+
           let last = game.frames |> list.last |> result.unwrap(Frame([], []))
           case last.rolls {
             [f] -> {
               case f == 10 {
                 True -> {
                   let new_frame =
-                    Frame(last.rolls |> list.append([knocked_pins]), last.bonus)
+                    Frame(
+                      last.rolls |> list.append([knocked_pins]),
+                      last.bonus |> list.prepend(ol_bonus),
+                    )
 
                   Ok(Game(
                     game.frames
@@ -113,7 +136,11 @@ pub fn roll(game: Game, knocked_pins: Int) -> Result(Game, Error) {
                   case f + knocked_pins > 10 {
                     True -> Error(InvalidPinCount)
                     False -> {
-                      let new_frame = Frame([f, knocked_pins], last.bonus)
+                      let new_frame =
+                        Frame(
+                          [f, knocked_pins],
+                          last.bonus |> list.prepend(ol_bonus),
+                        )
 
                       Ok(Game(
                         game.frames
@@ -215,37 +242,4 @@ pub fn score(game: Game) -> Result(Int, Error) {
       }
     }
   }
-}
-
-pub fn main() {
-  // let rolls = [6, 4, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-  // let rolls = [0, 0]
-  // let rolls = Game([Frame([5], [])])
-  let rolls = Game(list.repeat(Frame([10], []), 11))
-  // echo roll(rolls, 6)
-  // echo rolls |> rolling()
-
-  let rolls = roll(rolls, 10)
-  echo rolls
-  echo score(rolls |> result.unwrap(Game([Frame([], [])])))
-}
-
-fn rolling(rolls: List(Int)) {
-  rolls
-  |> list.fold(Game([]), fn(game, pins) {
-    // echo #(game)
-    let assert Ok(new_game) = roll(game, pins)
-    new_game
-  })
-  // |> score
-}
-
-fn roll_and_last_roll_be_error(rolls: List(Int), last_roll: Int, error: Error) {
-  rolls
-  |> list.fold(Game([]), fn(game, pins) {
-    let assert Ok(new_game) = roll(game, pins)
-    new_game
-  })
-  |> roll(last_roll)
-  |> should.equal(Error(error))
 }
