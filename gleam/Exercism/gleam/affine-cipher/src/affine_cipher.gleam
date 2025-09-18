@@ -1,3 +1,4 @@
+import gleam/float
 import gleam/int
 import gleam/list
 import gleam/regexp
@@ -61,8 +62,6 @@ fn to_ch(i: Int, a: Int, b: Int) {
 }
 
 fn string_group_5(acc: List(String), cur: List(String), rem: List(String)) {
-  // echo #(acc, cur, rem)
-
   case rem {
     [f, ..r] -> {
       case list.length(cur) {
@@ -95,9 +94,84 @@ pub fn decode(
   a a: Int,
   b b: Int,
 ) -> Result(String, Error) {
-  todo
+  case a % 2 == 0 || a % 13 == 0 {
+    True -> Error(KeyNotCoprime(a, string.length(abc)))
+    False -> {
+      let li =
+        ciphertext
+        |> string.replace(" ", "")
+        |> string.to_graphemes
+        |> list.map(to_i)
+
+      let lch = li |> list.map(fn(i) { dec_each(i, a, b) })
+
+      let i_abc =
+        abc |> string.to_graphemes |> list.index_map(fn(s, i) { #(i, s) })
+
+      lch
+      |> list.map(fn(i) {
+        case i >= 0 {
+          True -> i_abc |> list.key_find(i) |> result.unwrap("")
+          False -> -1 * i |> int.to_string
+        }
+      })
+      |> string.join("")
+      |> Ok
+    }
+  }
+}
+
+fn dec_each(i: Int, a: Int, b: Int) {
+  case i >= 0 {
+    True -> {
+      let index = mmi(a) * { i - b } % { abc |> string.length }
+
+      case index >= 0 {
+        True -> index
+        False -> { index + { -index / 26 + 1 } * 26 } % 26
+      }
+    }
+    False -> i
+  }
+}
+
+fn mmi(i: Int) {
+  let x = mmi_reducer(i, 26, 1, 0)
+
+  case x < 0 {
+    True -> x + 26
+    False -> x
+  }
+}
+
+fn mmi_reducer(i: Int, m: Int, x: Int, y: Int) {
+  case i > 1 {
+    True -> {
+      let q =
+        float.floor({ i |> int.to_float } /. { m |> int.to_float })
+        |> float.round
+      let t = m
+
+      let new_m = i % m
+      let new_i = t
+      let t = y
+
+      let y = x - q * y
+      let x = t
+
+      // echo i
+      mmi_reducer(new_i, new_m, x, y)
+    }
+    False -> {
+      x
+    }
+  }
 }
 
 pub fn main() {
-  echo encode("mindblowingly", 11, 15)
+  // echo decode("qdwju nqcro muwhn odqun oppmd aunwd o", 19, 16)
+  echo decode("tytgn fjr", 3, 7)
+  // echo mmi(15)
+
+  // echo mmi_reducer(7, 13, 1, 0)
 }
