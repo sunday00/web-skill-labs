@@ -48,3 +48,38 @@ print("-======--")
 for k, v in pairs(t3) do
     print(k, v)
 end
+
+
+print("-======--")
+
+
+local ii = 0
+repeat
+    print("hi")
+    ii = ii + 1
+until ii == 4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
