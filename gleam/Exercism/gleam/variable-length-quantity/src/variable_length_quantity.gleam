@@ -1,8 +1,6 @@
 import gleam/bit_array
 import gleam/int
-import gleam/io
 import gleam/list
-import gleam/result
 
 pub type Error {
   IncompleteSequence
@@ -40,11 +38,42 @@ fn do_encode(n: Int, acc: List(Int)) -> BitArray {
   }
 }
 
-pub fn decode(string: BitArray) -> Result(List(Int), Error) {
-  todo
+pub fn decode(bytes: BitArray) -> Result(List(Int), Error) {
+  do_decode(bytes, 0, [], [])
 }
 
-pub fn main() {
-  echo encode([0x80])
-  echo <<129, 0>> == <<0x81, 0x0>>
+fn do_decode(
+  bytes: BitArray,
+  current: Int,
+  numbers: List(Int),
+  pending: List(Int),
+) -> Result(List(Int), Error) {
+  case bytes {
+    <<>> ->
+      case pending {
+        [] -> Ok(list.reverse(numbers))
+        _ -> Error(IncompleteSequence)
+      }
+    <<byte:8, rest:bits>> -> {
+      let value = int.bitwise_and(byte, 0x7F)
+      let new_current =
+        int.bitwise_or(int.bitwise_shift_left(current, 7), value)
+
+      case int.bitwise_and(byte, 0x80) {
+        0 -> {
+          // End of current number
+          let new_numbers = case pending {
+            [] -> [new_current, ..numbers]
+            _ -> [new_current, ..numbers]
+          }
+          do_decode(rest, 0, new_numbers, [])
+        }
+        _ -> {
+          // Continue reading number
+          do_decode(rest, new_current, numbers, [byte, ..pending])
+        }
+      }
+    }
+    _ -> Error(IncompleteSequence)
+  }
 }
