@@ -13,3 +13,11 @@ function string.split (inputstr, sep)
 
     return t
 end
+
+function string.get(s, i) 
+    return string.sub(s, i, i)
+end
+
+function string.replace(s, prev, after)
+    return string.gsub(s, prev, after)
+end
