@@ -20,14 +20,16 @@ local tu = toTable(iu)
 local rotate = function(input, key)
     local res = ''
     for ch in string.gmatch(input, '.') do
-        print('ch', ch, ch == ' ', type(ch))
+        --print('ch', ch, ch == ' ', type(ch))
 
-        if ch == ' ' or type(ch) == 'number' then
+        --if ch == ' ' or ch == '.' or tonumber(ch) ~= nil then
+        if string.find(l, string.lower(ch)) == nil or ch == '.' then
             res = res .. ch
             goto continue
         end
 
         local curI = string.find(l, ch)
+        --print(ch, curI)
 
         if curI ~= nil then
             local id = (curI + key) % #l
@@ -54,7 +56,7 @@ local rotate = function(input, key)
     return res
 end
 
-print(rotate('Testing 1 2 3 testing', 5))
+--print(rotate('Gur dhvpx oebja sbk whzcf bire gur ynml qbt.', 13))
 
 return {
     rotate = rotate
