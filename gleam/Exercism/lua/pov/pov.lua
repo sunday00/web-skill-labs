@@ -1,23 +1,75 @@
 -- utils
 
-local function clone(t)
-    local c = {}
+local dictionary = {}
 
-    for _, v in ipairs(t) do
-        table.insert(c, v)
+local function contains(table, target)
+    for _, v in ipairs(table) do
+        if v == target then
+            return true
+        end
     end
 
-    return c
+    return false
 end
 
-local function toString(t)
-    local l = ''
+local function cloneTree(tree)
+    local clone = {}
+    for k, v in pairs(tree) do
+        if type(v) == 'table' then
+            clone[k] = cloneTree(v)
+        else
+            clone[k] = v
+        end
+    end
+    return clone
+end
 
-    for _, v in ipairs(t) do
-        l = l .. v .. ','
+local function toNamedTable(tree)
+    if type(tree[1]) == 'string' and type(tree[2]) == 'table' then
+        dictionary[tree[1]] = tree[2]
+
+        local r = {}
+        r[tree[1]] = toNamedTable(tree[2])
+        return r
     end
 
-    return l
+    local r = {}
+
+    for _, children in ipairs(tree) do
+        if type(children[1]) == 'string' and type(children[2]) == 'table' then
+            dictionary[children[1]] = children[2]
+
+            r[children[1]] = toNamedTable(children[2])
+
+            else
+
+            table.insert(r, children[1])
+        end
+    end
+
+    return r
+end
+
+local function reTree(tree, target, acc)
+    if type(tree) == 'table' then
+        for n, ch in pairs(tree) do
+            if n == target or (type(ch) == 'table' and contains(ch, target)) then
+                local removeSelf = {}
+                for i = 1, #ch do
+                    if ch[i] ~= target then
+                        table.insert(removeSelf, ch[i])
+                    end
+                end
+
+                local x = removeSelf
+
+            end
+
+            acc[n] = ch
+            return reTree(ch, target, acc)
+        end
+    end
+
 end
 
 -- logic start
@@ -25,61 +77,25 @@ end
 -- pov....
 
 local function pov_from(target)
-    local r = {}
+    return {
+        of = function(tree)
 
-    function r.of(struct)
-        if #struct == 1 then
-            return struct
+
+            local namedTable = toNamedTable(tree)
+
+            local newTree = reTree(namedTable, target, {})
+
+            return newTree
         end
-
-        local pf = path_from(target).of()
-    end
-
-    return r
+    }
 end
 
 -- path....
 
-local function pathReducer (acc, cur, target)
-    for _, v in ipairs(cur) do
-        if type(v[1]) == 'string' and v[2] and type(v[2]) == 'table' then
-            local c = clone(acc)
-            table.insert(c, v[1])
-            local midAcc, done = pathReducer(c, v[2], target)
 
-            if done then
-                return midAcc
-            end
-        end
-
-        for _, e in ipairs(v) do
-            if e == target then
-                local c = clone(acc)
-                table.insert(c, e)
-                return c, true
-            end
-        end
-    end
-end
 
 local function path_from(target)
-    local r = {}
 
-    function r.to ()
-        
-    end
-
-    function r.of(struct)
-        if #struct == 1 then
-            return struct
-        end
-
-        local res = pathReducer({ struct[1] }, struct[2], target)
-
-        return res
-    end
-
-    return r
 end
 
 -- test
