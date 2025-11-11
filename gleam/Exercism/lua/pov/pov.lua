@@ -1,6 +1,7 @@
 -- utils
 
-local dictionary = {}
+local nameDic = {}
+local ups = {}
 
 local function contains(table, target)
     for _, v in ipairs(table) do
@@ -24,52 +25,26 @@ local function cloneTree(tree)
     return clone
 end
 
-local function toNamedTable(tree)
-    if type(tree[1]) == 'string' and type(tree[2]) == 'table' then
-        dictionary[tree[1]] = tree[2]
+local function povReduce(tree, parent, target)
+    if #tree == 2 and type(tree[1]) == 'string' and type(tree[2]) == 'table' then
+        nameDic[tree[1]] = tree[2]
 
-        local r = {}
-        r[tree[1]] = toNamedTable(tree[2])
-        return r
+        povReduce(tree[2], tree[1])
     end
 
-    local r = {}
+    for _, ch in ipairs(tree) do
+        if #ch == 2 and type(ch[1]) == 'string' and type(ch[2]) == 'table' then
+            nameDic[ch[1]] = ch[2]
+            ups[ch[1]] = parent
 
-    for _, children in ipairs(tree) do
-        if type(children[1]) == 'string' and type(children[2]) == 'table' then
-            dictionary[children[1]] = children[2]
+            povReduce(ch[2], ch[1])
 
-            r[children[1]] = toNamedTable(children[2])
+            elseif #ch == 1 and type(ch[1]) == 'string' then
 
-            else
+            ups[ch[1]] = parent
 
-            table.insert(r, children[1])
         end
     end
-
-    return r
-end
-
-local function reTree(tree, target, acc)
-    if type(tree) == 'table' then
-        for n, ch in pairs(tree) do
-            if n == target or (type(ch) == 'table' and contains(ch, target)) then
-                local removeSelf = {}
-                for i = 1, #ch do
-                    if ch[i] ~= target then
-                        table.insert(removeSelf, ch[i])
-                    end
-                end
-
-                local x = removeSelf
-
-            end
-
-            acc[n] = ch
-            return reTree(ch, target, acc)
-        end
-    end
-
 end
 
 -- logic start
@@ -79,13 +54,13 @@ end
 local function pov_from(target)
     return {
         of = function(tree)
+            povReduce(tree, nil, target)
 
+            for n, v in pairs(ups) do
+                print(n, v)
+            end
 
-            local namedTable = toNamedTable(tree)
-
-            local newTree = reTree(namedTable, target, {})
-
-            return newTree
+            return {}
         end
     }
 end
