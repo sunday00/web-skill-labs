@@ -61,13 +61,27 @@ describe('pov', function()
             { 'cousin_1' }, { 'cousin_2' }}}}}
 
       local expected =
-        { 'leaf', {
-          { 'parent', {
-            { 'sibling_1' },
-            { 'sibling_2' },
-            { 'grand_parent', {
-              { 'uncle', {
-                { 'cousin_1' }, { 'cousin_2' }}}}}}}}}
+        {
+            'leaf',
+            {
+                {
+                    'parent',
+                    {
+                        { 'sibling_1' },
+                        { 'sibling_2' },
+                        {
+                            'grand_parent',
+                            {
+                                {
+                                    'uncle',
+                                    { { 'cousin_1' }, { 'cousin_2' } }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
       assert.same(expected, pov_from('leaf').of(larger_tree))
     end)

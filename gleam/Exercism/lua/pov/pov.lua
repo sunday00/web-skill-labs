@@ -1,7 +1,19 @@
 -- utils
 
+local _tree
 local nameDic = {}
 local ups = {}
+
+local function debugDescribe(res, label)
+    for _,v in pairs(res) do
+        if type(v) == 'string' then
+            print(label, v)
+
+        else
+            debugDescribe(v, label .. '-ch')
+        end
+    end
+end
 
 local function contains(table, target)
     for _, v in ipairs(table) do
@@ -25,11 +37,29 @@ local function cloneTree(tree)
     return clone
 end
 
-local function povReduce(tree, parent, target)
+local function remove(tree, target)
+    local res = {}
+
+    for _, v in ipairs(tree) do
+        if #v == 2 and type(v[1]) == 'string' and type(v[2]) == 'table' and v[1] ~= target then
+            table.insert(res, v)
+        elseif type(v) == 'table' and type(v[2]) ~= 'table' then
+            for _, e in ipairs(v) do
+                if e ~= target then
+                    table.insert(res, { e })
+                end
+            end
+        end
+    end
+
+    return res
+end
+
+local function povMakePrev(tree, parent)
     if #tree == 2 and type(tree[1]) == 'string' and type(tree[2]) == 'table' then
         nameDic[tree[1]] = tree[2]
 
-        povReduce(tree[2], tree[1])
+        povMakePrev(tree[2], tree[1])
     end
 
     for _, ch in ipairs(tree) do
@@ -37,13 +67,39 @@ local function povReduce(tree, parent, target)
             nameDic[ch[1]] = ch[2]
             ups[ch[1]] = parent
 
-            povReduce(ch[2], ch[1])
+            povMakePrev(ch[2], ch[1])
 
             elseif #ch == 1 and type(ch[1]) == 'string' then
 
             ups[ch[1]] = parent
-
         end
+    end
+end
+
+local function povReduce(target)
+    local me = nameDic[target]
+
+    local parentN = ups[target]
+    local parent = nameDic[parentN]
+
+    parent = remove(parent, target)
+
+    nameDic[parentN] = parent
+
+    if ups[parentN] then
+        povReduce(parentN)
+    end
+
+    if me then
+        table.insert(me, { parentN, parent })
+
+        local res =  { target, me }
+
+        return res
+    else
+        local res =  { target, { { parentN, parent } }}
+
+        return res
     end
 end
 
@@ -54,13 +110,14 @@ end
 local function pov_from(target)
     return {
         of = function(tree)
-            povReduce(tree, nil, target)
+            _tree = cloneTree(tree)
+            povMakePrev(tree, nil)
 
-            for n, v in pairs(ups) do
-                print(n, v)
-            end
+            local res = povReduce(target)
 
-            return {}
+            --print("================")
+
+            return res
         end
     }
 end
@@ -81,8 +138,10 @@ local res = pov_from('leaf').of({ 'grand_parent', {
     { 'uncle', {
         { 'cousin_1' }, { 'cousin_2' } } } } })
 
-for _, r in ipairs(res) do
-    print(r)
-end
+--print(#res, res[1], res[2])
+--print(#res[2], res[2][1])
+--print(#res[2][1], res[2][1][1], res[2][1][2])
+--print(#res[2][1][2], res[2][1][2] [1][1], res[2][1][2] [2][1], res[2][1][2] [3][1], res[2][1][2] [3][2])
+--print(res[2][1][2] [4], res[2][1][2] [4][1][1])
 
 return { pov_from = pov_from, path_from = path_from }
