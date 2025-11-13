@@ -91,7 +91,11 @@ local function povReduce(target)
     end
 
     if me then
-        table.insert(me, { parentN, parent })
+        if(#parent > 0) then
+            table.insert(me, { parentN, parent })
+        else
+            table.insert(me, { parentN })
+        end
 
         local res =  { target, me }
 
@@ -108,6 +112,10 @@ end
 -- pov....
 
 local function pov_from(target)
+    _tree = nil
+    nameDic = {}
+    ups = {}
+
     return {
         of = function(tree)
             _tree = cloneTree(tree)
@@ -132,16 +140,10 @@ end
 
 -- test
 
-local res = pov_from('leaf').of({ 'grand_parent', {
-    { 'parent', {
-        { 'sibling_1' }, { 'leaf' }, { 'sibling_2' } } },
-    { 'uncle', {
-        { 'cousin_1' }, { 'cousin_2' } } } } })
-
---print(#res, res[1], res[2])
---print(#res[2], res[2][1])
---print(#res[2][1], res[2][1][1], res[2][1][2])
---print(#res[2][1][2], res[2][1][2] [1][1], res[2][1][2] [2][1], res[2][1][2] [3][1], res[2][1][2] [3][2])
---print(res[2][1][2] [4], res[2][1][2] [4][1][1])
+local res = pov_from('leaf').of({ 'level1', {
+    { 'level2', {
+        { 'level3', {
+            { 'level4', {
+                { 'leaf' }}}}}}}}})
 
 return { pov_from = pov_from, path_from = path_from }
