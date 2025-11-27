@@ -136,14 +136,55 @@ end
 
 -- path....
 
+local function pathReduce(sarg, earg)
+    local e = earg
+    local p = { earg }
 
+    local loop = 0
 
-local function path_from(target)
+    while true do
+        local t = ups[e]
 
+        if t == nil then
+            error()
+        end
+
+        table.insert(p, 1, t)
+
+        if t == sarg then break end
+
+        e = t
+        loop = loop + 1
+
+        if loop > 10000 then break end
+    end
+
+    return p
 end
 
--- test
+local function path_from(sarg)
+    local s = sarg
+    local e = nil
 
-local res = pov_from('x').of({ 'x' })
+    return {
+        to = function(earg)
+            e = earg
 
+            return {
+                of = function(tree)
+                    local pov = pov_from(sarg).of(tree)
+                    povMakePrev(pov, nil)
+
+                    return pathReduce(s, e)
+                end
+            }
+        end,
+    }
+end
+
+---- test
+--
+--local res = path_from('leaf').to('parent').of({ 'parent', {
+--    { 'sibling' }, { 'leaf' }}})
+--
 return { pov_from = pov_from, path_from = path_from }
