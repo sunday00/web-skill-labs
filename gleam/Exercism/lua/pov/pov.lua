@@ -118,6 +118,10 @@ local function pov_from(target)
 
     return {
         of = function(tree)
+            if #tree == 1 then
+                return tree
+            end
+
             _tree = cloneTree(tree)
             povMakePrev(tree, nil)
 
@@ -140,10 +144,6 @@ end
 
 -- test
 
-local res = pov_from('leaf').of({ 'level1', {
-    { 'level2', {
-        { 'level3', {
-            { 'level4', {
-                { 'leaf' }}}}}}}}})
+local res = pov_from('x').of({ 'x' })
 
 return { pov_from = pov_from, path_from = path_from }
