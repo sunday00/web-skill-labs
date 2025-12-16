@@ -2,6 +2,19 @@ local g
 local maxW = 0
 local maxH = 0
 
+local checkHorizonDash = function(x, xx, y, yy)
+    for x1 = x, xx do
+        local pointT = g[y]:sub(x1, x1)
+        local pointB = g[yy]:sub(x1, x1)
+
+        if (pointT ~= '+' and pointT ~= '-') or (pointB ~= '+' and pointB ~= '-') then
+            return true
+        end
+    end
+
+    return false
+end
+
 local findVerticalPoints = function(x, xx, y)
     local sum = 0
 
@@ -14,14 +27,14 @@ local findVerticalPoints = function(x, xx, y)
         local pointRB = v:sub(xx, xx)
 
         if (pointLB ~= '+' and pointLB ~= '|') or (pointRB ~= '+' and pointRB ~= '|') then
-            goto continue
+            return sum
         end
 
         if pointLU == '+' and pointRU == '+' and pointLB == '+' and pointRB == '+' then
+            if checkHorizonDash(x, xx, y, yy) then return sum end
+
             sum = sum + 1
         end
-
-        :: continue ::
     end
 
     return sum
@@ -36,20 +49,26 @@ local find4Points = function(x, y)
         local pointRU = v:sub(xx, xx)
 
         if pointRU ~= '+' and pointRU ~= '-' then
-            goto continue
+            return sum
         end
 
         if pointRU == '+' then
             sum = sum + findVerticalPoints(x, xx, y)
         end
-
-        :: continue ::
     end
 
     return sum
 end
 
+local checkIsZero = function(grid)
+    if #grid == 0 then return true end
+end
+
 local count = function(grid)
+    local isZero = checkIsZero(grid)
+
+    if isZero then return 0 end
+
     g = grid
     maxW = #grid[1]
     maxH = #grid
@@ -74,11 +93,13 @@ local count = function(grid)
 end
 
 count({
-    '  +-+', -- ,
-    '  | |', -- ,
-    '+-+-+', -- ,
-    '| |  ', -- ,
-    '+-+  '
+    '+-+ +-+', -- ,
+    '| | | |', -- ,
+    '+-+-+-+', -- ,
+    '  | |  ', -- ,
+    '+-+-+-+', -- ,
+    '| | | |', -- ,
+    '+-+ +-+' --
 })
 
 return {
