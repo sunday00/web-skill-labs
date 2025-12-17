@@ -1,6 +1,7 @@
 local function Reactor()
     local acts = {}
-    local calculated = nil
+    local GArgs = {}
+    local cbs = {}
 
     local ins = {
         InputCell = function(n)
@@ -15,15 +16,29 @@ local function Reactor()
             end
 
             subIns.set_value = function(nn)
+                if subIns.v == nn then return end
+
+                local prev
+                for ii = 1, #acts do
+                    prev = acts[ii](table.unpack(GArgs[ii]))
+                end
+
                 subIns.v = nn
 
                 --
 
                 if #acts == 0 then return end
 
-                -- TODO:
-                -- WORK: here
+                for i = 1, #cbs do
+                    local isUpdated = false
+                    local n
 
+                    for ii = 1, #acts do
+                        n = acts[ii](table.unpack(GArgs[ii]))
+                    end
+
+                    if prev ~= n then cbs[i](n) end
+                end
             end
 
             return subIns
@@ -50,30 +65,21 @@ local function Reactor()
             end
 
             table.insert(acts, calculator)
+            table.insert(GArgs, v)
 
-            return { get_value = function() return calculator(table.unpack(v)) end }
+            return {
+                get_value = function() return calculator(table.unpack(v)) end,
+                watch = function(cb) table.insert(cbs, cb) end,
+                unwatch = function(cb)
+                    for i = 1, #cbs do
+                        if cbs[i] == cb then table.remove(cbs, i) end
+                    end
+                end
+            }
         end
     }
 
     return ins
 end
-
-local r = Reactor()
-local input = r.InputCell(1)
-local times_two = r.ComputeCell(input, function(x)
-    return x * 2
-end)
-
-local times_thirty = r.ComputeCell(input, function(x)
-    return x * 30
-end)
-
-local output = r.ComputeCell(times_two, times_thirty, function(x, y)
-    return x + y
-end)
-
-input.set_value(3)
-
-print(output.get_value())
 
 return { Reactor = Reactor }
