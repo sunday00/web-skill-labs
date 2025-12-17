@@ -23,7 +23,7 @@ local function Reactor()
 
                 -- TODO:
                 -- WORK: here
-                calculated = n * 100
+
             end
 
             return subIns
@@ -31,17 +31,27 @@ local function Reactor()
 
         ComputeCell = function(...)
             local args = {...}
-            table.insert(acts, args[#args])
-
             local v = {}
 
             for i=1, #args - 1 do
-                table.insert(v, args[i].get_value())
+                table.insert(v, args[i])
             end
 
-            calculated = args[#args](table.unpack(v))
+            local action =  args[#args]
+            local calculator = function(...)
+                local localArgs = {...}
+                local localV = {}
 
-            return { get_value = function() return calculated end }
+                for i=1, #localArgs do
+                    table.insert(localV, localArgs[i].get_value())
+                end
+
+                return action(table.unpack(localV))
+            end
+
+            table.insert(acts, calculator)
+
+            return { get_value = function() return calculator(table.unpack(v)) end }
         end
     }
 
