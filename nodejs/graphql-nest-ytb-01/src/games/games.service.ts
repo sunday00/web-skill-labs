@@ -10,7 +10,12 @@ export class GamesService {
     private gameModel: Model<GameEntity>,
   ) {}
 
-  public async getGames() {
-    return this.gameModel.find()
+  public async getGames(offset: number, limit: number) {
+    return this.gameModel.find().skip(offset).limit(limit)
+  }
+
+  public async getGameById(id: string) {
+    // return this.gameModel.findOne({ _id: new mongoose.Types.ObjectId(id) })
+    return this.gameModel.findById(id)
   }
 }

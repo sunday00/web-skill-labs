@@ -1,13 +1,32 @@
-import { Query, Resolver } from '@nestjs/graphql'
+import { Args, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 import { GamesService } from './games.service'
 import { Game } from './types/game.type'
+import { Achievement } from '../achievements/types/achievement.type'
+import { AchievementsService } from '../achievements/achievements.service'
+import { AchievementsArgs } from './types/acheivements.args'
 
-@Resolver()
+@Resolver(() => Game)
 export class GamesResolver {
-  constructor(private readonly gamesService: GamesService) {}
+  constructor(
+    private readonly gamesService: GamesService,
+    private readonly achievementsService: AchievementsService,
+  ) {}
 
   @Query(() => [Game], { name: 'games' })
-  public async getGames() {
-    return await this.gamesService.getGames()
+  public async getGames(
+    @Args('offset', { type: () => Int }) offset: number,
+    @Args('limit', { type: () => Int }) limit: number,
+  ) {
+    return await this.gamesService.getGames(offset, limit)
+  }
+
+  @Query(() => Game, { name: 'game' })
+  public async getGameById(@Args('id') id: string) {
+    return await this.gamesService.getGameById(id)
+  }
+
+  @ResolveField(() => [Achievement], { name: 'achievements' })
+  public async getAchievements(@Parent() game: Game, @Args() args: AchievementsArgs) {
+    return await this.achievementsService.getAchievementsByGameId(game.id)
   }
 }

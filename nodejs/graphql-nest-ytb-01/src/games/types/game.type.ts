@@ -1,4 +1,5 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql'
+import { Achievement } from '../../achievements/types/achievement.type'
 
 @ObjectType()
 export class Game {
@@ -13,4 +14,7 @@ export class Game {
 
   @Field(() => Int, { nullable: true })
   price: number
+
+  @Field(() => [Achievement], { nullable: true })
+  achievements: Achievement[]
 }
