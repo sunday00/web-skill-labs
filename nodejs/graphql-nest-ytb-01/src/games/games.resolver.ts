@@ -1,9 +1,10 @@
-import { Args, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Args, Int, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 import { GamesService } from './games.service'
 import { Game } from './types/game.type'
 import { Achievement } from '../achievements/types/achievement.type'
 import { AchievementsService } from '../achievements/achievements.service'
 import { AchievementsArgs } from './types/acheivements.args'
+import { CreateGameInput } from './types/game.input.create'
 
 @Resolver(() => Game)
 export class GamesResolver {
@@ -27,6 +28,11 @@ export class GamesResolver {
 
   @ResolveField(() => [Achievement], { name: 'achievements' })
   public async getAchievements(@Parent() game: Game, @Args() args: AchievementsArgs) {
-    return await this.achievementsService.getAchievementsByGameId(game.id)
+    return await this.achievementsService.getAchievementsByGameId(game.id, args)
+  }
+
+  @Mutation(() => Game, { name: 'createGame' })
+  public async createGame(@Args('input') input: CreateGameInput) {
+    return await this.gamesService.createGame(input)
   }
 }

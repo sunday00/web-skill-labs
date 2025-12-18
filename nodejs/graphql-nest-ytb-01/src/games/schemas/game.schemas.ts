@@ -10,6 +10,9 @@ export class GameEntity {
 
   @Prop({ required: true })
   genre: string
+
+  @Prop()
+  price: number
 }
 
 export const GameSchema = SchemaFactory.createForClass(GameEntity)
