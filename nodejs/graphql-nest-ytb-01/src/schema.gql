@@ -1,0 +1,16 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Game {
+  id: String!
+  name: String!
+
+  """rpg, shooting..."""
+  genre: String
+  price: Int
+}
+
+type Query {
+  games: [Game!]!
+}
