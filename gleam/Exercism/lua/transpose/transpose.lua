@@ -56,15 +56,21 @@ function transpose (s)
         local v = ''
         for y, ho in ipairs(horizontals) do
             local letter = string.sub(ho, i, i)
-            
-            if (letter == '' or letter == '|') and y <= maxLenIdx then
+
+            if y > maxLenIdx and i > maxLenIdx and (letter == '' or letter == '|') then
+                goto continue
+            end
+
+            if (letter == '' or letter == '|') then
                 letter = ' '
             end
 
             v = v .. letter
+
+            :: continue ::
         end
         table.insert(verticals, v)
-        --print('"' .. v .. '"')
+        print('"' .. v .. '"')
     end
 
     return string.join(verticals, '\n')
