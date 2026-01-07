@@ -1,4 +1,4 @@
-import { Query, Resolver } from '@nestjs/graphql'
+import { Mutation, Query, Resolver } from '@nestjs/graphql'
 import { HelloService } from './hello.service'
 
 @Resolver()
@@ -13,5 +13,10 @@ export class HelloResolver {
   @Query(() => String, { name: 'simpleJwtWorkingTest' })
   public getFakeAccessToken() {
     return this.helloService.getFakeAccessToken()
+  }
+
+  @Mutation(() => String, { name: 'testMongoConn' })
+  public async storeSimple() {
+    return this.helloService.storeSomething()
   }
 }

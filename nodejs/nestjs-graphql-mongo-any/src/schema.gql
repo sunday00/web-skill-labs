@@ -6,3 +6,7 @@ type Query {
   simpleHello: String!
   simpleJwtWorkingTest: String!
 }
+
+type Mutation {
+  testMongoConn: String!
+}
