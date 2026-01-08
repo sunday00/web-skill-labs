@@ -10,11 +10,13 @@ import { GraphQLModule } from '@nestjs/graphql'
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo'
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default'
 import { GraphQLError } from 'graphql/error'
+import { FirebaseModule } from './_common/modules/firebase/firebase.module'
 
 @Global()
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, load: [env, jwt, dbConn] }),
+    FirebaseModule,
     CqrsModule.forRoot(),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
