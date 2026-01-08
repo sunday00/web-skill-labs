@@ -1,0 +1,13 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Query {
+    simpleHello: String!
+    simpleJwtWorkingTest: String!
+    simpleRC: String!
+}
+
+type Mutation {
+    testMongoConn: String!
+}
