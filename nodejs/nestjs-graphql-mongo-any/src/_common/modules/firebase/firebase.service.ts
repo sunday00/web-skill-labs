@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import FB, { ServiceAccount } from 'firebase-admin'
+// INFO: this json file should download from firebase
+//  visit web then 🏠-> ⚙️-> project setting -> service account tab
+//  click generate new secret key then download json file
 import account from 'pem/firebase-sdk.json'
 
 @Injectable()
