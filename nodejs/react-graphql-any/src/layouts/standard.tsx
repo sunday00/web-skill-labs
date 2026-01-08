@@ -7,7 +7,7 @@ const Standard = () => {
   return (
     <Box w="full" mt={4} className={'layout standard-layout'}>
       <Routes>
-        <Route path="/home" element={<Home />}></Route>
+        <Route path="/home/*" element={<Home />}></Route>
         <Route path="/infra/*" element={<Infra />}></Route>
       </Routes>
     </Box>
