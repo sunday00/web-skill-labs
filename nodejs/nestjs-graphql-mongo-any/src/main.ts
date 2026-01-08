@@ -9,6 +9,12 @@ async function bootstrap(): Promise<[ConfigService, ConsoleLogger]> {
     logger,
   })
 
+  app.enableCors({
+    allowedHeaders: '*',
+    credentials: true,
+    origin: ['http://localhost:4000'],
+  })
+
   const config = app.get(ConfigService)
 
   await app.listen(config.get<number>('env.port', 3000), '0.0.0.0')
