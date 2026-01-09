@@ -1,11 +1,5 @@
 import { initializeApp } from 'firebase/app'
-import {
-  activate,
-  fetchAndActivate,
-  getRemoteConfig,
-  onConfigUpdate,
-  setCustomSignals,
-} from 'firebase/remote-config'
+import { activate, getRemoteConfig, onConfigUpdate, } from 'firebase/remote-config'
 import * as cfg from '@/utils/firebase/pem.json'
 
 const app = initializeApp(cfg)
@@ -30,16 +24,16 @@ onConfigUpdate(remoteConfig, {
   },
 })
 
-fetchAndActivate(remoteConfig)
-  .then(() => {
-    setCustomSignals(remoteConfig, { kkk: 'vvv' })
-      .then(() => {})
-      .catch((e) => {
-        console.error(e)
-      })
-  })
-  .catch((e) => {
-    console.error(e)
-  })
+// setCustomSignals(remoteConfig, { kkk: 'vvv' })
+//   .then(() => {
+//     fetchAndActivate(remoteConfig)
+//       .then(() => {})
+//       .catch((e) => {
+//         console.error(e)
+//       })
+//   })
+//   .catch((e) => {
+//     console.error(e)
+//   })
 
 export { remoteConfig }

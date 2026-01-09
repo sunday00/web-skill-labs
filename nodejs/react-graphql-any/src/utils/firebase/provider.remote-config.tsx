@@ -1,6 +1,6 @@
 import { type FC, type ReactNode, useEffect, useState } from 'react'
 import { remoteConfig } from '@/utils/firebase/remote-config.ts'
-import { fetchAndActivate } from 'firebase/remote-config'
+import { fetchAndActivate, setCustomSignals } from 'firebase/remote-config'
 import RemoteConfigContext from '@/utils/firebase/context.remote-config.ts'
 
 const RemoteConfigProvider: FC<{ children: ReactNode }> = ({ children }) => {
@@ -9,9 +9,11 @@ const RemoteConfigProvider: FC<{ children: ReactNode }> = ({ children }) => {
   useEffect(() => {
     remoteConfig.defaultConfig = {}
 
-    fetchAndActivate(remoteConfig)
-      .then(() => setIsReady(true))
-      .catch((err) => console.error('RC Fetch Error', err))
+    setCustomSignals(remoteConfig, { kkk: 'vvv' }).then(() => {
+      fetchAndActivate(remoteConfig)
+        .then(() => setIsReady(true))
+        .catch((err) => console.error('RC Fetch Error', err))
+    })
   }, [])
 
   return (
