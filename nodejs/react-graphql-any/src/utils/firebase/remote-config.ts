@@ -1,5 +1,9 @@
 import { initializeApp } from 'firebase/app'
-import { activate, getRemoteConfig, onConfigUpdate, } from 'firebase/remote-config'
+import {
+  activate,
+  getRemoteConfig,
+  onConfigUpdate,
+} from 'firebase/remote-config'
 import * as cfg from '@/utils/firebase/pem.json'
 
 const app = initializeApp(cfg)

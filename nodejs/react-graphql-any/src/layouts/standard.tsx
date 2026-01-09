@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router'
 import Home from '@/views/home'
 import { Box } from '@chakra-ui/react'
 import Infra from '@/views/infra'
+import Ui from '@/views/ui'
 
 const Standard = () => {
   return (
@@ -9,6 +10,7 @@ const Standard = () => {
       <Routes>
         <Route path="/home/*" element={<Home />}></Route>
         <Route path="/infra/*" element={<Infra />}></Route>
+        <Route path="/ui/*" element={<Ui />}></Route>
       </Routes>
     </Box>
   )

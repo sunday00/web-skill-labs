@@ -6,6 +6,7 @@ const Home = () => {
   const siteMapInThis = [
     { id: 0, label: 'backendConn', href: '/home/backend-conn' },
     { id: 1, label: 'infra', href: '/infra' },
+    { id: 2, label: 'ui', href: '/ui' },
   ]
 
   return (
