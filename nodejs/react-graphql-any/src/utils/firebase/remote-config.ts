@@ -30,9 +30,9 @@ onConfigUpdate(remoteConfig, {
   },
 })
 
-setCustomSignals(remoteConfig, { kkk: 'vvv' })
+fetchAndActivate(remoteConfig)
   .then(() => {
-    fetchAndActivate(remoteConfig)
+    setCustomSignals(remoteConfig, { kkk: 'vvv' })
       .then(() => {})
       .catch((e) => {
         console.error(e)
