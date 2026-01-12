@@ -1,10 +1,14 @@
 import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
 import { ConfigService } from '@nestjs/config'
-import { ConsoleLogger } from '@nestjs/common'
+import { ConsoleLogger, ValidationPipe } from '@nestjs/common'
 
 async function bootstrap(): Promise<[ConfigService, ConsoleLogger]> {
-  const logger = new ConsoleLogger('bootstrap 🚀')
+  const logger = new ConsoleLogger({
+    context: 'bootstrap 🚀',
+    json: false,
+    colors: true,
+  })
   const app = await NestFactory.create(AppModule, {
     logger,
   })
@@ -14,6 +18,8 @@ async function bootstrap(): Promise<[ConfigService, ConsoleLogger]> {
     credentials: true,
     origin: ['http://localhost:4000'],
   })
+
+  app.useGlobalPipes(new ValidationPipe({ transform: true }))
 
   const config = app.get(ConfigService)
 
