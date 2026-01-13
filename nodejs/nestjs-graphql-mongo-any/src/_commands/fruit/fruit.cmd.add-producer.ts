@@ -14,34 +14,33 @@ export class FruitCmdAddProducer extends CommandRunner {
   }
 
   async run(passedParams: string[], options?: SeederOptions): Promise<void> {
-    async function* get10Fruits(service: FruitService) {
-      let page = 1
-      const size = 20
+    const i = this.addProducerTo10Fruits()
 
-      while (true) {
-        const items: Fruit[] = await service.findMany(page, size)
-
-        const m = items.map((item: Fruit) => {
-          item.producer = randFullName()
-
-          return item
-        })
-
-        await service.updateMany(m)
-
-        page++
-
-        if (items.length < 1) return null
-
-        yield items.map((item: Fruit) => item.id)
-      }
+    let iNext: IteratorResult<string[]> = {
+      done: false,
+      value: [],
     }
 
-    const i = get10Fruits(this.service)
-    let iNext = await i.next()
     while (!iNext.done) {
-      console.log(iNext.value)
+      if (iNext.value.length > 0) console.log(iNext.value)
       iNext = await i.next()
+    }
+  }
+
+  async *addProducerTo10Fruits() {
+    let page = 0
+    const size = 20
+
+    while (true) {
+      const items: Fruit[] = await this.service.findMany(++page, size)
+
+      if (items.length < 1) return null // <-- iterator to be done.
+
+      items.forEach((item: Fruit) => (item.producer = randFullName()))
+
+      await this.service.updateMany(items)
+
+      yield items.map((item: Fruit) => item.id) // <-- iterator shows nexted value.
     }
   }
 }
