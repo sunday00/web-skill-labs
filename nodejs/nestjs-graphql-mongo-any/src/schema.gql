@@ -5,6 +5,7 @@
 type Fruit {
   id: String!
   name: String!
+  producer: String!
   lastOrder: DateTime!
 }
 
@@ -27,5 +28,6 @@ type Mutation {
 
 input CreateFruit {
   name: String!
+  producer: String
   lastOrder: DateTime!
 }

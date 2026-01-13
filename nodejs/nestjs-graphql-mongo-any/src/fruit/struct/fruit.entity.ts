@@ -15,6 +15,10 @@ export class Fruit {
   name: string
 
   @Field()
+  @Prop({ type: String, required: false })
+  producer?: string
+
+  @Field()
   @Prop({ type: Date })
   lastOrder: Date
 }

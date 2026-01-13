@@ -7,6 +7,9 @@ export class CreateFruit implements Omit<Fruit, 'id'> {
   @Field()
   name: string
 
+  @Field({ nullable: true })
+  producer?: string
+
   @Field(() => Date)
   @IsDate()
   lastOrder: Date
