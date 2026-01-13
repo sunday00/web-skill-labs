@@ -16,4 +16,8 @@ export class FruitService {
 
     return r
   }
+
+  async storeBulk(dataBag: Omit<Fruit, 'id'>[]) {
+    return await this.model.insertMany(dataBag)
+  }
 }
