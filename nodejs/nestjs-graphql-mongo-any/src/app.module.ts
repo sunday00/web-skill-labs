@@ -5,7 +5,12 @@ import { UFireBaseModule } from './u-fire-base/u-fire-base.module'
 import { FruitModule } from './fruit/fruit.module'
 
 @Module({
-  imports: [InfraModule, HelloModule, UFireBaseModule, FruitModule],
+  imports: [
+    InfraModule.register({ graphql: true }),
+    HelloModule,
+    UFireBaseModule,
+    FruitModule,
+  ],
   controllers: [],
   providers: [],
 })

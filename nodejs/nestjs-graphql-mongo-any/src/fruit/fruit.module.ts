@@ -9,5 +9,6 @@ import { Fruit, FruitSchema } from './struct/fruit.entity'
     MongooseModule.forFeature([{ name: Fruit.name, schema: FruitSchema }]),
   ],
   providers: [FruitResolver, FruitService],
+  exports: [FruitService],
 })
 export class FruitModule {}
