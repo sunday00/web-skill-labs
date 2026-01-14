@@ -1,6 +1,16 @@
 import { Elysia, t } from 'elysia'
 import { env } from '@yolk-oss/elysia-env'
 import openapi from '@elysiajs/openapi'
+import { cookiesRoutes } from './aop/cookie.route'
+import { extendsRoute } from './aop/extends.route'
+
+class CustomErrrrr extends Error {
+  status = 444
+
+  public get statusCode() {
+    return this.status
+  }
+}
 
 const app = new Elysia()
 
@@ -14,6 +24,65 @@ app
   .use(openapi()) // http://localhost:8081/openapi
 
 app
+  .error({
+    // register custom error for search by code ------------------------------------------------+
+    custom1: CustomErrrrr, //                                                                   |
+  }) //                                                                                         |
+  .onError((err) => {
+    if (err.code === 'NOT_FOUND') return err.status(404, '...;;') //            |
+    //    +-------------------------------------------------------------------------------------+
+    //    |
+    //    \/
+    if (err.code === 'custom1')
+      return err.status(err.error.statusCode, 'custom.... eerrorroror')
+
+    return err.status(400, 'too bad...')
+  })
+
+const userRoutes = ({ log }: { log: boolean }) => {
+  const r = new Elysia()
+
+  return r
+    .guard({
+      // as: 'scoped',
+      query: t.Object({
+        hi: t.String(),
+      }),
+    })
+    .onBeforeHandle((ctx) => {
+      if (log) console.log(ctx.request)
+    })
+    .onAfterHandle({ as: 'scoped' }, (ctx) => {
+      if (log) console.log('scoped hook can propagate to parent also')
+    })
+}
+
+app
+  .use(userRoutes({ log: true }))
+  .use(cookiesRoutes())
+  .use(extendsRoute)
+  .onBeforeHandle((ctx) => {
+    console.log('this is interceptor before handle')
+  })
+  .onAfterHandle((ctx) => {
+    console.log('this is interceptor after handle')
+  })
+  .onAfterResponse((ctx) => {
+    console.log('this is interceptor after response')
+  })
+  .guard({
+    beforeHandle: [
+      (ctx) => {
+        // if (!ctx.query.name) return ctx.status(401)
+      },
+      (ctx) => {
+        console.log(ctx.query.name)
+      },
+    ],
+    afterResponse({ responseValue }) {
+      console.log(responseValue)
+    },
+  })
   .get('/', () => 'Hello Elysia')
   .get('/static/*', () => 'Hello Static')
   .get('/dynamic/:slug', ({ params: { slug } }) => `Hello ${slug}`)
@@ -52,6 +121,7 @@ app
   .get('/tutorial/redirect', (context) => {
     return context.redirect('/tutorial/status')
   })
+
   .get('/tutorial/swg-dt', () => ({ hello: 'world' }), {
     detail: { hide: false, summary: 'WOW', description: 'let me see' },
   })
@@ -64,12 +134,21 @@ app
       return { something: 'ok' }
     },
     {
+      beforeHandle(ctx) {
+        console.log(ctx.query.step)
+      },
       body: t.Object({
         name: t.String({ error: 'oops' }),
         age: t.Optional(t.Number()),
       }),
+      query: t.Object({
+        step: t.Optional(t.Number()),
+      }),
     },
   )
+  .get('/tutorial/errr', () => {
+    throw new CustomErrrrr()
+  })
 
 app.listen({ hostname: '0.0.0.0', port: process.env.APP_PORT || 3000 })
 
