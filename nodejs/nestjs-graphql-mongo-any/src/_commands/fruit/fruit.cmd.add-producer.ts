@@ -1,8 +1,8 @@
-import { Command, CommandRunner } from 'nest-commander';
-import { SeederOptions } from '@/_commands/_common/seeder.options';
-import { FruitService } from '@/fruit/fruit.service';
-import { Fruit } from '@/fruit/struct/fruit.entity';
-import { randFullName } from '@ngneat/falso';
+import { Command, CommandRunner } from 'nest-commander'
+import { SeederOptions } from '@/_commands/_common/seeder.options'
+import { FruitService } from '@/fruit/fruit.service'
+import { Fruit } from '@/fruit/struct/fruit.entity'
+import { randFullName } from '@ngneat/falso'
 
 @Command({
   name: 'fruit.add.producer',
