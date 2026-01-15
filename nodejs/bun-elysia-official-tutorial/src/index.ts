@@ -5,6 +5,7 @@ import { cookiesRoutes } from './aop/cookie.route'
 import { extendsRoute } from './aop/extends.route'
 import { hono } from './third-fw/hono.fw'
 import { h3 } from './third-fw/h3.fw'
+import { migrateDB } from './configs/db/drizzle.db.config'
 
 class CustomErrrrr extends Error {
   status = 444
@@ -65,6 +66,10 @@ const PAA = app // this is for eden type
   .use(userRoutes({ log: true }))
   .use(cookiesRoutes())
   .use(extendsRoute)
+  .onStart(async () => {
+    // check dev
+    await migrateDB()
+  })
   .onBeforeHandle((ctx) => {
     console.log('this is interceptor before handle')
   })

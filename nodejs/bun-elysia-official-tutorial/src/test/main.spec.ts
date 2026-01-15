@@ -2,7 +2,7 @@ import { describe, expect, it } from 'bun:test'
 import { treaty } from '@elysiajs/eden'
 import app, { type App } from '../index'
 
-const eden = treaty<App>(app)
+const eden = treaty<App>(app as unknown as App)
 
 describe('test main app', () => {
   it('should return Hello World', async () => {
