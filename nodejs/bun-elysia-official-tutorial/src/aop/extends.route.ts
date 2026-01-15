@@ -22,10 +22,27 @@ extendsRoute
     }),
   })
 
-  .get('/extend/log', ({ logger }) => {
-    logger.log('loggggg')
-    return 'hello log'
-  })
+  //  +-----------------------------------------------------------------------------------------+
+  //  |                                                                                         |
+  .macro('auth', {
+    cookie: t.Object({
+      session: t.Optional(t.String()),
+    }),
+    beforeHandle({ cookie: { session }, status }) {
+      // if (!session.value) return status(401)                                                |
+      if (!session.value) console.log('no coooookie')
+    }, //                                                                                      |
+  }) //                                                                                        |
+  //                                                                                           |
+  .get(
+    '/extend/log',
+    ({ logger }) => {
+      logger.log('loggggg')
+      return 'hello log'
+    },
+    //                                                                                         |
+    { auth: true }, // <-----------------------------------------------------------------------+
+  )
   .post(
     '/extend/store',
     ({ store, bye, boooo }) => {

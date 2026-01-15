@@ -3,6 +3,8 @@ import { env } from '@yolk-oss/elysia-env'
 import openapi from '@elysiajs/openapi'
 import { cookiesRoutes } from './aop/cookie.route'
 import { extendsRoute } from './aop/extends.route'
+import { hono } from './third-fw/hono.fw'
+import { h3 } from './third-fw/h3.fw'
 
 class CustomErrrrr extends Error {
   status = 444
@@ -21,7 +23,7 @@ app
     }),
   )
   // .use(html())
-  .use(openapi()) // http://localhost:8081/openapi
+  .use(openapi(/* can insert type generator... */)) // http://localhost:8081/openapi
 
 app
   .error({
@@ -36,7 +38,7 @@ app
     if (err.code === 'custom1')
       return err.status(err.error.statusCode, 'custom.... eerrorroror')
 
-    return err.status(400, 'too bad...')
+    return err.status(400, `too bad... ${err.error}`)
   })
 
 const userRoutes = ({ log }: { log: boolean }) => {
@@ -56,6 +58,8 @@ const userRoutes = ({ log }: { log: boolean }) => {
       if (log) console.log('scoped hook can propagate to parent also')
     })
 }
+
+app.mount('/hono', hono.fetch).mount('/h3', h3.fetch)
 
 app
   .use(userRoutes({ log: true }))
@@ -84,6 +88,9 @@ app
     },
   })
   .get('/', () => 'Hello Elysia')
+  .get('/pm', async () => {
+    return Promise.resolve(1)
+  })
   .get('/static/*', () => 'Hello Static')
   .get('/dynamic/:slug', ({ params: { slug } }) => `Hello ${slug}`)
   .get(
@@ -150,7 +157,15 @@ app
     throw new CustomErrrrr()
   })
 
+// real test
+// something like easy curl
+app.fetch(new Request('http://localhost:8081/pm'))
+// .then((res: Response) => res.text()) // <----+
+// .then(console.log) // <----------------------+ i don't think this is mandatory
+
 app.listen({ hostname: '0.0.0.0', port: process.env.APP_PORT || 3000 })
+
+export default app
 
 console.log(
   `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`,
