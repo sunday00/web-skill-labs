@@ -6,6 +6,7 @@ import { extendsRoute } from './aop/extends.route'
 import { hono } from './third-fw/hono.fw'
 import { h3 } from './third-fw/h3.fw'
 import { migrateDB } from './configs/db/drizzle.db.config'
+import { userRoutes } from './user'
 
 class CustomErrrrr extends Error {
   status = 444
@@ -41,24 +42,6 @@ app
 
     return err.status(400, `too bad... ${err.error}`)
   })
-
-const userRoutes = ({ log }: { log: boolean }) => {
-  const r = new Elysia()
-
-  return r
-    .guard({
-      // as: 'scoped',
-      query: t.Object({
-        hi: t.String(),
-      }),
-    })
-    .onBeforeHandle((ctx) => {
-      if (log) console.log(ctx.request)
-    })
-    .onAfterHandle({ as: 'scoped' }, (ctx) => {
-      if (log) console.log('scoped hook can propagate to parent also')
-    })
-}
 
 app.mount('/hono', hono.fetch).mount('/h3', h3.fetch)
 

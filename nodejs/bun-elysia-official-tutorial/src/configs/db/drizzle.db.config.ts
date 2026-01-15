@@ -13,7 +13,10 @@ const pools = mysql.createPool({
   database: process.env.DATABASE_DBNM,
 })
 
-const db = drizzle({ client: pools })
+const db = drizzle({
+  client: pools,
+  // logger: true
+})
 
 const migrateDB = async () => {
   // const r =
