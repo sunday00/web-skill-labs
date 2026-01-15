@@ -61,7 +61,7 @@ const userRoutes = ({ log }: { log: boolean }) => {
 
 app.mount('/hono', hono.fetch).mount('/h3', h3.fetch)
 
-app
+const PAA = app // this is for eden type
   .use(userRoutes({ log: true }))
   .use(cookiesRoutes())
   .use(extendsRoute)
@@ -166,6 +166,7 @@ app.fetch(new Request('http://localhost:8081/pm'))
 app.listen({ hostname: '0.0.0.0', port: process.env.APP_PORT || 3000 })
 
 export default app
+export type App = typeof PAA
 
 console.log(
   `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`,
