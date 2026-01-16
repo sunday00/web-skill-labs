@@ -7,6 +7,7 @@ import { hono } from './third-fw/hono.fw'
 import { h3 } from './third-fw/h3.fw'
 import { migrateDB } from './configs/db/drizzle.db.config'
 import { userRoutes } from './user'
+import cors from '@elysiajs/cors'
 
 class CustomErrrrr extends Error {
   status = 444
@@ -25,6 +26,20 @@ app
     }),
   )
   // .use(html())
+  .use(
+    cors({
+      origin: ['localhost:4001', '127.0.0.1:4001'],
+      allowedHeaders: [
+        'Content-Type',
+        'Authorization',
+        'HX-Request',
+        'HX-Trigger',
+        'HX-Target',
+        'HX-Current-URL',
+      ],
+      exposeHeaders: ['HX-Push-Url', 'HX-Redirect', 'HX-Refresh', 'HX-Trigger'],
+    }),
+  )
   .use(openapi(/* can insert type generator... */)) // http://localhost:8081/openapi
 
 app

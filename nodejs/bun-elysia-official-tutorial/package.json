@@ -12,6 +12,7 @@
     "mig:mig": "bun drizzle-kit migrate --config ./src/configs/db/drizzle.config.ts"
   },
   "dependencies": {
+    "@elysiajs/cors": "^1.4.1",
     "@elysiajs/eden": "^1.4.6",
     "@elysiajs/openapi": "^1.4.13",
     "@yolk-oss/elysia-env": "^3.0.0",
