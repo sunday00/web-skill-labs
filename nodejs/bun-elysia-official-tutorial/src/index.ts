@@ -46,6 +46,35 @@ app
 app.mount('/hono', hono.fetch).mount('/h3', h3.fetch)
 
 const PAA = app // this is for eden type
+  .onAfterHandle((ctx) => {
+    const res: { isPageList?: boolean; items?: any[]; total?: number } =
+      ctx.responseValue as {
+        isPageList?: boolean
+        items?: any[]
+      }
+
+    if (res.isPageList) {
+      const items = res.items
+
+      const page = Number(ctx.query.page) || 1
+      const size = Number(ctx.query.size) || 20
+
+      const total = res.total
+      const lastPage = Math.ceil(total! / size)
+
+      ctx.response = {
+        page,
+        size,
+        items,
+        total,
+
+        nextPage: page + 1 < lastPage ? page + 1 : null,
+        lastPage,
+      }
+
+      return ctx.response
+    }
+  })
   .use(userRoutes({ log: true }))
   .use(cookiesRoutes())
   .use(extendsRoute)
@@ -58,6 +87,8 @@ const PAA = app // this is for eden type
   })
   .onAfterHandle((ctx) => {
     console.log('this is interceptor after handle')
+
+    console.log(ctx.responseValue)
   })
   .onAfterResponse((ctx) => {
     console.log('this is interceptor after response')

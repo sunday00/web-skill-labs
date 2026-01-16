@@ -1,5 +1,5 @@
 import { Elysia, t } from 'elysia'
-import { userCreateInput, userService } from './user.service'
+import { paginateInput, userCreateInput, userService } from './user.service'
 
 const userRoutes = ({ log }: { log: boolean }) => {
   const r = new Elysia()
@@ -11,7 +11,7 @@ const userRoutes = ({ log }: { log: boolean }) => {
     }),
   })
     .onBeforeHandle((ctx) => {
-      if (log) console.log(ctx.request)
+      if (log) console.log('LOG Router before handler', ctx.request)
     })
     .onAfterHandle({ as: 'scoped' }, (ctx) => {
       if (log) console.log('scoped hook can propagate to parent also')
@@ -26,6 +26,18 @@ const userRoutes = ({ log }: { log: boolean }) => {
     },
     {
       body: userCreateInput,
+    },
+  )
+
+  r.get(
+    '/user',
+    async (ctx) => {
+      const [items, total] = await userService.findManyWithCount(ctx.query)
+
+      return { items, total, isPageList: true }
+    },
+    {
+      query: paginateInput,
     },
   )
 
