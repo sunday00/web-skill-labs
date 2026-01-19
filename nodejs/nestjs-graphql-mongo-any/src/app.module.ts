@@ -3,6 +3,7 @@ import { InfraModule } from './infra.module'
 import { HelloModule } from './hello/hello.module'
 import { UFireBaseModule } from './u-fire-base/u-fire-base.module'
 import { FruitModule } from './fruit/fruit.module'
+import { DuckdbModule } from './duckdb/duckdb.module';
 
 @Module({
   imports: [
@@ -10,6 +11,7 @@ import { FruitModule } from './fruit/fruit.module'
     HelloModule,
     UFireBaseModule,
     FruitModule,
+    DuckdbModule,
   ],
   controllers: [],
   providers: [],
