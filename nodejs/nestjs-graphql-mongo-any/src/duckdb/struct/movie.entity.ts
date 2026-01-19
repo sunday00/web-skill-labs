@@ -2,6 +2,7 @@ import { Field, InputType, ObjectType } from '@nestjs/graphql'
 
 @ObjectType()
 export class Movie {
+  @Field()
   id: number
 
   @Field()

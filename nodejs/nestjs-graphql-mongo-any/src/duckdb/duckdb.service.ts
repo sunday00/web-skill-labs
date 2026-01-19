@@ -14,19 +14,16 @@ export class DuckdbService {
     const conn = await instance.connect()
 
     return await conn.run(`
+      CREATE SEQUENCE IF NOT EXISTS seq_movieid START 1;
+
       CREATE TABLE IF NOT EXISTS movies
       (
-        id         INTEGER PRIMARY KEY,
+        id         INTEGER PRIMARY KEY DEFAULT nextval('seq_movieid'),
         title      VARCHAR,
         director   VARCHAR
       );
 
-      CREATE SEQUENCE IF NOT EXISTS seq_movieid START 1;
-
-      INSERT INTO movies VALUES 
-                           (nextval('seq_movieid'), 'Old Boy', 'Park chan-wook'), 
-                           (nextval('seq_movieid'), 'Parasite', 'Bong Jun-ho')
-        ;
+      INSERT INTO movies (title, director) VALUES ('${input.title}', '${input.director}');
     `)
   }
 }
