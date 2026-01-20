@@ -11,6 +11,7 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo'
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default'
 import { GraphQLError } from 'graphql/error'
 import { FirebaseModule } from './_common/modules/firebase/firebase.module'
+import { DuckModule } from '@/_common/modules/duck/duck.module'
 
 @Global()
 @Module({})
@@ -35,6 +36,7 @@ export class InfraModule {
         },
         inject: [ConfigService],
       }),
+      DuckModule.registerAsync(),
       JwtModule.register(jwtOptions()),
     ]
 

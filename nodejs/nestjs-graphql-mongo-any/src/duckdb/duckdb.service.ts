@@ -1,19 +1,14 @@
 import { Injectable } from '@nestjs/common'
 import { CreateMovieInput } from '@/duckdb/struct/movie.entity'
-import { DuckDBInstance } from '@duckdb/node-api'
-import path from 'node:path'
+import { DuckService } from '@/_common/modules/duck/duck.service'
+import { Result } from '@duckdb/node-bindings'
 
 @Injectable()
 export class DuckdbService {
-  async storeMovie(input: CreateMovieInput) {
-    const instance = await DuckDBInstance.fromCache(
-      path.join(process.cwd(), 'db', 'ducks', 'duck.parquet'),
-      { threads: '4' },
-    )
+  constructor(private readonly duckService: DuckService) {}
 
-    const conn = await instance.connect()
-
-    return await conn.run(`
+  async storeMovie(input: CreateMovieInput): Promise<Result> {
+    const res = await this.duckService.conn.run(`
       CREATE SEQUENCE IF NOT EXISTS seq_movieid START 1;
 
       CREATE TABLE IF NOT EXISTS movies
@@ -23,7 +18,13 @@ export class DuckdbService {
         director   VARCHAR
       );
 
-      INSERT INTO movies (title, director) VALUES ('${input.title}', '${input.director}');
+      INSERT INTO movies (title, director) VALUES ('${input.title}', '${input.director}') RETURNING id;
     `)
+
+    // await this.duckService.conn.run(
+    //   `COPY (SELECT * FROM movies) TO 'duck.parquet' (FORMAT 'parquet')`,
+    // )
+
+    return res['result']
   }
 }

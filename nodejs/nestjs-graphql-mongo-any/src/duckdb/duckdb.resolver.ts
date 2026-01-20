@@ -10,8 +10,10 @@ export class DuckdbResolver {
   public async storeMovie(@Args('input') input: CreateMovieInput) {
     const r = await this.duckdbService.storeMovie(input)
 
+    console.log(r)
+
     return {
-      id: Number(r.returnType),
+      id: 1,
       title: input.title,
       director: input.director,
     }
