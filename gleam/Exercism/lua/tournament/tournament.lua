@@ -14,6 +14,24 @@ function string.split (inputstr, sep)
     return t
 end
 
+function string.rightPad(str, len, char)
+    char = char or " "
+    local padLen = len - #tostring(str)
+    if padLen <= 0 then
+        return str
+    end
+    return tostring(str) .. string.rep(char, padLen)
+end
+
+function string.leftPad(str, len, char)
+    char = char or " "
+    local padLen = len - #tostring(str)
+    if padLen <= 0 then
+        return str
+    end
+    return string.rep(char, padLen) .. tostring(str)
+end
+
 local r = {}
 
 local function recordR(home, away, res, reverse)
@@ -28,9 +46,9 @@ local function recordR(home, away, res, reverse)
         end
 
     else
-
         r[home] = {
-            mp = 1,
+            label = home,
+            mp = 0,
             win = 0,
             loss = 0,
             draw = 0,
@@ -38,13 +56,13 @@ local function recordR(home, away, res, reverse)
         }
 
         recordR(home, away, res, reverse)
+
+        return
     end
 
     if reverse then
         return
-
     else
-
         local unRes = 'draw'
         if res == 'win' then
             unRes = 'loss'
@@ -54,10 +72,14 @@ local function recordR(home, away, res, reverse)
         end
 
         recordR(away, home, unRes, true)
+
+        return
     end
 end
 
 local function tournament (results)
+    r = {}
+
     for _, v in ipairs(results) do
         local row = string.split(v, ';')
 
@@ -78,24 +100,48 @@ local function tournament (results)
         :: continue ::
     end
 
-    for i, v in pairs(r) do
-        print(i, '===')
-
-        for ii, vv in pairs(v) do
-            print('  ', ii, vv)
-        end
+    local localR = {}
+    for _, v in pairs(r) do
+        table.insert(localR, v)
     end
 
-    return r
+    table.sort(localR, function(a, b)
+        if a.point == b.point then
+            return a.label < b.label
+        end
+
+        return a.point > b.point
+    end)
+
+    local res = {
+        'Team                           | MP |  W |  D |  L |  P'
+    }
+
+    for _, v in ipairs(localR) do
+        local label = string.rightPad(v.label, 30) .. ' | '
+        local mp = string.leftPad(tostring(v.mp), 2) .. ' | '
+        local w = string.leftPad(tostring(v.win), 2) .. ' | '
+        local d = string.leftPad(tostring(v.draw), 2) .. ' | '
+        local l = string.leftPad(tostring(v.loss), 2) .. ' | '
+        local p = string.leftPad(tostring(v.point), 2)
+
+        table.insert(res, label .. mp .. w .. d .. l .. p)
+    end
+
+    return res
 end
 
-tournament({
-    'Courageous Californians;Devastating Donkeys;win',
+local res = tournament({
     'Allegoric Alaskans;Blithering Badgers;win',
-    'Devastating Donkeys;Allegoric Alaskans;loss',
-    'Courageous Californians;Blithering Badgers;win',
-    'Blithering Badgers;Devastating Donkeys;draw',
-    'Allegoric Alaskans;Courageous Californians;draw'
+    'Devastating Donkeys;Courageous Californians;draw',
+    'Devastating Donkeys;Allegoric Alaskans;win',
+    'Courageous Californians;Blithering Badgers;loss',
+    'Blithering Badgers;Devastating Donkeys;loss',
+    'Allegoric Alaskans;Courageous Californians;win'
 })
+
+--for _, v in ipairs(res) do
+--    print(v)
+--end
 
 return tournament
