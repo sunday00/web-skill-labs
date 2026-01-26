@@ -26,9 +26,10 @@ local function smallest(min, max)
     end
 
     local value = nil
+    local middle = max
 
     for i = min, max do
-        for ii = i, max do
+        for ii = i, middle do
             local x = tostring(i * ii)
 
             for xi = 1, math.floor(#x / 2) do
@@ -39,6 +40,7 @@ local function smallest(min, max)
 
             if value == nil or value > i * ii then
                 value = i * ii
+                middle = ii
             end
 
             :: continue ::
@@ -60,9 +62,10 @@ local function largest(min, max)
     end
 
     local value = nil
+    local middle = 1
 
     for i = max, min, -1 do
-        for ii = i, min, -1 do
+        for ii = i, middle, -1 do
             local x = tostring(i * ii)
 
             for xi = 1, math.floor(#x / 2) do
@@ -73,6 +76,7 @@ local function largest(min, max)
 
             if value == nil or value < i * ii then
                 value = i * ii
+                middle = ii
             end
 
             :: continue ::
@@ -88,7 +92,7 @@ local function largest(min, max)
     return { value = value, factors = f }
 end
 
-local r = largest(1000, 9999)
-print(r.value, r.factors[1])
+--local r = largest(1000, 9999)
+--print(r.value, r.factors[1])
 
 return { smallest = smallest, largest = largest }
