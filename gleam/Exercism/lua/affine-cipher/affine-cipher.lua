@@ -14,6 +14,10 @@ function string.split (inputstr, sep)
     return t
 end
 
+function string.replace(s, prev, after)
+    return string.gsub(s, prev, after)
+end
+
 local list = {
     a = 1,
     b = 2,
@@ -65,6 +69,16 @@ local function iToA (i)
     return rList[i + 1]
 end
 
+local function isACop (x)
+    for i = 2, 13 do
+        if x % i == 0 and 26 % i == 0 then
+            return false
+        end
+    end
+
+    return true
+end
+
 local function encLetter (key, l)
     if tonumber(l) ~= nil then
         return l
@@ -78,12 +92,16 @@ local function encLetter (key, l)
 end
 
 local function encode(phrase, key)
+    if not isACop(key.a) then
+        error('a and m must be coprime.')
+    end
+
     local lower = string.split(phrase:lower())
 
     local enc = ''
     for _, v in ipairs(lower) do
         local el = encLetter(key, v)
-        if #enc % 6 == 0 then
+        if #enc % 6 == 0 and el ~= '' then
             enc = enc .. ' ' .. el
         else
             enc = enc .. el
@@ -93,10 +111,40 @@ local function encode(phrase, key)
     return enc:sub(2, #enc)
 end
 
-local function decode(phrase, key)
-
+local function getMMI(n)
+    for i = 1, 26 do
+        if (n * i) % 26 == 1 then
+            return i
+        end
+    end
 end
 
-print(decode('Testing,1 2 3, testing.', { a = 3, b = 4 }))
+local function decodeLetter(key, l)
+    if tonumber(l) ~= nil then
+        return l
+    end
+
+    local mmi = getMMI(key.a)
+    return iToA(mmi * (aToI(l) - key.b) % 26)
+end
+
+local function decode(phrase, key)
+    if not isACop(key.a) then
+        error('a and m must be coprime.')
+    end
+
+    local plain = string.replace(phrase, ' ', '')
+    plain = string.split(plain)
+
+    local dec = ''
+    for _, v in ipairs(plain) do
+        local dl = decodeLetter(key, v)
+        dec = dec .. dl
+    end
+
+    return dec
+end
+
+--print(encode('This is a test.', { a = 6, b = 17 }))
 
 return { encode = encode, decode = decode }
