@@ -1,0 +1,22 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="prime-factors.lua" type="lua.app" factoryName="Lua Application">
+    <option name="program" value="$USER_HOME$/.luaver/lua/5.4.8/bin/lua" />
+    <option name="file" value="$PROJECT_DIR$/prime-factors/prime-factors.lua" />
+    <option name="workingDir" value="$PROJECT_DIR$" />
+    <option name="debuggerType" value="2" />
+    <option name="params" value="" />
+    <option name="charset" value="UTF-8" />
+    <option name="showConsole" value="true" />
+    <method v="2" />
+  </configuration>
+  <configuration default="false" name="prime-factors.lua" type="lua.app" factoryName="Lua Application">
+    <option name="program" value="$USER_HOME$/.luaver/lua/5.4.8/bin/lua" />
+    <option name="file" value="$PROJECT_DIR$/prime-factors/prime-factors.lua" />
+    <option name="workingDir" value="$PROJECT_DIR$" />
+    <option name="debuggerType" value="2" />
+    <option name="params" value="" />
+    <option name="charset" value="UTF-8" />
+    <option name="showConsole" value="true" />
+    <method v="2" />
+  </configuration>
+</component>
