@@ -1,0 +1,3 @@
+#!/bin/zsh
+
+exercism test
