@@ -1,8 +1,0 @@
-extend type Mutation {
-    addScore(addScoreInput: AddScoreInput): Boolean
-}
-
-input AddScoreInput {
-    name: String
-    score: Int
-}

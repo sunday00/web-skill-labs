@@ -1,8 +1,0 @@
-[package]
-name = "ch19-advanced"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-hello_macro = { path = "./src/e_macro/hello_macro" }
-hello_macro_derive = { path = "./src/e_macro/hello_macro/hello_macro_derive" }

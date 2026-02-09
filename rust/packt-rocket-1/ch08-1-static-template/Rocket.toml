@@ -1,7 +1,0 @@
-[default]
-database_url = "sqlite:///Users/sunday00/workspace/web-skill-labs/rust/packt-rocket-1/ch08-1-static-template/rocket_exam.db"
-log_level = "normal"
-template_dir = "src/views"
-
-[debug]
-database_url = "sqlite:///Users/sunday00/workspace/web-skill-labs/rust/packt-rocket-1/ch08-1-static-template/rocket_exam.db"

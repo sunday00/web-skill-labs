@@ -1,7 +1,0 @@
-name = "plain_strings"
-version = "0.1.0"
-
-[dependencies]
-gleam_stdlib = ">= 0.54.0 or ~> 1.0"
-
-[dev-dependencies]
