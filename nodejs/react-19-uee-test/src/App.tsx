@@ -1,14 +1,20 @@
 import { Container } from '@/components/ui/container.tsx'
+import { Navigate, Route, Routes } from 'react-router'
+import StandardLayout from '@/layout/standard.layout.tsx'
 
 function App() {
   return (
     <Container
-      className="container border-2 border-blue-500"
+      className="container"
       variant="fullMobileConstrainedBreakpointPadded"
     >
-      <div className="border-2 border-red-500 h-[800px]">
-        <p>SUCCESS</p>
-      </div>
+      <main className="main p-2">
+        <Routes>
+          <Route path="/*" element={<StandardLayout />} />
+
+          <Route path="/" element={<Navigate to="/home" replace />} />
+        </Routes>
+      </main>
     </Container>
   )
 }
