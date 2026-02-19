@@ -17,17 +17,26 @@ local CircularBuffer = {
             wp = 1,
             rp = 1,
 
+            len = 0,
+
             write = function(self, el)
-                if #self.space == n then
+                if self.len == n then
                     error('buffer is full')
                 end
 
+                if el == nil then
+                    self.space[self.wp] = nil
+                    return
+                end
+
                 self.space[self.wp] = el
+                self.len = self.len + 1
+
                 self.wp = adjN(self.wp + 1)
             end,
 
             forceWrite = function(self, el)
-                if #self.space == n then
+                if self.len == n then
                     self.space[self.rp] = el
                     self.rp = adjN(self.rp + 1)
 
@@ -40,18 +49,26 @@ local CircularBuffer = {
             read = function(self)
                 local t = self.space[self.rp]
 
-                if #self.space == n then
+                if self.len == n then
                     self.wp = self.rp
                 end
 
-                if #self.space == 0 then
+                if self.len == 0 then
                     error('buffer is empty')
                 end
 
                 self.space[self.rp] = nil
                 self.rp = adjN(self.rp + 1)
+                self.len = self.len - 1
 
                 return t
+            end,
+
+            clear = function(self)
+                self.space = {}
+                self.wp = 1
+                self.rp = 1
+                self.len = 0
             end
         }
 
@@ -59,17 +76,17 @@ local CircularBuffer = {
     end
 }
 
-local b = CircularBuffer:new(3)
-b:write('1')
+--local b = CircularBuffer:new(2)
+--print('len0', b.len)
+--b:write('1')
+--print('len after add 1', b.len)
+--b:forceWrite('2')
+--print('len after add 2', b.len)
 --print(b:read())
-b:write('2')
+--print('len after read 1', b.len)
 --print(b:read())
-b:write('3')
---b:write('11')
-print(b:read())
---b:forceWrite('12')
---b:forceWrite('13')
-
---print(b.space[1], b.space[2], b.space[3], b.space[4], b.space[5], b.wp, b.rp)
+--print('len after read 2', b.len)
+--print(b:read())
+--print('len after read empty', b.len)
 
 return CircularBuffer
