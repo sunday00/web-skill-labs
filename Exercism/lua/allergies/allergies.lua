@@ -41,10 +41,18 @@ local function list(score)
 end
 
 local function allergic_to(score, which)
-    
+    local l = list(score)
+
+    for _, v in ipairs(l) do
+        if v == which then
+            return true
+        end
+    end
+
+    return false
 end
 
-local ll = list(216)
-print(ll[1], ll[2], ll[3], ll[4], ll[5])
+--local ll = list(0)
+--print(ll[1], ll[2], ll[3], ll[4], ll[5])
 
 return { list = list, allergic_to = allergic_to }
