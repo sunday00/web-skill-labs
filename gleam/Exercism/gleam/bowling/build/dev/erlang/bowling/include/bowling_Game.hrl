@@ -1,0 +1,1 @@
+-record(game, {frames :: list(bowling:frame())}).

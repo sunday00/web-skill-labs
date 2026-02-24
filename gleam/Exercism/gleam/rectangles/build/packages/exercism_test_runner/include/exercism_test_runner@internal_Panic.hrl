@@ -1,0 +1,1 @@
+-record(panic, {message :: binary(), module :: binary(), line :: integer()}).

@@ -1,0 +1,1 @@
+-record(tree, {label :: any(), children :: list(pov:tree(any()))}).

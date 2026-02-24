@@ -1,0 +1,1 @@
+-record(crashed, {error :: gleam@dynamic:dynamic_()}).

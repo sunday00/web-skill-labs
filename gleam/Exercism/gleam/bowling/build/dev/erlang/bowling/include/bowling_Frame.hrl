@@ -1,0 +1,1 @@
+-record(frame, {rolls :: list(integer()), bonus :: list(integer())}).

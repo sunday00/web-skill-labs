@@ -1,0 +1,1 @@
+-record(variant, {name :: binary(), fields :: list(glance:field(glance:type()))}).

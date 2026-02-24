@@ -1,0 +1,14 @@
+{application, exercism_test_runner, [
+    {vsn, "1.9.0"},
+    {applications, [argv,
+                    gap,
+                    glance,
+                    gleam_community_ansi,
+                    gleam_erlang,
+                    gleam_json,
+                    gleam_stdlib,
+                    simplifile]},
+    {description, "A test framework for Gleam exercises on Exercism"},
+    {modules, []},
+    {registered, []}
+]}.
