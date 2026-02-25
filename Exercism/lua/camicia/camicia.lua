@@ -9,6 +9,7 @@ local function debug(game, line)
     print('B: ', game.B.dec)
 
     print('piles: ', game.piles)
+    print('game: ', game.tricks, game.cards)
     print('\n\n')
 end
 
@@ -40,23 +41,25 @@ local function newGame(playerA, playerB)
         cards = 0,
         status = '',
 
-        A = { history = { '' }, dec = '' },
-        B = { history = { '' }, dec = '' },
+        A = { dec = '' },
+        B = { dec = '' },
         turn = 'A',
+
         lastAskPay = nil,
+        history = {},
 
         piles = ''
     }
 
     for _, v in ipairs(playerA) do
-        game.A.history[1] = game.A.history[1] .. cardToI(v)
         game.A.dec = game.A.dec .. cardToI(v)
     end
 
     for _, v in ipairs(playerB) do
-        game.B.history[1] = game.B.history[1] .. cardToI(v)
         game.B.dec = game.B.dec .. cardToI(v)
     end
+
+    table.insert(game.history, game.A.dec .. '|' .. game.B.dec)
 
     return game
 end
@@ -110,28 +113,53 @@ local function processPayDn(game)
 
     game.piles = ''
 
-    game.turn = opposite(game.turn)
+    game.turn = game.lastAskPay
+
+    if game[opposite(game.lastAskPay)].dec == '' then
+        game.status = 'finished'
+        return true
+    end
+
+    return false
 end
 
 local function processNoCard (game)
-    game[opposite(game.turn)].dec = game[opposite(game.turn)].dec .. game.piles
-    game.tricks = game.tricks + 1
-    game.cards = game.cards + #game.piles
+    if game.piles ~= '' then
+        game[opposite(game.turn)].dec = game[opposite(game.turn)].dec .. game.piles
+        game.tricks = game.tricks + 1
+        game.cards = game.cards + #game.piles
+    end
 
     game.status = 'finished'
     game.piles = ''
 end
 
+local function recordAndCheck(game)
+    for i, v in ipairs(game.history) do
+        if v == game.A.dec .. '|' .. game.B.dec .. '|' .. game.piles then
+            return true
+        end
+    end
+
+    table.insert(game.history, game.A.dec .. '|' .. game.B.dec .. '|' .. game.piles)
+    return false
+end
+
 local function processTurn (game, prevCard)
     local card = prevCard or drawCard(game)
 
-    debug(game)
+    --print(card == nil, card == '', card)
+    --debug(game)
 
-    if card == nil then
+    if card == nil or card == '' then
         processNoCard(game)
 
         return { status = 'finished', tricks = game.tricks, cards = game.cards }
     elseif card == '0' then
+        if recordAndCheck(game) then
+            return { status = 'loop', tricks = game.tricks, cards = game.cards }
+        end
+
         game.turn = opposite(game.turn)
 
         return processTurn(game)
@@ -141,13 +169,29 @@ local function processTurn (game, prevCard)
         if not dn and why == 'payChange' then
             local chgTrigger = processPayChange(game)
 
-            processTurn(game, chgTrigger)
+            if recordAndCheck(game) then
+                return { status = 'loop', tricks = game.tricks, cards = game.cards }
+            end
+
+            return processTurn(game, chgTrigger)
+        elseif not dn and why == 'noCard' then
+            processNoCard(game)
+            return { status = 'finished', tricks = game.tricks, cards = game.cards }
         else
-            processPayDn(game)
+            local gameDn = processPayDn(game)
+            if gameDn then
+                return { status = 'finished', tricks = game.tricks, cards = game.cards }
+            end
+
+            --if recordAndCheck(game) then
+            --    return { status = 'loop', tricks = game.tricks, cards = game.cards }
+            --end
 
             return processTurn(game)
         end
     end
+
+    return { status = 'finished', tricks = game.tricks, cards = game.cards }
 end
 
 local function simulate_game(playerA, playerB)
@@ -155,10 +199,5 @@ local function simulate_game(playerA, playerB)
 
     return processTurn(game)
 end
-
-local playerA = { '1', '2', '3' }
-local playerB = { '4', '5', '6' }
-local r = simulate_game(playerA, playerB)
-print(r.status, r.tricks, r.cards)
 
 return { simulate_game = simulate_game }
