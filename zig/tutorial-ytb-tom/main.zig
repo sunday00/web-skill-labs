@@ -1,6 +1,46 @@
 const std = @import("std");
 const print = std.debug.print;
 
+const JobType = enum {
+    Doctor,
+    Lawyer,
+    Teacher,
+};
+
+const User = struct {
+    name: []const u8,
+    age: usize = 0,
+    occupation: JobType = .Doctor,
+
+    // pub fn format(
+    //     // self: User,
+    //     self: @This(),
+    //     comptime fmt: []const u8,
+    //     options: std.fmt.FormatOptions,
+    //     writer: anytype,
+    // ) !void {
+    //     // fmt나 options를 사용하지 않더라도 선언은 되어 있어야 함
+    //     _ = fmt;
+    //     _ = options;
+    //
+    //     // "User: 이름(나이)" 형태로 출력 시도
+    //     try writer.print("Custom Format -> User: {s} ({d}, {s})", .{
+    //         self.name,
+    //         self.age,
+    //         @tagName(self.occupation),
+    //     });
+    // }
+    //
+
+    pub fn toString(self: @This()) void {
+        print("User: {s} ({d}, {s})", .{
+            self.name,
+            self.age,
+            @tagName(self.occupation),
+        });
+    }
+};
+
 fn printString(comptime input: []const u8) void {
     std.debug.print(input, .{});
 }
@@ -103,5 +143,10 @@ pub fn main() void {
     // ----------------------------------------------
     // struct
 
-    const User = struct {};
+    const user: User = .{
+        .name = "John",
+    };
+
+    // std.debug.print("{}\n", .{user});
+    user.toString();
 }
