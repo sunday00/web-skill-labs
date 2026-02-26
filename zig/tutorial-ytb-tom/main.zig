@@ -59,4 +59,49 @@ pub fn main() void {
     const sli2: []i32 = arr3[0..2]; // slice ref shallow copy. not deep copy.
     sli2[1] = 100;
     print("{any} | {any}\n", .{ arr3, sli2 });
+
+    // -- pointer --
+
+    const ptr1: *i32 = &arr3[0];
+    ptr1.* = 0;
+    print("{}, {any}\n", .{ ptr1, arr3 });
+
+    // const
+    var exNo: i32 = 10;
+    const ptr2: *i32 = &exNo;
+    ptr2.* = 11;
+
+    print("{}\n", .{exNo});
+
+    const exNo22: i32 = 10;
+    const ptr22: *const i32 = &exNo22;
+    // ptr22.* = 11;
+
+    print("{}\n", .{ptr22.*});
+
+    // ----------------------------------------------
+    // chars
+
+    // const sli21: []const u8 = "Hello English";
+    const letter21: u8 = 'A';
+    const letter22: u8 = 65;
+
+    print("{}, {}, {c}\n", .{ letter21, letter22, letter22 });
+
+    const ss21: []const u8 = "hello my string example";
+    const ss22: [6]u8 = .{ 'g', 'r', 'a', 'y', ' ', 'y' };
+
+    var ss223: [6]u8 = .{ 'g', 'r', 'a', 'y', ' ', 'y' };
+    const ss23: []u8 = &ss223; // <-- ref via pointer can be from mutable var only.
+    ss23[0] = 'k';
+
+    print("{s} | {s} | {s}\n", .{ ss21, ss22, ss23 });
+
+    const kr1: []const u8 = "안녕";
+    print("{s} | {}\n", .{ kr1, kr1.len });
+
+    // ----------------------------------------------
+    // struct
+
+    const User = struct {};
 }
