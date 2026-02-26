@@ -32,8 +32,9 @@ const User = struct {
     // }
     //
 
-    pub fn toString(self: @This()) void {
-        print("User: {s} ({d}, {s})", .{
+    // pub fn print(self: @This()) void {
+    pub fn print(self: *const User) void {
+        std.debug.print("User: {s} ({d}, {s})", .{
             self.name,
             self.age,
             @tagName(self.occupation),
@@ -148,5 +149,5 @@ pub fn main() void {
     };
 
     // std.debug.print("{}\n", .{user});
-    user.toString();
+    user.print();
 }
