@@ -22,10 +22,20 @@ pub fn run() !void {
         }
     }.getUserById;
 
-    const v = getUserById(7) catch |ee| {
+    const v = getUserById(7) catch |ee| blk: {
         print("{any}", .{ee});
-        return;
+        // return;
+        break :blk "oops";
     };
 
     ssPrint(v);
+
+    const v2 = getUserById(7);
+    if (v2) |res| {
+        ssPrint(res);
+    } else |err| {
+        print("{any}", .{err});
+    }
+
+    print("{d}", .{@divTrunc(10, 3)});
 }
