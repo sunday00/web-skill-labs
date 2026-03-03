@@ -13,7 +13,7 @@ pub fn run() !void {
     const e = error{notFound};
 
     const getUserById = struct {
-        fn getUserById(id: u8) ![]const u8 {
+        fn getUserById(id: u8) e![]const u8 { // error or return | E!T
             const users = [_][]const u8{ "kim", "lee", "ho" };
 
             if (id > users.len) return e.notFound;
@@ -38,4 +38,7 @@ pub fn run() !void {
     }
 
     print("{d}", .{@divTrunc(10, 3)});
+
+    // std.debug.assert(1 == 1);
+    // std.debug.assert(1 == 2);
 }
