@@ -7,6 +7,7 @@ const allocate = @import("p04-mem/allocate.zig");
 const compTime = @import("p05-comp-time/compTime.zig");
 const platform = @import("p06-built/platform.zig");
 const strictness = @import("p06-built/strict.zig");
+const att = @import("p06-built/att.zig");
 
 pub fn main() !void {
     // try primitive.run();
@@ -17,5 +18,6 @@ pub fn main() !void {
     // try allocate.run();
     // try compTime.run();
     // try platform.run();
-    try strictness.run();
+    // try strictness.run();
+    try att.run();
 }
