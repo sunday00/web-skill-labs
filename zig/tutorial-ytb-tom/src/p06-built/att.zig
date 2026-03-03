@@ -47,4 +47,7 @@ pub fn run() !void {
     // const vei: ee = @enumFromInt(2);
     // u.print("{}", .{vei});
     u.print("{}", .{@as(ee, @enumFromInt(2))});
+
+    const s = @src();
+    u.print("{s} @ fn {s} () - {d}:{d}", .{ s.file, s.fn_name, s.line, s.column });
 }

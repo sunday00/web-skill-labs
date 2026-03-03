@@ -8,6 +8,7 @@ const compTime = @import("p05-comp-time/compTime.zig");
 const platform = @import("p06-built/platform.zig");
 const strictness = @import("p06-built/strict.zig");
 const att = @import("p06-built/att.zig");
+const ioInput = @import("p07-io/input.zig");
 
 pub fn main() !void {
     // try primitive.run();
@@ -19,5 +20,6 @@ pub fn main() !void {
     // try compTime.run();
     // try platform.run();
     // try strictness.run();
-    try att.run();
+    // try att.run();
+    try ioInput.run();
 }
