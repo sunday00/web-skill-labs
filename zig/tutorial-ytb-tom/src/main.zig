@@ -5,6 +5,7 @@ const errorHandle = @import("p03-errors/handle.zig");
 const optional = @import("p03-errors/optional.zig");
 const allocate = @import("p04-mem/allocate.zig");
 const compTime = @import("p05-comp-time/compTime.zig");
+const platform = @import("p06-built/platform.zig");
 
 pub fn main() !void {
     // try primitive.run();
@@ -13,5 +14,6 @@ pub fn main() !void {
     // try errorHandle.run();
     // try optional.run();
     // try allocate.run();
-    try compTime.run();
+    // try compTime.run();
+    try platform.run();
 }

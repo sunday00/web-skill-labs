@@ -1,5 +1,5 @@
 0
-188 88048483 1772168481683862577 98253bf2b4bb8515d8d2ec064ba14466 0 src/main.zig
+693 88048483 1772520975439347538 2766512416ffadebe50c83aaf2bc2848 0 src/main.zig
 755 88562715 1772167889251014242 2bba894099517c5964b8ab4cda17b74e 0 src/root.zig
 22376 88534226 1760154801000000000 2d968f90418b6afe5ba91eaa2e18ba71 1 ubsan_rt.zig
 11083 88515330 1760154798000000000 3c8016eb348fede9a19b94ec4869d8a6 1 compiler_rt.zig
@@ -834,6 +834,14 @@
 419 88534052 1760154801000000000 ed7dfc04a5d0c4f0853edb5414ce981e 1 std/os/linux/bpf/btf_ext.zig
 24293 88534053 1760154801000000000 0c7d3ee9ea8e698a843ee6039fd161c4 1 std/os/linux/bpf/helpers.zig
 3221 88533800 1760154801000000000 fda67b74062c7f535bb0a6d0f1fe74fb 1 std/crypto/codecs/asn1/der/ArrayListReverse.zig
-188 88048483 1772168481683862577 98253bf2b4bb8515d8d2ec064ba14466 0 /Users/sunday00/workspace/web-skill-labs/zig/tutorial-ytb-tom/src/main.zig
+693 88048483 1772520975439347538 2766512416ffadebe50c83aaf2bc2848 0 /Users/sunday00/workspace/web-skill-labs/zig/tutorial-ytb-tom/src/main.zig
 4860 88562851 1772169094068795573 fb2e9e19013b2d57f991bba76d3264b4 0 /Users/sunday00/workspace/web-skill-labs/zig/tutorial-ytb-tom/src/p01-primitives/primitive.zig
-171 88567565 1772169148923417978 f4312b3fb4cdea1d8ba459beb2b4f281 0 /Users/sunday00/workspace/web-skill-labs/zig/tutorial-ytb-tom/src/p02-controls/control.zig
+1831 88567565 1772175784497839656 e0f301ecd8ef33ebc2a09c799d0cf401 0 /Users/sunday00/workspace/web-skill-labs/zig/tutorial-ytb-tom/src/p02-controls/conditions.zig
+998 88595844 1772177358916432463 0188bdf27d6aaead2425ca2702c6f569 0 /Users/sunday00/workspace/web-skill-labs/zig/tutorial-ytb-tom/src/p02-controls/list-and-loop.zig
+952 88598860 1772504932686842434 c3f0c33e9cc5ee0c7fd6a21fa07093a4 0 /Users/sunday00/workspace/web-skill-labs/zig/tutorial-ytb-tom/src/p03-errors/handle.zig
+875 88629985 1772502039611335539 cc0b27eb6a93ac0d8192f916616de479 0 /Users/sunday00/workspace/web-skill-labs/zig/tutorial-ytb-tom/src/p03-errors/optional.zig
+2139 89450737 1772515335754218031 695ab213c9f8e1f95bd27003ee376d44 0 /Users/sunday00/workspace/web-skill-labs/zig/tutorial-ytb-tom/src/p04-mem/allocate.zig
+1131 89483368 1772519695094376280 09d73cb1a4bd3ca4efd868e8b713a33a 0 /Users/sunday00/workspace/web-skill-labs/zig/tutorial-ytb-tom/src/p05-comp-time/compTime.zig
+163 89502970 1772521107320946548 427a08b17a613f233012412e2de4e2d9 0 /Users/sunday00/workspace/web-skill-labs/zig/tutorial-ytb-tom/src/p06-built/platform.zig
+238 88630008 1772184662067654294 60e18bbb2e9c31d1b5809675d56119e6 0 /Users/sunday00/workspace/web-skill-labs/zig/tutorial-ytb-tom/src/utils.zig
+3518 89482582 1772515209229677194 053e9ff40cdcb71dfd1bca2a1766456e 0 /Users/sunday00/workspace/web-skill-labs/zig/tutorial-ytb-tom/src/tracking_allocator.zig
