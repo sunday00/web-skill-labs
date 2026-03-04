@@ -1,3 +1,5 @@
+const std = @import("std");
+
 const primitive = @import("p01-primitives/primitive.zig");
 const conditions = @import("p02-controls/conditions.zig");
 const listAndLoop = @import("p02-controls/list-and-loop.zig");
@@ -9,6 +11,10 @@ const platform = @import("p06-built/platform.zig");
 const strictness = @import("p06-built/strict.zig");
 const att = @import("p06-built/att.zig");
 const ioInput = @import("p07-io/input.zig");
+const output = @import("p07-io/output.zig");
+const logging = @import("p07-io/logging.zig");
+
+pub const std_options: std.Options = .{ .log_level = .err };
 
 pub fn main() !void {
     // try primitive.run();
@@ -21,5 +27,7 @@ pub fn main() !void {
     // try platform.run();
     // try strictness.run();
     // try att.run();
-    try ioInput.run();
+    // try ioInput.run();
+    // try output.run();
+    try logging.run();
 }
