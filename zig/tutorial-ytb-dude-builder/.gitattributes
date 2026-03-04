@@ -1,0 +1,14 @@
+# 1. 기본 설정: 모든 텍스트 파일은 Git이 자동으로 줄바꿈을 정규화함 (추천)
+* text=auto
+
+# 2. 소스 코드: 어떤 OS에서 체크아웃하든 항상 LF(\n)로 유지
+# Zig 소스 파일과 빌드 설정 파일들이 대상입니다.
+*.zig text eol=lf
+*.zon text eol=lf
+
+# 3. 바이너리 파일: 이미지나 컴파일된 결과물은 줄바꿈 수정을 하지 않도록 보호
+*.png binary
+*.jpg binary
+*.ico binary
+*.exe binary
+*.dll binary
