@@ -8,3 +8,9 @@ pub fn print(comptime fmt: []const u8, args: anytype) void {
 pub fn ssPrint(args: []const u8) void {
     std.debug.print("{s}\n", .{args});
 }
+
+pub fn nsPrint(args: anytype) void {
+    const fmt = "{}   " ** args.len;
+    std.debug.print(fmt, args);
+    std.debug.print("\n", .{});
+}
