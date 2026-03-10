@@ -1,0 +1,48 @@
+services:
+  # 1. Config Server
+  configsvr:
+    image: mongo:8.2
+    container_name: configRS
+    command: ["mongod", "--config", "/etc/mongod.conf"]
+    ports:
+      - "27119:27119"
+    volumes:
+      - ./configsvr/conf/mongod.conf:/etc/mongod.conf
+      - ./configsvr/data:/data/db
+
+  # 2. Shard Server 1
+  shard1:
+    image: mongo:8.2
+    container_name: shard1
+    command: ["mongod", "--config", "/etc/mongod.conf"]
+    ports:
+      - "27118:27118"
+    volumes:
+      - ./shard1/conf/mongod.conf:/etc/mongod.conf
+      - ./shard1/data:/data/db
+
+  # 3. Shard Server 2
+  shard2:
+    image: mongo:8.2
+    container_name: shard2
+    command: ["mongod", "--config", "/etc/mongod.conf"]
+    ports:
+      - "27120:27120"
+    volumes:
+      - ./shard2/conf/mongod.conf:/etc/mongod.conf
+      - ./shard2/data:/data/db
+
+  # 4. Mongos (Router)
+  mongos:
+    image: mongo:8.2
+    container_name: mongos
+    depends_on:
+      - configsvr
+      - shard1
+      - shard2
+    command: ["mongos", "--config", "/etc/mongos.conf"]
+    ports:
+      - "27117:27117"
+    volumes:
+      - ./mongos/conf/mongos.conf:/etc/mongos.conf
+      - ./mongos/data:/data/db
