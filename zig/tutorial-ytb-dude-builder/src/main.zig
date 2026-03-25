@@ -5,6 +5,7 @@ const bo = @import("p03-control/bool.zig");
 const sw = @import("p03-control/switch.zig");
 const pnt = @import("p04-core/pointer.zig");
 const sli = @import("p02-mapped/slice.zig");
+const fl = @import("p03-control/loop-for.zig");
 
 pub fn main() !void {
     // try baseVari.run();
@@ -13,5 +14,6 @@ pub fn main() !void {
     // try sw.run();
     // try mapped.en.run();
     // try pnt.run();
-    try sli.run();
+    // try sli.run();
+    try fl.run();
 }

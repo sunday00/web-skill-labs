@@ -14,3 +14,9 @@ pub fn nsPrint(args: anytype) void {
     std.debug.print(fmt, args);
     std.debug.print("\n", .{});
 }
+
+pub fn rand(min: u8, max: u8) u8 {
+    const rd = std.crypto.random;
+
+    return rd.intRangeAtMost(u8, min, max);
+}
