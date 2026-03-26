@@ -9,6 +9,10 @@ pub fn ssPrint(args: []const u8) void {
     std.debug.print("{s}\n", .{args});
 }
 
+pub fn dsPrint(arg: u64) void {
+    std.debug.print("{}\n", .{arg});
+}
+
 pub fn nsPrint(args: anytype) void {
     const fmt = "{}   " ** args.len;
     std.debug.print(fmt, args);
