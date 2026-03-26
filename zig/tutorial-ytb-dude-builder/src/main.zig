@@ -8,6 +8,7 @@ const sli = @import("p02-mapped/slice.zig");
 const fl = @import("p03-control/loop-for.zig");
 const wl = @import("p03-control/loop-while.zig");
 const ff = @import("p04-core/func.zig");
+const err = @import("p04-core/err.zig");
 
 pub fn main() !void {
     // try baseVari.run();
@@ -19,5 +20,6 @@ pub fn main() !void {
     // try sli.run();
     // try fl.run();
     // try wl.run();
-    try ff.run();
+    // try ff.run();
+    try err.run();
 }
