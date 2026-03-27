@@ -11,6 +11,7 @@ const ff = @import("p04-core/func.zig");
 const err = @import("p04-core/err.zig");
 const str = @import("p01-names-num/strings.zig");
 const stct = @import("p02-mapped/oop.zig");
+const co = @import("p04-core/comp.zig");
 
 pub fn main() !void {
     // try baseVari.run();
@@ -25,5 +26,6 @@ pub fn main() !void {
     // try ff.run();
     // try err.run();
     // try str.run();
-    try stct.run();
+    // try stct.run();
+    try co.run();
 }

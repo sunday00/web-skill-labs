@@ -2,15 +2,15 @@ const std = @import("std");
 const builtin = @import("builtin");
 const u = @import("../custom_utils.zig");
 
-const Point = struct {
+pub const Point = struct {
     x: f32,
     y: f32 = 0,
 
-    fn new(x: f32, y: f32) Point {
+    pub fn new(x: f32, y: f32) Point {
         return .{ .x = x, .y = y };
     }
 
-    fn distance(self: @This(), other: Point) f32 {
+    pub fn distance(self: @This(), other: Point) f32 {
         const diffx = other.x - self.x;
         const diffy = other.y - self.y;
 
