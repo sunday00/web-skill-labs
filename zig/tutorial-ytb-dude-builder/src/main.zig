@@ -8,11 +8,12 @@ const sli = @import("p02-mapped/slice.zig");
 const fl = @import("p03-control/loop-for.zig");
 const wl = @import("p03-control/loop-while.zig");
 const ff = @import("p04-core/func.zig");
-const err = @import("p04-core/err.zig");
+const err = @import("p06-dev/err.zig");
 const str = @import("p01-names-num/strings.zig");
 const stct = @import("p02-mapped/oop.zig");
 const co = @import("p04-core/comp.zig");
 const any = @import("p04-core/any.zig");
+const tt = @import("p06-dev/testing.zig");
 
 pub fn main() !void {
     // try baseVari.run();
@@ -29,5 +30,10 @@ pub fn main() !void {
     // try str.run();
     // try stct.run();
     // try co.run();
-    try any.run();
+    // try any.run();
+    try tt.run();
+}
+
+test {
+    @import("std").testing.refAllDecls(@This());
 }
