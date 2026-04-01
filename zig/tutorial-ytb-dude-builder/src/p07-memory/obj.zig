@@ -5,6 +5,8 @@ const u = @import("../custom_utils.zig");
 const he = "Hello";
 const wd = "World";
 
+const Error = error{ Boom, OutOfMemory };
+
 fn catOutVarLen(a: u.String, b: u.String, out: []u8) usize {
     std.debug.assert(out.len >= a.len + b.len);
 
@@ -53,8 +55,37 @@ fn useCatAlloc() !void {
     u.ssPrint(resMem);
 }
 
+fn useFailableCatAlloc(allocator: std.mem.Allocator) Error![]u8 {
+    const resMem = try catAlloc(allocator, he, wd);
+    errdefer allocator.free(resMem); // only defer when error.
+
+    mayFail() catch |e| {
+        std.debug.print("{any}", .{e});
+    };
+
+    return resMem;
+}
+
+fn mayFail() Error!void {
+    return Error.Boom;
+}
+
 pub fn run() !void {
     useCatOutVarLen();
 
     try useCatAlloc();
+
+    var gpa = std.heap.GeneralPurposeAllocator(.{}).init;
+    defer _ = gpa.deinit();
+
+    const allocator = gpa.allocator();
+
+    const fwd = useFailableCatAlloc(allocator) catch |e| blk: {
+        std.debug.print("{any}", .{e});
+
+        break :blk "";
+    };
+    defer allocator.free(fwd); // defer should on caller.
+
+    std.debug.print("{s}", .{fwd});
 }
