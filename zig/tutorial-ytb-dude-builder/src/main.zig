@@ -15,6 +15,7 @@ const co = @import("p04-core/comp.zig");
 const any = @import("p04-core/any.zig");
 const tt = @import("p06-dev/testing.zig");
 const mb = @import("p07-memory/basic.zig");
+const mo = @import("p07-memory/obj.zig");
 
 pub fn main() !void {
     // try baseVari.run();
@@ -33,7 +34,8 @@ pub fn main() !void {
     // try co.run();
     // try any.run();
     // try tt.run();
-    try mb.run();
+    // try mb.run();
+    try mo.run();
 }
 
 test {

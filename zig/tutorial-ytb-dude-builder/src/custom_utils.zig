@@ -26,3 +26,7 @@ pub fn rand(min: u8, max: u8) u8 {
 
     return rd.intRangeAtMost(u8, min, max);
 }
+
+pub fn eq(a: String, b: String) bool {
+    return std.mem.eql(u8, a, b);
+}
