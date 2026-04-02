@@ -23,6 +23,7 @@ const areb = @import("p07-memory/arena.zig");
 const etcM = @import("p07-memory/etc.zig");
 const mp = @import("p07-memory/pool.zig");
 const buildMode = @import("p06-dev/build-mode.zig");
+const formatString = @import("p01-names-num/format.zig");
 
 pub const std_options: std.Options = .{
     .log_level = if (builtin.mode == .Debug) .debug else .info,
@@ -51,7 +52,8 @@ pub fn main() !void {
     // try areb.run();
     // try etcM.run();
     // try mp.run();
-    try buildMode.run();
+    // try buildMode.run();
+    try formatString.main();
 }
 
 test {
