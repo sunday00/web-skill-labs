@@ -42,8 +42,8 @@ pub fn main() !void {
     // try mo.run();
     // try fb.run();
     // try areb.run();
-    // try etcM.run();
-    try mp.run();
+    try etcM.run();
+    // try mp.run();
 }
 
 test {
