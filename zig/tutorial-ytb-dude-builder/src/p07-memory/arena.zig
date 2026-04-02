@@ -100,7 +100,7 @@ pub fn AList(comptime T: type) type {
 
             fn init(allocator: Allocator, data: T) !*Node {
                 const ptr = try allocator.create(Node);
-                ptr.allocator = allocator;
+                // ptr.allocator = allocator;
                 ptr.data = data;
                 ptr.next = null;
 

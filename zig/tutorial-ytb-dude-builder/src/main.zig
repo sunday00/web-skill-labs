@@ -18,6 +18,8 @@ const mb = @import("p07-memory/basic.zig");
 const mo = @import("p07-memory/obj.zig");
 const fb = @import("p07-memory/fixed-buffer.zig");
 const areb = @import("p07-memory/arena.zig");
+const etcM = @import("p07-memory/etc.zig");
+const mp = @import("p07-memory/pool.zig");
 
 pub fn main() !void {
     // try baseVari.run();
@@ -39,7 +41,9 @@ pub fn main() !void {
     // try mb.run();
     // try mo.run();
     // try fb.run();
-    try areb.run();
+    // try areb.run();
+    // try etcM.run();
+    try mp.run();
 }
 
 test {
