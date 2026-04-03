@@ -53,7 +53,8 @@ pub fn main() !void {
     // try etcM.run();
     // try mp.run();
     // try buildMode.run();
-    try formatString.main();
+    // try formatString.main();
+    try @import("p02-mapped/cast.zig").run();
 }
 
 test {
