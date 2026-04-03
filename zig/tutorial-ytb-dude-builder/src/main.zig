@@ -54,7 +54,11 @@ pub fn main() !void {
     // try mp.run();
     // try buildMode.run();
     // try formatString.main();
-    try @import("p02-mapped/cast.zig").run();
+    // try @import("p02-mapped/cast.zig").run();
+
+    try @import("p01-names-num/dynamic.zig").run();
+    std.debug.print("\n\n=======\n\n", .{});
+    try @import("p02-mapped/tuple.zig").main();
 }
 
 test {
