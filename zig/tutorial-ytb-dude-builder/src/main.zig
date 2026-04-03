@@ -56,9 +56,11 @@ pub fn main() !void {
     // try formatString.main();
     // try @import("p02-mapped/cast.zig").run();
 
-    try @import("p01-names-num/dynamic.zig").run();
-    std.debug.print("\n\n=======\n\n", .{});
-    try @import("p02-mapped/tuple.zig").main();
+    // try @import("p01-names-num/dynamic.zig").run();
+    // std.debug.print("\n\n=======\n\n", .{});
+    // try @import("p02-mapped/tuple.zig").main();
+
+    try @import("p07-memory/mem-layout.zig").main();
 }
 
 test {
