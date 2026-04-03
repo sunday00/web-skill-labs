@@ -60,7 +60,9 @@ pub fn main() !void {
     // std.debug.print("\n\n=======\n\n", .{});
     // try @import("p02-mapped/tuple.zig").main();
 
-    try @import("p07-memory/mem-layout.zig").main();
+    // try @import("p07-memory/mem-layout.zig").main();
+
+    try @import("p02-mapped/arr-list.zig").main();
 }
 
 test {
