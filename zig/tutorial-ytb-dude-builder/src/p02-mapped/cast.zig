@@ -86,6 +86,47 @@ fn pointCast() !void {
     u.print("{*} {*} {*} {}", .{ &a, b, c, @TypeOf(c) });
 }
 
+fn bit() !void {
+    const ff1: f64 = 3.141592;
+    const bits: u64 = @bitCast(ff1);
+    u.print("{} {} {b}", .{ ff1, bits, bits });
+
+    const ii1: u64 = @intFromFloat(ff1);
+    u.print("{d} {b}", .{ ii1, ii1 });
+
+    const ffBitBit: f64 = @bitCast(bits);
+    u.print("{}", .{ffBitBit});
+
+    const negative: i32 = -1;
+    const bNG: u32 = @bitCast(negative);
+    const hm: f32 = @floatFromInt(bNG);
+    u.print("{d} {d} {d}", .{ negative, bNG, hm });
+
+    const S = packed struct { x: u16, y: u16 };
+    const s = S{ .x = 11, .y = 1 };
+    const bs: u32 = @bitCast(s);
+    u.print("{}", .{bs});
+
+    const reS: S = @bitCast(bs);
+    u.print("{}", .{reS});
+
+    const S2 = packed struct { x: u8, y: u16 };
+    const s2 = S2{ .x = 11, .y = 1 };
+    const b2s: u24 = @bitCast(s2);
+    u.print("{}", .{b2s});
+
+    const re2S: S2 = @bitCast(b2s);
+    u.print("{}", .{re2S});
+
+    const S3 = extern struct { x: u8, y: bool };
+    const s3 = S3{ .x = 11, .y = true };
+    const b3s: u16 = @bitCast(s3);
+    u.print("{}", .{b3s});
+
+    const re3S: S3 = @bitCast(b3s);
+    u.print("{}", .{re3S});
+}
+
 pub fn run() !void {
     try intSizeCast();
     try floatCast();
@@ -95,4 +136,6 @@ pub fn run() !void {
     try optional();
 
     try pointCast();
+
+    try bit();
 }
