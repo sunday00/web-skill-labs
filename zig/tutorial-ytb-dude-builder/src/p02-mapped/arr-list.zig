@@ -24,6 +24,14 @@ fn methods(comptime T: type) type {
             return l;
         }
 
+        fn compact(alloc: std.mem.Allocator, cap: usize) !std.ArrayList(T) {
+            var l: std.ArrayList(T) = try std.ArrayList(T).initCapacity(alloc, cap);
+
+            for ("hello, World!") |byte| l.appendAssumeCapacity(byte);
+
+            return l;
+        }
+
         fn usingWriter(alloc: std.mem.Allocator, l: *std.ArrayList(T)) !void {
             const w = l.writer(alloc);
             try w.print("?, {s}", .{"Huh?"});
@@ -59,6 +67,14 @@ fn methods(comptime T: type) type {
 
             return l.swapRemove(i);
         }
+
+        fn ownedSlice(alloc: std.mem.Allocator, l: *std.ArrayList(T)) ![]T {
+            // std.ArrayList to empty.
+            // convert to new slice
+            //
+            //⚠️ new slice should free on somewhere.
+            return l.toOwnedSlice(alloc);
+        }
     };
 }
 
@@ -73,6 +89,7 @@ pub fn main() !void {
     defer l1.deinit(alloc);
 
     try m.printCharList(l1);
+    u.print("len: {} cap: {}", .{ l1.items.len, l1.capacity });
 
     _ = l1.pop();
 
@@ -101,5 +118,15 @@ pub fn main() !void {
     l1.items[2] = 'X'; // <--- directly insert possible.
     try m.printCharList(l1);
 
-    // TODO: owned slice
+    const s = try m.ownedSlice(alloc, &l1);
+    defer alloc.free(s);
+    u.print("{any}", .{s});
+    try m.printCharList(l1);
+
+    u.print("==-=-=-=-===--=-=-===-=-======-=-=---=", .{});
+
+    var l2 = try m.compact(alloc, 20);
+    defer l2.deinit(alloc);
+    try m.printCharList(l2);
+    u.print("len: {} cap: {}", .{ l2.items.len, l2.capacity });
 }
