@@ -62,7 +62,9 @@ pub fn main() !void {
 
     // try @import("p07-memory/mem-layout.zig").main();
 
-    try @import("p02-mapped/arr-list.zig").main();
+    // try @import("p02-mapped/arr-list.zig").main();
+
+    try @import("p02-mapped/hashmap.zig").main();
 }
 
 test {

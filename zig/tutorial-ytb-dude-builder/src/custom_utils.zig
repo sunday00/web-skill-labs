@@ -1,6 +1,8 @@
 const std = @import("std");
 
 pub const String = []const u8;
+pub const mString = []u8;
+pub const ID = usize;
 
 pub fn print(comptime fmt: []const u8, args: anytype) void {
     std.debug.print(fmt, args);
