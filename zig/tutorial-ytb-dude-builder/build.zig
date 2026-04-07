@@ -85,12 +85,25 @@ pub fn build(b: *std.Build) void {
         }),
     });
 
+    // ================= C lang ===============
+
     exe.addCSourceFile(.{
         .file = b.path("src/p04-core/clib/math.c"),
         .flags = &[_][]const u8{"-std=c99"},
     });
 
     exe.addIncludePath(b.path("src/p04-core/clib"));
+
+    // =============== PACKAGES ===============
+
+    const zig_string = b.dependency("zig_string", .{
+        .target = target,
+        .optimize = optimize,
+    });
+
+    exe.root_module.addImport("zig_string", zig_string.module("string"));
+
+    // =========================================
 
     // This declares intent for the executable to be installed into the
     // install prefix when running `zig build` (i.e. when executing the default

@@ -66,7 +66,9 @@ pub fn main() !void {
 
     // try @import("p02-mapped/hashmap.zig").main();
 
-    try @import("p04-core/withc.zig").main();
+    // try @import("p04-core/withc.zig").main();
+
+    try @import("p04-core/with-3.zig").main();
 }
 
 test {

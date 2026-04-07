@@ -1,3 +1,13 @@
+## add dep
+
+```shell
+zig fetch --save package {..url} 
+
+# eg
+
+zig fetch --save https://github.com/JakubSzark/zig-string/archive/refs/heads/master.tar.gz
+```
+
 ## test
 
 ```shell
