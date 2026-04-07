@@ -16,12 +16,12 @@ pub fn main() !void {
 
     try user.readArticle(1);
 
-    // var admin = Members.Admin{
-    //     .name = "Administrtor",
-    // };
+    var admin = Members.Admin{
+        .name = "Administrtor",
+    };
 
-    // try admin.readArticle(1);
+    try admin.readArticle(1);
 
     try readArticleAnyRole(user.Imember(), 2);
-    // try readArticleAnyRole(admin.Imember(), 2);
+    try readArticleAnyRole(admin.Imember(), 2);
 }

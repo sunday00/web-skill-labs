@@ -12,34 +12,43 @@ pub const User = struct {
         std.debug.print("read article {}\n", .{aid});
     }
 
-    fn implReadArticle(ptr: *anyopaque, aid: u8) !void {
-        const self: *User = @ptrCast(@alignCast(ptr));
-
-        try self.readArticle(aid);
-    }
-
-    const Vtable = struct {
+    const VTABLE = struct { // organize implementations function only
         fn implReadArticle(ptr: *anyopaque, aid: u8) !void {
-            const self: *User = @ptrCast(@alignCast(ptr));
+            const self: *User = @ptrCast(@alignCast(ptr)); // anytype to real type
 
             try self.readArticle(aid);
         }
     };
 
-    pub fn Imember(self: *User) IMember {
-        return .{ .ptr = self, .name = self.name, .vtable = &.{ .implReadArticle = implReadArticle } };
+    pub fn Imember(self: *@This()) IMember {
+        return .{ .ptr = self, .name = self.name, .vtable = &.{
+            .implReadArticle = VTABLE.implReadArticle,
+        } };
     }
 };
 
-// pub const Admin = struct {
-//     name: []const u8,
-//
-//     pub fn readArticle(self: @This(), aid: u8) !void {
-//         _ = self;
-//         std.debug.print("admin read anonimuse article {}\n", .{aid});
-//     }
-//
-//     pub fn Imember(self: *Admin) IMember {
-//         return .{ .ptr = self, .implReadArticle = Admin.readArticle };
-//     }
-// };
+pub const Admin = struct {
+    name: []const u8,
+
+    pub fn readArticle(self: @This(), aid: u8) !void {
+        _ = self;
+
+        // other logic
+
+        std.debug.print("admin read article {}\n", .{aid});
+    }
+
+    const VTABLE = struct { // organize implementations function only
+        fn implReadArticle(ptr: *anyopaque, aid: u8) !void {
+            const self: *Admin = @ptrCast(@alignCast(ptr)); // anytype to real type
+
+            try self.readArticle(aid);
+        }
+    };
+
+    pub fn Imember(self: *@This()) IMember {
+        return .{ .ptr = self, .name = self.name, .vtable = &.{
+            .implReadArticle = VTABLE.implReadArticle,
+        } };
+    }
+};
