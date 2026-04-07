@@ -37,3 +37,12 @@ zig build run -Doptimize=ReleaseSafe # build and run
 zig build run -Doptimize=ReleaseFast # build using more memory then super fast
 zig build run -Doptimize=ReleaseSmall # build a little fast but super small size
 ```
+
+- custom options
+
+```shell
+zig build run -D{key}={value}
+
+# eg
+zig build run -Dver=1.2.3
+```

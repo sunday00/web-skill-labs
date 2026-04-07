@@ -96,12 +96,21 @@ pub fn build(b: *std.Build) void {
 
     // =============== PACKAGES ===============
 
-    const zig_string = b.dependency("zig_string", .{
+    const zig_string_dep = b.dependency("zig_string", .{
         .target = target,
         .optimize = optimize,
     });
 
-    exe.root_module.addImport("zig_string", zig_string.module("string"));
+    exe.root_module.addImport("zig_string", zig_string_dep.module("string"));
+
+    // =============== OPTIONS ===============
+
+    const ver_opt = b.option([]const u8, "ver", "define version") orelse "1.1.1";
+
+    const options = b.addOptions();
+    options.addOption([]const u8, "ver", ver_opt);
+
+    exe.root_module.addImport("my_conf", options.createModule());
 
     // =========================================
 
