@@ -71,6 +71,7 @@ pub fn main() !void {
     // try @import("p04-core/with-3.zig").main();
 
     try @import("p06-dev/build-opt.zig").main();
+    try @import("p06-dev/running-opt.zig").main();
 }
 
 test {
