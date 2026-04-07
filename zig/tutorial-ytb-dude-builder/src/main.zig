@@ -73,7 +73,9 @@ pub fn main() !void {
     // try @import("p06-dev/build-opt.zig").main();
     // try @import("p06-dev/running-opt.zig").main();
 
-    try @import("p05-interface/main.zig").main();
+    // try @import("p05-interface/main.zig").main();
+
+    try @import("p02-mapped/vertor.zig").main();
 }
 
 test {
