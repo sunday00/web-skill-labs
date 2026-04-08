@@ -75,7 +75,11 @@ pub fn main() !void {
 
     // try @import("p05-interface/main.zig").main();
 
-    try @import("p02-mapped/vertor.zig").main();
+    // try @import("p02-mapped/vertor.zig").main();
+
+    // try @import("p08-module/namespace.zig").main();
+
+    try @import("p07-memory/defer-errordef.zig").main();
 }
 
 test {
