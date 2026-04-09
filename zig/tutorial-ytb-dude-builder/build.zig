@@ -101,7 +101,13 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
+    const zig_clap_dep = b.dependency("zig_clap", .{
+        .target = target,
+        .optimize = optimize,
+    });
+
     exe.root_module.addImport("zig_string", zig_string_dep.module("string"));
+    exe.root_module.addImport("zig_clap", zig_clap_dep.module("clap"));
 
     // =============== OPTIONS ===============
 
