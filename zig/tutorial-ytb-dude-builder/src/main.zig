@@ -81,7 +81,9 @@ pub fn main() !void {
 
     // try @import("p07-memory/defer-errordef.zig").main();
 
-    try @import("p02-mapped/mul-arr.zig").main();
+    // try @import("p02-mapped/mul-arr.zig").main();
+
+    try @import("p09-concurrency/thread.zig").main();
 }
 
 test {
