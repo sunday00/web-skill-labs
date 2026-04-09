@@ -83,7 +83,8 @@ pub fn main() !void {
 
     // try @import("p02-mapped/mul-arr.zig").main();
 
-    try @import("p09-concurrency/thread.zig").main();
+    // try @import("p09-concurrency/thread.zig").main();
+    try @import("p09-concurrency/mutex.zig").main();
 }
 
 test {
