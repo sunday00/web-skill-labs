@@ -2,7 +2,7 @@ const std = @import("std");
 
 fn work(id: usize) void {
     std.debug.print("{} started \n", .{id});
-    std.Thread.sleep(500 * 1000 * 1000);
+    std.Thread.sleep(500 * std.time.ns_per_ms);
     std.debug.print("{} finished \n", .{id});
 }
 
@@ -37,7 +37,19 @@ fn threadingWithDetach() !void {
         handler.detach();
     }
 
-    std.Thread.sleep(500 * std.time.ns_per_ms);
+    std.Thread.sleep(500 * std.time.ns_per_ms + 1000 * 1000);
+}
+
+fn threadingWithPool(alloc: std.mem.Allocator) !void {
+    const cpus = try std.Thread.getCpuCount();
+
+    var pool: std.Thread.Pool = undefined;
+    try pool.init(.{ .allocator = alloc });
+    defer pool.deinit();
+
+    for (0..cpus) |i| {
+        try pool.spawn(work, .{i});
+    }
 }
 
 pub fn main() !void {
@@ -50,5 +62,10 @@ pub fn main() !void {
     // var handlers = try threadingWithJoin(alloc);
     // defer handlers.deinit(alloc);
 
-    try threadingWithDetach();
+    // try threadingWithDetach();
+
+    var gpa = std.heap.GeneralPurposeAllocator(.{}).init;
+    defer _ = gpa.deinit();
+    const alloc = gpa.allocator();
+    try threadingWithPool(alloc);
 }
