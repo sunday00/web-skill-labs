@@ -68,11 +68,15 @@ pub fn main() !void {
 
             const reader = &br.interface;
 
-            outer: while (reader.takeDelimiterExclusive('\n')) |line| {
+            // outer: while (reader.takeDelimiterExclusive('\n')) |line| {
+            //     std.debug.print("{s}\n", .{line});
+            // } else |err| switch (err) {
+            //     error.EndOfStream => break :outer, // is really best??
+            //     else => std.debug.print("{}", .{err}),
+            // }
+
+            while (try reader.takeDelimiter('\n')) |line| {
                 std.debug.print("{s}\n", .{line});
-            } else |err| switch (err) {
-                error.EndOfStream => break :outer, // is really best??
-                else => std.debug.print("{}", .{err}),
             }
         }
 
