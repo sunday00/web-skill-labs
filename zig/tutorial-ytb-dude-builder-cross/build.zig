@@ -89,6 +89,48 @@ pub fn build(b: *std.Build) void {
     // by passing `--prefix` or `-p`.
     b.installArtifact(exe);
 
+    // <<<<<=============================compile to windows==================================
+    const exe_win = b.addExecutable(.{
+        .name = "tutorial_ytb_dude_builder_cross",
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("src/main.zig"),
+            .target = b.resolveTargetQuery(std.Target.Query{
+                .cpu_arch = .x86_64,
+                .os_tag = .windows,
+                .abi = .gnu,
+            }),
+            .optimize = optimize,
+            .imports = &.{
+                .{ .name = "tutorial_ytb_dude_builder_cross", .module = mod },
+            },
+        }),
+    });
+
+
+    b.installArtifact(exe_win);
+    // ======================================================================================>>>>>
+    //
+    // <<<<<=============================compile to windows==================================
+    const exe_c_win = b.addExecutable(.{
+        .name = "tutorial_ytb_dude_builder_win_c",
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("src/main.zig"),
+            .target = b.resolveTargetQuery(std.Target.Query{
+                .cpu_arch = .x86_64,
+                .os_tag = .windows,
+                .abi = .gnu,
+            }),
+            .optimize = .ReleaseSmall,
+            .imports = &.{
+                .{ .name = "tutorial_ytb_dude_builder_cross", .module = mod },
+            },
+        }),
+    });
+
+    exe_c_win.linkLibC();
+    b.installArtifact(exe_c_win);
+    // ======================================================================================>>>>>
+
     // This creates a top level step. Top level steps have a name and can be
     // invoked by name when running `zig build` (e.g. `zig build run`).
     // This will evaluate the `run` step rather than the default step.
