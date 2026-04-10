@@ -88,7 +88,8 @@ pub fn main() !void {
     // try @import("p09-concurrency/atomic.zig").main();
 
     // try @import("p10-etc/struct-format-method.zig").main();
-    try @import("p10-etc/file.zig").main();
+    // try @import("p10-etc/file.zig").main();
+    try @import("p10-etc/meta.zig").main();
 }
 
 test {
