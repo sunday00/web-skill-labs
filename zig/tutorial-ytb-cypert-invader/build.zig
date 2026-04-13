@@ -28,7 +28,7 @@ pub fn build(b: *std.Build) void {
     // to our consumers. We must give it a name because a Zig package can expose
     // multiple modules and consumers will need to be able to specify which
     // module they want to access.
-    const mod = b.addModule("zig_invaders", .{
+    const mod = b.addModule("invader", .{
         // The root source file is the "entry point" of this module. Users of
         // this module will only be able to access public declarations contained
         // in this file, which means that if you have declarations that you
@@ -58,7 +58,7 @@ pub fn build(b: *std.Build) void {
     // If neither case applies to you, feel free to delete the declaration you
     // don't need and to put everything under a single module.
     const exe = b.addExecutable(.{
-        .name = "zig_invaders",
+        .name = "invader",
         .root_module = b.createModule(.{
             // b.createModule defines a new module just like b.addModule but,
             // unlike b.addModule, it does not expose the module to consumers of
@@ -73,15 +73,34 @@ pub fn build(b: *std.Build) void {
             // List of modules available for import in source files part of the
             // root module.
             .imports = &.{
-                // Here "zig_invaders" is the name you will use in your source code to
-                // import this module (e.g. `@import("zig_invaders")`). The name is
+                // Here "tutorial_ytb_cypert_invader" is the name you will use in your source code to
+                // import this module (e.g. `@import("tutorial_ytb_cypert_invader")`). The name is
                 // repeated because you are allowed to rename your imports, which
                 // can be extremely useful in case of collisions (which can happen
                 // importing modules from different packages).
-                .{ .name = "zig_invaders", .module = mod },
+                .{ .name = "invader", .module = mod },
             },
         }),
     });
+
+    // =============== <<<PACKAGES ===============
+
+    const raylib_zig_dep = b.dependency("raylib_zig", .{
+        .target = target,
+        .optimize = optimize,
+    });
+
+    const raylib = raylib_zig_dep.module("raylib");
+    const raygui = raylib_zig_dep.module("raygui");
+    const raylib_artifact = raylib_zig_dep.artifact("raylib");
+
+    // raylib_artifact.root_module.addCMacro("SUPPORT_FILEFORMAT_JPG", "");
+
+    exe.root_module.linkLibrary(raylib_artifact);
+    exe.root_module.addImport("raylib", raylib);
+    exe.root_module.addImport("raygui", raygui);
+
+    // =============== PACKAGES>>> ===============
 
     // This declares intent for the executable to be installed into the
     // install prefix when running `zig build` (i.e. when executing the default
