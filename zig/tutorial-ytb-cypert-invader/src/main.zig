@@ -12,6 +12,15 @@ const Rectangle = struct {
             self.y < other.y + other.height and
             self.y + self.height > other.y;
     }
+
+    pub fn getRect(self: anytype) Rectangle {
+        return .{
+            .x = self.position_x,
+            .y = self.position_y,
+            .width = self.width,
+            .height = self.height,
+        };
+    }
 };
 
 const GameConfig = struct {
@@ -70,14 +79,9 @@ const Player = struct {
         }
     }
 
-    // pub fn getRect(self: @This()) Rectangle {
-    //     return .{
-    //         .x = self.position_x,
-    //         .y = self.position_y,
-    //         .width = self.width,
-    //         .height = self.height,
-    //     };
-    // }
+    pub fn getRect(self: @This()) Rectangle {
+        return Rectangle.getRect(self);
+    }
 
     pub fn draw(self: @This()) void {
         rl.drawRectangle(
@@ -117,6 +121,10 @@ const Bullet = struct {
         if (self.position_y < 0) {
             self.active = false;
         }
+    }
+
+    pub fn getRect(self: @This()) Rectangle {
+        return Rectangle.getRect(self);
     }
 
     pub fn draw(self: @This()) void {
@@ -161,6 +169,10 @@ const Invader = struct {
                 rl.Color.green,
             );
         }
+    }
+
+    pub fn getRect(self: @This()) Rectangle {
+        return Rectangle.getRect(self);
     }
 
     pub fn update(self: *@This(), dx: f32, dy: f32) void {
@@ -242,6 +254,22 @@ pub fn main() !void {
 
         for (&bullets) |*bullet| {
             bullet.update();
+        }
+
+        for (&bullets) |*bullet| {
+            if (bullet.active) {
+                for (&invaders) |*row| {
+                    for (row) |*invader| {
+                        if (invader.alive) {
+                            if (bullet.getRect().intersect(invader.getRect())) {
+                                bullet.active = false;
+                                invader.alive = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         move_timer += 1;
