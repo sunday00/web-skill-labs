@@ -57,19 +57,27 @@ const Player = struct {
             self.position_x += self.speed;
         }
 
+        if (self.position_x < 0) {
+            self.position_x = 0;
+        }
+
         if (rl.isKeyDown(rl.KeyboardKey.left)) {
             self.position_x -= self.speed;
         }
+
+        if (self.position_x + self.width > @as(f32, @floatFromInt(rl.getScreenWidth()))) {
+            self.position_x = @as(f32, @floatFromInt(rl.getScreenWidth())) - self.width;
+        }
     }
 
-    pub fn getRect(self: @This()) Rectangle {
-        return .{
-            .x = self.position_x,
-            .y = self.position_y,
-            .width = self.width,
-            .height = self.height,
-        };
-    }
+    // pub fn getRect(self: @This()) Rectangle {
+    //     return .{
+    //         .x = self.position_x,
+    //         .y = self.position_y,
+    //         .width = self.width,
+    //         .height = self.height,
+    //     };
+    // }
 
     pub fn draw(self: @This()) void {
         rl.drawRectangle(
