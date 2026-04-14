@@ -181,6 +181,51 @@ const Invader = struct {
     }
 };
 
+const EnemyBullet = struct {
+    position_x: f32,
+    position_y: f32,
+    width: f32,
+    height: f32,
+    speed: f32,
+    active: bool,
+
+    pub fn init(position_x: f32, position_y: f32, width: f32, height: f32) @This() {
+        return .{
+            .position_x = position_x,
+            .position_y = position_y,
+            .width = width,
+            .height = height,
+            .speed = 5.0,
+            .active = false,
+        };
+    }
+
+    pub fn getRect(self: @This()) Rectangle {
+        return Rectangle.getRect(self);
+    }
+
+    pub fn update(self: *@This(), screen_height: i32) void {
+        if (self.active) {
+            self.position_y += self.speed;
+            if (self.position_y > @as(f32, @floatFromInt(screen_height))) {
+                self.active = false;
+            }
+        }
+    }
+
+    pub fn draw(self: @This()) void {
+        if (self.active) {
+            rl.drawRectangle(
+                @intFromFloat(self.position_x),
+                @intFromFloat(self.position_y),
+                @intFromFloat(self.width),
+                @intFromFloat(self.height),
+                rl.Color.yellow,
+            );
+        }
+    }
+};
+
 pub fn main() !void {
     const screenWidth = 800;
     const screenHeight = 600;
@@ -189,6 +234,7 @@ pub fn main() !void {
     const bulletWidth = 4.0;
     const bulletHeight = 10.0;
 
+    var move_timer: i32 = 0;
     const invaderRows = 5;
     const invaderCols = 11;
     const invaderWidth = 40.0;
@@ -200,10 +246,15 @@ pub fn main() !void {
     const invaderSpeed = 5.0;
     const invaderMoveDelay = 30;
     var invaderDirection: f32 = 1.0;
-    var move_timer: i32 = 0;
     const invaderDropDistance = 20.0;
 
+    var enemy_shoot_timer: i32 = 0;
+    const maxEnemyBullets = 20;
+    const enemyShootDelay = 60;
+    const enemyShootChance = 5;
+
     var score: i32 = 0;
+    var gameover = false;
 
     rl.initWindow(screenWidth, screenHeight, "Zig Invaders");
     defer rl.closeWindow();
@@ -222,6 +273,11 @@ pub fn main() !void {
         bullet.* = Bullet.init(0, 0, bulletWidth, bulletHeight);
     }
 
+    var enemy_bullets: [maxEnemyBullets]EnemyBullet = undefined;
+    for (&enemy_bullets) |*bullet| {
+        bullet.* = EnemyBullet.init(0, 0, bulletWidth, bulletHeight);
+    }
+
     var invaders: [invaderRows][invaderCols]Invader = undefined;
     for (&invaders, 0..) |*row, i| {
         for (row, 0..) |*invader, j| {
@@ -238,6 +294,19 @@ pub fn main() !void {
         defer rl.endDrawing();
 
         rl.clearBackground(rl.Color.black);
+
+        if (gameover) {
+            rl.drawText("GameOver", 270, 250, 40, rl.Color.red);
+            const score_text = rl.textFormat("Final Score %d", .{score});
+            rl.drawText(score_text, 285, 310, 30, rl.Color.white);
+            rl.drawText("Press ENTER to play again or ESC to quit", 180, 360, 20, rl.Color.green);
+
+            if (rl.isKeyPressed(rl.KeyboardKey.enter)) {
+                gameover = false;
+            }
+
+            continue;
+        }
 
         // update ==============================
 
@@ -271,6 +340,37 @@ pub fn main() !void {
                                 break;
                             }
                         }
+                    }
+                }
+            }
+        }
+
+        for (&enemy_bullets) |*bullet| {
+            bullet.update(screenHeight);
+
+            if (bullet.active) {
+                if (bullet.getRect().intersect(player.getRect())) {
+                    bullet.active = false;
+                    gameover = true;
+                }
+            }
+        }
+
+        enemy_shoot_timer += 1;
+        if (enemy_shoot_timer >= enemyShootDelay) {
+            enemy_shoot_timer = 0;
+            for (&invaders) |*row| {
+                for (row) |*invader| {
+                    if (invader.alive and rl.getRandomValue(0, 100) < enemyShootChance) {
+                        for (&enemy_bullets) |*bullet| {
+                            if (!bullet.active) {
+                                bullet.position_x = invader.position_x + invader.width / 2 - bullet.width / 2;
+                                bullet.position_y = invader.position_y + invaderHeight;
+                                bullet.active = true;
+                                break;
+                            }
+                        }
+                        break;
                     }
                 }
             }
@@ -323,6 +423,10 @@ pub fn main() !void {
             for (row) |*invader| {
                 invader.draw();
             }
+        }
+
+        for (&enemy_bullets) |*bullet| {
+            bullet.draw();
         }
 
         const score_text = rl.textFormat("Score: %d", .{score});
