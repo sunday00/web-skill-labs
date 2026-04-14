@@ -42,15 +42,18 @@ pub fn build(b: *std.Build) !void {
     wasm.root_module.addImport("raygui", raygui);
 
     const install_dir: std.Build.InstallDir = .{ .custom = "web" };
-    const emcc_flags = emsdk.emccDefaultFlags(b.allocator, .{ .optimize = optimize });
-    const emcc_settings = emsdk.emccDefaultSettings(b.allocator, .{ .optimize = optimize });
+    var emcc_flags = emsdk.emccDefaultFlags(b.allocator, .{ .optimize = optimize });
+    try emcc_flags.put("--shell-file", {});
+    try emcc_flags.put(b.path("src/shell.html").getPath(b), {});
 
+    const emcc_settings = emsdk.emccDefaultSettings(b.allocator, .{ .optimize = optimize });
     const emcc_step = emsdk.emccStep(b, raylib_artifact, wasm, .{
         .optimize = optimize,
         .flags = emcc_flags,
         .settings = emcc_settings,
         .install_dir = install_dir,
     });
+
     b.getInstallStep().dependOn(emcc_step);
 
     const html_filename = try std.fmt.allocPrint(b.allocator, "{s}.html", .{wasm.name});
