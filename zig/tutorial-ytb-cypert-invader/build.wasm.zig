@@ -1,136 +1,67 @@
 const std = @import("std");
-const builtin = @import("builtin");
+const rlz = @import("raylib_zig");
 
-pub fn build(b: *std.Build) void {
-    const target = b.standardTargetOptions(.{});
+pub fn build(b: *std.Build) !void {
+    const emsdk = rlz.emsdk;
+
+    const target = b.resolveTargetQuery(.{
+        .cpu_arch = .wasm32,
+        .os_tag = .emscripten,
+    });
     const optimize = b.standardOptimizeOption(.{});
 
-    const exe_mod = b.createModule(.{
-        .root_source_file = b.path("src/main.zig"),
+    const raylib_zig_dep = b.dependency("raylib_zig", .{
         .target = target,
         .optimize = optimize,
     });
 
-    if (!target.result.cpu.arch.isWasm()) {
-        const exe = b.addExecutable(.{
-            .name = "breakout",
-            .root_module = exe_mod,
-            .link_libc = true,
-        });
+    const raylib = raylib_zig_dep.module("raylib");
+    const raygui = raylib_zig_dep.module("raygui");
+    const raylib_artifact = raylib_zig_dep.artifact("raylib");
 
-        const raylib_dep = b.dependency("raylib", .{
+    const wasm = b.addLibrary(.{
+        .name = "invaders",
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("src/main.zig"),
             .target = target,
             .optimize = optimize,
-            .linux_display_backend = .X11,
-        });
+            .imports = &.{
+                .{
+                    .name = "invader",
+                    .module = b.addModule("invader", .{
+                        .root_source_file = b.path("src/root.zig"),
+                        .target = target,
+                    }),
+                },
+            },
+        }),
+    });
 
-        const raylib_lib = raylib_dep.artifact("raylib");
-        exe.linkLibrary(raylib_lib);
-        const install_step = b.addInstallDirectory(.{
-            .source_dir = b.path("res"),
-            .install_dir = std.Build.InstallDir{ .custom = "res" },
-            .install_subdir = "res",
-        });
-        exe.step.dependOn(&install_step.step);
+    wasm.root_module.linkLibrary(raylib_artifact);
+    wasm.root_module.addImport("raylib", raylib);
+    wasm.root_module.addImport("raygui", raygui);
 
-        b.installArtifact(exe);
+    const install_dir: std.Build.InstallDir = .{ .custom = "web" };
+    const emcc_flags = emsdk.emccDefaultFlags(b.allocator, .{ .optimize = optimize });
+    const emcc_settings = emsdk.emccDefaultSettings(b.allocator, .{ .optimize = optimize });
 
-        const run_cmd = b.addRunArtifact(exe);
+    const emcc_step = emsdk.emccStep(b, raylib_artifact, wasm, .{
+        .optimize = optimize,
+        .flags = emcc_flags,
+        .settings = emcc_settings,
+        .install_dir = install_dir,
+    });
+    b.getInstallStep().dependOn(emcc_step);
 
-        run_cmd.step.dependOn(b.getInstallStep());
+    const html_filename = try std.fmt.allocPrint(b.allocator, "{s}.html", .{wasm.name});
+    const emrun_step = emsdk.emrunStep(
+        b,
+        b.getInstallPath(install_dir, html_filename),
+        &.{},
+    );
 
-        if (b.args) |args| {
-            run_cmd.addArgs(args);
-        }
+    const run_step = b.step("run", "Run the app");
 
-        const run_step = b.step("run", "Run the app");
-        run_step.dependOn(&run_cmd.step);
-    } else {
-        const wasm_target = b.resolveTargetQuery(.{
-            .cpu_arch = .wasm32,
-            .cpu_model = .{ .explicit = &std.Target.wasm.cpu.mvp },
-            .cpu_features_add = std.Target.wasm.featureSet(&.{
-                .atomics,
-                .bulk_memory,
-            }),
-            .os_tag = .emscripten,
-        });
-
-        const raylib_dep = b.dependency("raylib", .{
-            .target = target,
-            .optimize = optimize,
-            .rmodels = false,
-        });
-        const raylib_artifact = raylib_dep.artifact("raylib");
-
-        const app_lib = b.addLibrary(.{
-            .linkage = .static,
-            .name = "breakout",
-            .root_module = b.createModule(.{
-                .root_source_file = b.path("src/main.zig"),
-                .target = wasm_target,
-                .optimize = optimize,
-            }),
-        });
-        app_lib.linkLibC();
-        app_lib.shared_memory = true;
-        app_lib.linkLibrary(raylib_artifact);
-        app_lib.addIncludePath(.{ .cwd_relative = ".emscripten_cache-3.1.73/sysroot/include" });
-
-        const emcc = b.addSystemCommand(&.{"emcc"});
-
-        for (app_lib.getCompileDependencies(false)) |lib| {
-            if (lib.isStaticLibrary()) {
-                emcc.addArtifactArg(lib);
-            }
-        }
-
-        emcc.addArgs(&.{
-            "-sUSE_GLFW=3",
-            "-sUSE_OFFSET_CONVERTER",
-
-            //"-sAUDIO_WORKLET=1",
-            //"-sWASM_WORKERS=1",
-            "-sSHARED_MEMORY=1",
-            "-sALLOW_MEMORY_GROWTH=1",
-
-            "-sASYNCIFY",
-            "--shell-file",
-            b.path("src/shell.html").getPath(b),
-        });
-
-        const link_items: []const *std.Build.Step.Compile = &.{
-            raylib_artifact,
-            app_lib,
-        };
-
-        for (link_items) |item| {
-            emcc.addFileArg(item.getEmittedBin());
-            emcc.step.dependOn(&item.step);
-        }
-
-        //emcc.addArg("--pre-js");
-        emcc.addArg("-o");
-
-        const app_html = emcc.addOutputFileArg("index.html");
-        b.getInstallStep().dependOn(&b.addInstallDirectory(.{
-            .source_dir = app_html.dirname(),
-            .install_dir = .{ .custom = "www" },
-            .install_subdir = "",
-        }).step);
-
-        //const run_emrun = b.addSystemCommand(&.{"emrun"});
-
-        //run_emrun.addArg(b.pathJoin(&.{ b.install_path, "www", "breakout.html" }));
-
-        //run_emrun.addArgs(&.{
-        //"--browser=/mnt/c/Program Files/Google/Chrome/Application/chrome.exe",
-        //});
-
-        //if (b.args) |args| run_emrun.addArgs(args);
-        //run_emrun.step.dependOn(b.getInstallStep());
-        //const run_step = b.step("run", "Run the app");
-
-        //run_step.dependOn(&run_emrun.step);
-    }
+    emrun_step.dependOn(emcc_step);
+    run_step.dependOn(emrun_step);
 }

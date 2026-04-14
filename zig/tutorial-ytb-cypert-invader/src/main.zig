@@ -301,6 +301,7 @@ fn resetGame(
 
 pub fn main() !void {
     @setEvalBranchQuota(1100); // when reach default maximum inline
+    rl.setTraceLogLevel(.none);
 
     const screenWidth = 800;
     const screenHeight = 600;
