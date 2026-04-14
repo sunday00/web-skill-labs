@@ -1,4 +1,5 @@
 const std = @import("std");
+const rlz = @import("raylib_zig");
 
 // Although this function looks imperative, it does not perform the build
 // directly and instead it mutates the build graph (`b`) that will be then
@@ -6,7 +7,7 @@ const std = @import("std");
 // for defining build steps and express dependencies between them, allowing the
 // build runner to parallelize the build automatically (and the cache system to
 // know when a step doesn't need to be re-run).
-pub fn build(b: *std.Build) void {
+pub fn build(b: *std.Build) !void {
     // Standard target options allow the person running `zig build` to choose
     // what target to build for. Here we do not override the defaults, which
     // means any target is allowed, and the default is native. Other options
@@ -132,6 +133,39 @@ pub fn build(b: *std.Build) void {
     // command itself, like this: `zig build run -- arg1 arg2 etc`
     if (b.args) |args| {
         run_cmd.addArgs(args);
+    }
+
+    if (target.query.os_tag == .emscripten) {
+        const emsdk = rlz.emsdk;
+
+        exe.root_module.link_libc = true;
+
+        const wasm = b.addLibrary(.{
+            .name = "invaders",
+            .root_module = exe.root_module,
+        });
+
+        const install_dir: std.Build.InstallDir = .{ .custom = "web" };
+        const emcc_flags = emsdk.emccDefaultFlags(b.allocator, .{ .optimize = optimize });
+        const emcc_settings = emsdk.emccDefaultSettings(b.allocator, .{ .optimize = optimize });
+
+        const emcc_step = emsdk.emccStep(b, raylib_artifact, wasm, .{
+            .optimize = optimize,
+            .flags = emcc_flags,
+            .settings = emcc_settings,
+            .install_dir = install_dir,
+        });
+        b.getInstallStep().dependOn(emcc_step);
+
+        const html_filename = try std.fmt.allocPrint(b.allocator, "{s}.html", .{wasm.name});
+        const emrun_step = emsdk.emrunStep(
+            b,
+            b.getInstallPath(install_dir, html_filename),
+            &.{},
+        );
+
+        emrun_step.dependOn(emcc_step);
+        run_step.dependOn(emrun_step);
     }
 
     // Creates an executable that will run `test` blocks from the provided module.
