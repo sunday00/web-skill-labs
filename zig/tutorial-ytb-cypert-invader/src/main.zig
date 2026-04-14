@@ -6,14 +6,14 @@ const Rectangle = struct {
     width: f32,
     height: f32,
 
-    pub fn intersect(self: Rectangle, other: Rectangle) bool {
+    pub inline fn intersect(self: Rectangle, other: Rectangle) bool {
         return self.x < other.x + other.width and
             self.x + self.width > other.x and
             self.y < other.y + other.height and
             self.y + self.height > other.y;
     }
 
-    pub fn getRect(self: anytype) Rectangle {
+    pub inline fn getRect(self: anytype) Rectangle {
         return .{
             .x = self.position_x,
             .y = self.position_y,
@@ -51,7 +51,7 @@ const Player = struct {
     height: f32,
     speed: f32,
 
-    pub fn init(position_x: f32, position_y: f32, width: f32, height: f32) @This() {
+    pub inline fn init(position_x: f32, position_y: f32, width: f32, height: f32) @This() {
         return .{
             .position_x = position_x,
             .position_y = position_y,
@@ -79,11 +79,11 @@ const Player = struct {
         }
     }
 
-    pub fn getRect(self: @This()) Rectangle {
+    pub inline fn getRect(self: @This()) Rectangle {
         return Rectangle.getRect(self);
     }
 
-    pub fn draw(self: @This()) void {
+    pub inline fn draw(self: @This()) void {
         rl.drawRectangle(
             @intFromFloat(self.position_x),
             @intFromFloat(self.position_y),
@@ -102,7 +102,7 @@ const Bullet = struct {
     speed: f32,
     active: bool,
 
-    pub fn init(position_x: f32, position_y: f32, width: f32, height: f32) @This() {
+    pub inline fn init(position_x: f32, position_y: f32, width: f32, height: f32) @This() {
         return .{
             .position_x = position_x,
             .position_y = position_y,
@@ -123,11 +123,11 @@ const Bullet = struct {
         }
     }
 
-    pub fn getRect(self: @This()) Rectangle {
+    pub inline fn getRect(self: @This()) Rectangle {
         return Rectangle.getRect(self);
     }
 
-    pub fn draw(self: @This()) void {
+    pub inline fn draw(self: @This()) void {
         if (self.active) {
             rl.drawRectangle(
                 @intFromFloat(self.position_x),
@@ -148,7 +148,7 @@ const Invader = struct {
     speed: f32,
     alive: bool,
 
-    pub fn init(position_x: f32, position_y: f32, width: f32, height: f32) @This() {
+    pub inline fn init(position_x: f32, position_y: f32, width: f32, height: f32) @This() {
         return .{
             .position_x = position_x,
             .position_y = position_y,
@@ -159,7 +159,7 @@ const Invader = struct {
         };
     }
 
-    pub fn draw(self: @This()) void {
+    pub inline fn draw(self: @This()) void {
         if (self.alive) {
             rl.drawRectangle(
                 @intFromFloat(self.position_x),
@@ -171,7 +171,7 @@ const Invader = struct {
         }
     }
 
-    pub fn getRect(self: @This()) Rectangle {
+    pub inline fn getRect(self: @This()) Rectangle {
         return Rectangle.getRect(self);
     }
 
@@ -189,7 +189,7 @@ const EnemyBullet = struct {
     speed: f32,
     active: bool,
 
-    pub fn init(position_x: f32, position_y: f32, width: f32, height: f32) @This() {
+    pub inline fn init(position_x: f32, position_y: f32, width: f32, height: f32) @This() {
         return .{
             .position_x = position_x,
             .position_y = position_y,
@@ -200,7 +200,7 @@ const EnemyBullet = struct {
         };
     }
 
-    pub fn getRect(self: @This()) Rectangle {
+    pub inline fn getRect(self: @This()) Rectangle {
         return Rectangle.getRect(self);
     }
 
@@ -213,7 +213,7 @@ const EnemyBullet = struct {
         }
     }
 
-    pub fn draw(self: @This()) void {
+    pub inline fn draw(self: @This()) void {
         if (self.active) {
             rl.drawRectangle(
                 @intFromFloat(self.position_x),
@@ -233,7 +233,7 @@ const Shield = struct {
     height: f32,
     health: i32,
 
-    pub fn init(position_x: f32, position_y: f32, width: f32, height: f32) @This() {
+    pub inline fn init(position_x: f32, position_y: f32, width: f32, height: f32) @This() {
         return .{
             .position_x = position_x,
             .position_y = position_y,
@@ -243,11 +243,11 @@ const Shield = struct {
         };
     }
 
-    pub fn getRect(self: @This()) Rectangle {
+    pub inline fn getRect(self: @This()) Rectangle {
         return Rectangle.getRect(self);
     }
 
-    pub fn draw(self: @This()) void {
+    pub inline fn draw(self: @This()) void {
         if (self.health > 0) {
             const alpha = @as(u8, @intCast(@min(255, self.health * 25)));
             rl.drawRectangle(
@@ -300,6 +300,8 @@ fn resetGame(
 }
 
 pub fn main() !void {
+    @setEvalBranchQuota(1100); // when reach default maximum inline
+
     const screenWidth = 800;
     const screenHeight = 600;
 
@@ -377,17 +379,17 @@ pub fn main() !void {
     );
 
     var bullets: [maxBullets]Bullet = undefined;
-    for (&bullets) |*bullet| {
+    inline for (&bullets) |*bullet| {
         bullet.* = Bullet.init(0, 0, bulletWidth, bulletHeight);
     }
 
     var enemy_bullets: [maxEnemyBullets]EnemyBullet = undefined;
-    for (&enemy_bullets) |*bullet| {
+    inline for (&enemy_bullets) |*bullet| {
         bullet.* = EnemyBullet.init(0, 0, bulletWidth, bulletHeight);
     }
 
     var invaders: [invaderRows][invaderCols]Invader = undefined;
-    for (&invaders, 0..) |*row, i| {
+    inline for (&invaders, 0..) |*row, i| {
         for (row, 0..) |*invader, j| {
             const x = invaderStartX + @as(f32, @floatFromInt(j)) * invaderSpacingX;
             const y = invaderStartY + @as(f32, @floatFromInt(i)) * invaderSpacingY;
@@ -396,7 +398,7 @@ pub fn main() !void {
     }
 
     var shields: [shieldCount]Shield = undefined;
-    for (&shields, 0..) |*shield, i| {
+    inline for (&shields, 0..) |*shield, i| {
         const x = shieldStartX + @as(f32, @floatFromInt(i)) * shieldSpacing;
         shield.* = Shield.init(x, shieldY, shieldWidth, shieldHeight);
     }
@@ -459,7 +461,7 @@ pub fn main() !void {
         player.update();
 
         if (rl.isKeyPressed(rl.KeyboardKey.space)) {
-            for (&bullets) |*bullet| {
+            inline for (&bullets) |*bullet| {
                 if (!bullet.active) {
                     bullet.position_x = player.position_x + player.width / 2 - bullet.width / 2;
                     bullet.position_y = player.position_y;
@@ -475,7 +477,7 @@ pub fn main() !void {
 
         for (&bullets) |*bullet| {
             if (bullet.active) {
-                for (&invaders) |*row| {
+                inline for (&invaders) |*row| {
                     for (row) |*invader| {
                         if (invader.alive) {
                             if (bullet.getRect().intersect(invader.getRect())) {
@@ -489,7 +491,7 @@ pub fn main() !void {
                     }
                 }
 
-                for (&shields) |*shield| {
+                inline for (&shields) |*shield| {
                     if (shield.health > 0) {
                         if (bullet.getRect().intersect(shield.getRect())) {
                             bullet.active = false;
@@ -501,7 +503,7 @@ pub fn main() !void {
             }
         }
 
-        for (&enemy_bullets) |*bullet| {
+        inline for (&enemy_bullets) |*bullet| {
             bullet.update(screenHeight);
 
             if (bullet.active) {
@@ -525,10 +527,10 @@ pub fn main() !void {
         enemy_shoot_timer += 1;
         if (enemy_shoot_timer >= enemyShootDelay) {
             enemy_shoot_timer = 0;
-            for (&invaders) |*row| {
+            inline for (&invaders) |*row| {
                 for (row) |*invader| {
                     if (invader.alive and rl.getRandomValue(0, 100) < enemyShootChance) {
-                        for (&enemy_bullets) |*bullet| {
+                        inline for (&enemy_bullets) |*bullet| {
                             if (!bullet.active) {
                                 bullet.position_x = invader.position_x + invader.width / 2 - bullet.width / 2;
                                 bullet.position_y = invader.position_y + invaderHeight;
@@ -547,7 +549,7 @@ pub fn main() !void {
             move_timer = 0;
 
             var hit_edge = false;
-            for (&invaders) |*row| {
+            inline for (&invaders) |*row| {
                 for (row) |*invader| {
                     if (invader.alive) {
                         const next_x = invader.position_x + (invaderSpeed * invaderDirection);
@@ -563,20 +565,20 @@ pub fn main() !void {
 
             if (hit_edge) {
                 invaderDirection *= -1.0;
-                for (&invaders) |*row| {
+                inline for (&invaders) |*row| {
                     for (row) |*invader| {
                         invader.update(0, invaderDropDistance);
                     }
                 }
             } else {
-                for (&invaders) |*row| {
+                inline for (&invaders) |*row| {
                     for (row) |*invader| {
                         invader.update(invaderSpeed * invaderDirection, 0);
                     }
                 }
             }
 
-            for (&invaders) |*row| {
+            inline for (&invaders) |*row| {
                 for (row) |*invader| {
                     if (invader.alive) {
                         if (invader.getRect().intersect(player.getRect())) {
@@ -591,7 +593,7 @@ pub fn main() !void {
         }
 
         var allDead = true;
-        outerLoop: for (&invaders) |*row| {
+        outerLoop: inline for (&invaders) |*row| {
             for (row) |*invader| {
                 if (invader.alive) {
                     allDead = false;
@@ -603,23 +605,23 @@ pub fn main() !void {
 
         // draw ==============================
 
-        for (&shields) |*shield| {
+        inline for (&shields) |*shield| {
             shield.draw();
         }
 
         player.draw();
 
-        for (&bullets) |*bullet| {
+        inline for (&bullets) |*bullet| {
             bullet.draw();
         }
 
-        for (&invaders) |*row| {
+        inline for (&invaders) |*row| {
             for (row) |*invader| {
                 invader.draw();
             }
         }
 
-        for (&enemy_bullets) |*bullet| {
+        inline for (&enemy_bullets) |*bullet| {
             bullet.draw();
         }
 
