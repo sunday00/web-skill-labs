@@ -7,7 +7,7 @@ zig build --build-file build.wasm.zig
 
 # or, small file build
 
-zig build --build-file build.wasm.zig --shell-file=src/shell.html build.wasm.zig -Doptimize=ReleaseSmall  
+zig build --build-file build.wasm.zig -Doptimize=ReleaseSmall  
 ```
 
 - this shows error
