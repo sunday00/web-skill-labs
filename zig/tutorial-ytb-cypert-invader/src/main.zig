@@ -226,6 +226,41 @@ const EnemyBullet = struct {
     }
 };
 
+const Shield = struct {
+    position_x: f32,
+    position_y: f32,
+    width: f32,
+    height: f32,
+    health: i32,
+
+    pub fn init(position_x: f32, position_y: f32, width: f32, height: f32) @This() {
+        return .{
+            .position_x = position_x,
+            .position_y = position_y,
+            .width = width,
+            .height = height,
+            .health = 10,
+        };
+    }
+
+    pub fn getRect(self: @This()) Rectangle {
+        return Rectangle.getRect(self);
+    }
+
+    pub fn draw(self: @This()) void {
+        if (self.health > 0) {
+            const alpha = @as(u8, @intCast(@min(255, self.health * 25)));
+            rl.drawRectangle(
+                @intFromFloat(self.position_x),
+                @intFromFloat(self.position_y),
+                @intFromFloat(self.width),
+                @intFromFloat(self.height),
+                rl.Color{ .r = 0, .g = 255, .b = 255, .a = alpha },
+            );
+        }
+    }
+};
+
 pub fn main() !void {
     const screenWidth = 800;
     const screenHeight = 600;
@@ -252,6 +287,13 @@ pub fn main() !void {
     const maxEnemyBullets = 20;
     const enemyShootDelay = 60;
     const enemyShootChance = 5;
+
+    const shieldCount = 4;
+    const shieldWidth = 80.0;
+    const shieldHeight = 60.0;
+    const shieldStartX = 150.0;
+    const shieldY = 450.0;
+    const shieldSpacing = 150.0;
 
     var score: i32 = 0;
     var gameover = false;
@@ -285,6 +327,12 @@ pub fn main() !void {
             const y = invaderStartY + @as(f32, @floatFromInt(i)) * invaderSpacingY;
             invader.* = Invader.init(x, y, invaderWidth, invaderHeight);
         }
+    }
+
+    var shields: [shieldCount]Shield = undefined;
+    for (&shields, 0..) |*shield, i| {
+        const x = shieldStartX + @as(f32, @floatFromInt(i)) * shieldSpacing;
+        shield.* = Shield.init(x, shieldY, shieldWidth, shieldHeight);
     }
 
     rl.setTargetFPS(60);
@@ -342,6 +390,16 @@ pub fn main() !void {
                         }
                     }
                 }
+
+                for (&shields) |*shield| {
+                    if (shield.health > 0) {
+                        if (bullet.getRect().intersect(shield.getRect())) {
+                            bullet.active = false;
+                            shield.health -= 1;
+                            break;
+                        }
+                    }
+                }
             }
         }
 
@@ -352,6 +410,16 @@ pub fn main() !void {
                 if (bullet.getRect().intersect(player.getRect())) {
                     bullet.active = false;
                     gameover = true;
+                }
+
+                for (&shields) |*shield| {
+                    if (shield.health > 0) {
+                        if (bullet.getRect().intersect(shield.getRect())) {
+                            bullet.active = false;
+                            shield.health -= 1;
+                            break;
+                        }
+                    }
                 }
             }
         }
@@ -412,6 +480,10 @@ pub fn main() !void {
         }
 
         // draw ==============================
+
+        for (&shields) |*shield| {
+            shield.draw();
+        }
 
         player.draw();
 
