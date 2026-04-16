@@ -1,13 +1,12 @@
 #include <emscripten.h>
 
-EM_JS(void, _sendDataToJS, (const char* ptr, int len), {
-    var message = UTF8ToString(ptr, len);
-//    console.log("C Bridge 수신:", message);
-    window.callApi()
+EM_JS(void, _callJs, (const char* ptr), {
+    var evt = UTF8ToString(ptr);
+    FromWASM.fire(evt).then((r) => {  })
 });
 
-void sendDataToJS(const char* str, int len) {
-    _sendDataToJS(str, len);
+void callJs(const char* str) {
+    _callJs(str);
 }
 
 

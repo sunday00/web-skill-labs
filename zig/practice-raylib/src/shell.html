@@ -13,9 +13,14 @@
 </div>
 
 <script>
-    window.callApi = async () => {
-        const r = await fetch('https://my-json-server.typicode.com/sunday00/placeholders/metaVariables/1')
-        console.log(await r.json())
+    const FromWASM = {
+        async fire(evt) {
+            await this[evt]();
+        },
+        async logKeyValue() {
+            const r = await fetch('https://my-json-server.typicode.com/sunday00/placeholders/metaVariables/1')
+            console.log(await r.json())
+        }
     }
 </script>
 
