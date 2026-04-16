@@ -41,10 +41,22 @@ pub fn build(b: *std.Build) !void {
     wasm.root_module.addImport("raylib", raylib);
     wasm.root_module.addImport("raygui", raygui);
 
+    wasm.root_module.addCSourceFile(.{
+        .file = b.path("src/transmission/lib.c"),
+        .flags = &[_][]const u8{"-std=c99"},
+    });
+
     const install_dir: std.Build.InstallDir = .{ .custom = "web" };
     var emcc_flags = emsdk.emccDefaultFlags(b.allocator, .{ .optimize = optimize });
+
     try emcc_flags.put("--shell-file", {});
     try emcc_flags.put(b.path("src/shell.html").getPath(b), {});
+
+    try emcc_flags.put("-sEXPORTED_FUNCTIONS=['_main', '_sendDataToJS']", {});
+    try emcc_flags.put("-sEXPORTED_RUNTIME_METHODS=['HEAPU8', '_sendDataToJS']", {});
+    // try emcc_flags.put("-sERROR_ON_UNDEFINED_SYMBOLS=0", {});
+    // try emcc_flags.put("-sDEFAULT_LIBRARY_FUNCS_TO_INCLUDE=['sendDataToJS']", {});
+    // try emcc_flags.put("-sDEFAULT_LIBRARY_FUNCS_TO_INCLUDE=['_sendDataToJS']", {});
 
     const emcc_settings = emsdk.emccDefaultSettings(b.allocator, .{ .optimize = optimize });
     const emcc_step = emsdk.emccStep(b, raylib_artifact, wasm, .{

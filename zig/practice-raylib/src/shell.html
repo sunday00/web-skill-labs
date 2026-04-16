@@ -12,11 +12,20 @@
     <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex=-1></canvas>
 </div>
 
+<script>
+    window.callApi = async () => {
+        const r = await fetch('https://my-json-server.typicode.com/sunday00/placeholders/metaVariables/1')
+        console.log(await r.json())
+    }
+</script>
+
 <script type='text/javascript'>
     var Module = {
         canvas: document.getElementById('canvas'),
-    };
+    }
 </script>
 {{{ SCRIPT }}}
+
+
 </body>
 </html>

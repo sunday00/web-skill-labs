@@ -30,5 +30,6 @@ pub fn main() !void {
     rl.setTargetFPS(60);
     // ==========================CONFIGS========================================
 
-    try @import("tcp/get.zig").run();
+    // try @import("tcp/get.zig").run();
+    try @import("transmission/example.zig").run();
 }
