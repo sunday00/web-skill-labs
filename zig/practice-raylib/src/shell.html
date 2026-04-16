@@ -5,32 +5,81 @@
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
     <title>Emscripten-Generated Code</title>
 
+    <style>
+        canvas.emscripten {
+            border: 1px solid #000;
+            width: 800px;
+            height: 600px;
+        }
+    </style>
 </head>
 <body>
 
+
 <div class="emscripten_border">
+    <form id="form1">
+        <label for="ii1">
+            <input id="ii1" name="ii1" type="text">
+            <input disabled type="submit" value="send">
+        </label>
+    </form>
+
     <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex=-1></canvas>
 </div>
 
 <script>
+    const initWasm = () => {
+        document.querySelector('#form1 input[type="submit"]').disabled = false;
+    }
+
     const FromWASM = {
         async fire(evt) {
             await this[evt]();
         },
         async logKeyValue() {
             const r = await fetch('https://my-json-server.typicode.com/sunday00/placeholders/metaVariables/1')
-            console.log(await r.json())
+            console.log(await r.json());
         }
     }
 </script>
 
 <script type='text/javascript'>
     var Module = {
+        onRuntimeInitialized: function () {
+            initWasm();
+        },
         canvas: document.getElementById('canvas'),
     }
 </script>
+
 {{{ SCRIPT }}}
 
+<script>
+    const ToWASM = {
+        module: Module,
 
+        sendEx1(v) {
+            // 1. 문자열을 바이트 배열로 변환
+            const encoder = new TextEncoder();
+            const bytes = encoder.encode(v);
+
+            // 2. Zig가 준비한 버퍼의 메모리 주소 가져오기
+            const ptr = Module._getInputBufferPtr();
+
+            // 3. Module.HEAPU8을 통해 Zig 메모리에 데이터 복사
+            // ptr 위치부터 bytes 데이터의 길이만큼 덮어씁니다.
+            Module.HEAPU8.set(bytes, ptr);
+
+            // 4. Zig에게 "데이터 다 썼으니 처리해!"라고 알림
+            Module._processInput(bytes.length);
+        }
+    }
+
+    document.querySelector('#form1').addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        ToWASM.sendEx1(e.target.ii1.value);
+    })
+</script>
 </body>
 </html>

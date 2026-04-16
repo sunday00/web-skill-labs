@@ -52,8 +52,8 @@ pub fn build(b: *std.Build) !void {
     try emcc_flags.put("--shell-file", {});
     try emcc_flags.put(b.path("src/shell.html").getPath(b), {});
 
-    try emcc_flags.put("-sEXPORTED_FUNCTIONS=['_main', '_callJs']", {});
-    try emcc_flags.put("-sEXPORTED_RUNTIME_METHODS=['HEAPU8', '_callJs']", {});
+    try emcc_flags.put("-sEXPORTED_FUNCTIONS=['_main', '_callJs', '_getInputBufferPtr', '_processInput']", {});
+    try emcc_flags.put("-sEXPORTED_RUNTIME_METHODS=['HEAPU8', '_callJs', '_getInputBufferPtr', '_processInput']", {});
 
     const emcc_settings = emsdk.emccDefaultSettings(b.allocator, .{ .optimize = optimize });
     const emcc_step = emsdk.emccStep(b, raylib_artifact, wasm, .{

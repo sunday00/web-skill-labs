@@ -31,5 +31,6 @@ pub fn main() !void {
     // ==========================CONFIGS========================================
 
     // try @import("tcp/get.zig").run();
-    try @import("transmission/example.zig").run();
+    // try @import("transmission/example.zig").run();
+    try @import("transmission/receive.zig").run();
 }
