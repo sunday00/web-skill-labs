@@ -32,5 +32,7 @@ pub fn main() !void {
 
     // try @import("tcp/get.zig").run();
     // try @import("transmission/example.zig").run();
-    try @import("transmission/receive.zig").run();
+    // try @import("transmission/receive.zig").run();
+
+    try @import("sprite/load.zig").run();
 }
