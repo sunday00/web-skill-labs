@@ -20,7 +20,7 @@ pub fn run() !void {
     defer codepoints.deinit(alloc);
 
     const font = try rl.loadFontEx(
-        "assets/neodgm_code.ttf",
+        "src/assets/neodgm_code.ttf",
         15,
         codepoints.items,
     );

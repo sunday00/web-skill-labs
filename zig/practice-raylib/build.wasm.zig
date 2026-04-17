@@ -47,11 +47,6 @@ pub fn build(b: *std.Build) !void {
     });
 
     const install_dir: std.Build.InstallDir = .{ .custom = "web" };
-    // const preload_dir: emsdk.EmccFilePath = .{
-    //     .src_path = "src/assets",
-    //     // .virtual_path: ?[]const u8 = null,
-    // };
-
     const emcc_flags = emsdk.emccDefaultFlags(b.allocator, .{
         .optimize = optimize,
     });
@@ -72,7 +67,7 @@ pub fn build(b: *std.Build) !void {
         .install_dir = install_dir,
         .shell_file_path = b.path("src/shell.html"),
         .preload_paths = &.{.{
-            .src_path = "assets",
+            .src_path = "src/assets",
         }},
     });
 
