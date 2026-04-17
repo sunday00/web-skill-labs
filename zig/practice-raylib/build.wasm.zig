@@ -53,7 +53,9 @@ pub fn build(b: *std.Build) !void {
     try emcc_flags.put(b.path("src/shell.html").getPath(b), {});
 
     var emcc_settings = emsdk.emccDefaultSettings(b.allocator, .{ .optimize = optimize });
-    try emcc_settings.put(" -sEXIT_RUNTIME", "1");
+    try emcc_settings.put("EXIT_RUNTIME", "1");
+    try emcc_settings.put("STACK_SIZE", "1MB");
+    // try emcc_settings.put("ALLOW_MEMORY_GROWTH", "1");
 
     const emcc_step = emsdk.emccStep(b, raylib_artifact, wasm, .{
         .optimize = optimize,

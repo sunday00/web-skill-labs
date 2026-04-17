@@ -49,7 +49,7 @@ pub fn build(b: *std.Build) void {
     const raygui = raylib_zig_dep.module("raygui");
     const raylib_artifact = raylib_zig_dep.artifact("raylib");
 
-    // raylib_artifact.root_module.addCMacro("SUPPORT_FILEFORMAT_JPG", "");
+    raylib_artifact.root_module.addCMacro("SUPPORT_FILEFORMAT_MP3", "1");
 
     exe.root_module.linkLibrary(raylib_artifact);
     exe.root_module.addImport("raylib", raylib);

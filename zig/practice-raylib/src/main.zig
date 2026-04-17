@@ -34,5 +34,6 @@ pub fn main() !void {
     // try @import("transmission/example.zig").run();
     // try @import("transmission/receive.zig").run();
 
-    try @import("sprite/load.zig").run();
+    // try @import("handle-resource/load.zig").run();
+    try @import("handle-resource/sound.zig").run();
 }
