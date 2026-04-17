@@ -41,10 +41,6 @@ pub fn build(b: *std.Build) !void {
     wasm.root_module.addImport("raylib", raylib);
     wasm.root_module.addImport("raygui", raygui);
 
-    wasm.root_module.addAnonymousImport("src/assets/knight.png", .{
-        .root_source_file = b.path("src/assets/knight.png"),
-    });
-
     wasm.root_module.addCSourceFile(.{
         .file = b.path("src/transmission/lib.c"),
         .flags = &[_][]const u8{"-std=c99"},
@@ -53,23 +49,10 @@ pub fn build(b: *std.Build) !void {
     const install_dir: std.Build.InstallDir = .{ .custom = "web" };
     var emcc_flags = emsdk.emccDefaultFlags(b.allocator, .{ .optimize = optimize });
 
-    // try emcc_flags.put("--preload-file", {});
-    // try emcc_flags.put(b.path("assets").getPath(b), {});
-
-    // try emcc_flags.put("--preload-file", "assets");
-    // try emcc_flags.put("-sEXIT_RUNTIME=1", {});
-
     try emcc_flags.put("--shell-file", {});
     try emcc_flags.put(b.path("src/shell.html").getPath(b), {});
 
-    // // // using on transmission test
-    // try emcc_flags.put("-sEXPORTED_FUNCTIONS=['_main', '_callJs', '_getInputBufferPtr', '_processInput']", {});
-    // try emcc_flags.put("-sEXPORTED_RUNTIME_METHODS=['HEAPU8', '_callJs', '_getInputBufferPtr', '_processInput']", {});
-
     var emcc_settings = emsdk.emccDefaultSettings(b.allocator, .{ .optimize = optimize });
-
-    try emcc_settings.put(" --preload-file", b.path("src/assets/knight.png").getPath(b));
-    try emcc_settings.put(" --preload-paths", b.path("src/assets").getPath(b));
     try emcc_settings.put(" -sEXIT_RUNTIME", "1");
 
     const emcc_step = emsdk.emccStep(b, raylib_artifact, wasm, .{

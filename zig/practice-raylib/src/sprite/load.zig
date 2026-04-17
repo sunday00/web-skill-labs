@@ -4,11 +4,11 @@ const rl = @import("raylib");
 const global = @import("../_common/global.zig");
 
 pub fn run() !void {
-    const texture = rl.loadTexture("src/assets/knight.png") catch |err| {
-        std.debug.print("{any}\n", .{err});
-        return;
-    };
+    const image_bytes = @embedFile("../assets/knight.png");
+    const image = try rl.loadImageFromMemory(".png", image_bytes);
+    defer rl.unloadImage(image);
 
+    const texture = try rl.loadTextureFromImage(image);
     defer rl.unloadTexture(texture);
 
     // 원본 이미지의 어느 영역을 가져올 것인가 (전체)
