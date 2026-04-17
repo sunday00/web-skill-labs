@@ -35,7 +35,7 @@ pub fn run() !void {
 
         rl.drawTextEx(
             font,
-            "누르시오",
+            "누르시오...",
             .{ .x = 20, .y = global.g.screenH - 130 },
             20,
             3,
