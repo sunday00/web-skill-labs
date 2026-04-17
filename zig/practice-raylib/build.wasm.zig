@@ -47,10 +47,17 @@ pub fn build(b: *std.Build) !void {
     });
 
     const install_dir: std.Build.InstallDir = .{ .custom = "web" };
-    var emcc_flags = emsdk.emccDefaultFlags(b.allocator, .{ .optimize = optimize });
+    // const preload_dir: emsdk.EmccFilePath = .{
+    //     .src_path = "src/assets",
+    //     // .virtual_path: ?[]const u8 = null,
+    // };
 
-    try emcc_flags.put("--shell-file", {});
-    try emcc_flags.put(b.path("src/shell.html").getPath(b), {});
+    const emcc_flags = emsdk.emccDefaultFlags(b.allocator, .{
+        .optimize = optimize,
+    });
+
+    // try emcc_flags.put("--preload-file", {});
+    // try emcc_flags.put(b.path("assets").getPath(b), {});
 
     var emcc_settings = emsdk.emccDefaultSettings(b.allocator, .{ .optimize = optimize });
     try emcc_settings.put("EXIT_RUNTIME", "1");
@@ -63,6 +70,10 @@ pub fn build(b: *std.Build) !void {
         .flags = emcc_flags,
         .settings = emcc_settings,
         .install_dir = install_dir,
+        .shell_file_path = b.path("src/shell.html"),
+        .preload_paths = &.{.{
+            .src_path = "assets",
+        }},
     });
 
     b.getInstallStep().dependOn(emcc_step);

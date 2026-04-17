@@ -36,5 +36,6 @@ pub fn main() !void {
 
     // try @import("handle-resource/load.zig").run();
     // try @import("handle-resource/sound.zig").run();
-    try @import("handle-resource/font.zig").run();
+    // try @import("handle-resource/font.zig").run();
+    try @import("handle-resource/preload.zig").run();
 }
