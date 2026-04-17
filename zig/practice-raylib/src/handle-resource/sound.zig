@@ -6,11 +6,8 @@ const global = @import("../_common/global.zig");
 pub fn run() !void {
     // rl.setTraceLogLevel(rl.TraceLogLevel.all);
 
-    std.debug.print("1: st", .{});
-
     const sound_data align(8) = @embedFile("../assets/jump.mp3");
     if (sound_data.len == 0) {
-        std.debug.print("2: no data", .{});
         @panic("Sound data is empty!");
     }
 
@@ -37,6 +34,6 @@ pub fn run() !void {
             rl.playSound(soundIns);
         }
 
-        rl.drawText("PRESS SPACE BAR", 40, global.g.screenH - 130, 20, rl.Color.white);
+        rl.drawText("누르시오", 40, global.g.screenH - 130, 20, rl.Color.white);
     }
 }

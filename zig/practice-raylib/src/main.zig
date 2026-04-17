@@ -35,5 +35,6 @@ pub fn main() !void {
     // try @import("transmission/receive.zig").run();
 
     // try @import("handle-resource/load.zig").run();
-    try @import("handle-resource/sound.zig").run();
+    // try @import("handle-resource/sound.zig").run();
+    try @import("handle-resource/font.zig").run();
 }
