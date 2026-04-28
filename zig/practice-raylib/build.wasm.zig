@@ -59,6 +59,16 @@ pub fn build(b: *std.Build) !void {
     try emcc_settings.put("STACK_SIZE", "5MB");
     try emcc_settings.put("INITIAL_MEMORY", "64MB");
     // try emcc_settings.put("ALLOW_MEMORY_GROWTH", "1");
+    // "-sMODULARIZE=1",
+    //    "-sEXPORT_ES6=1",
+    //    "-sUSE_ES6_IMPORT_META=1",
+    //    "-sENVIRONMENT='web'",
+    //    "-sEXPORT_NAME='createModule'",
+    // try emcc_settings.put("MODULARIZE", "1");
+    // try emcc_settings.put("EXPORT_ES6", "1");
+    // try emcc_settings.put("USE_ES6_IMPORT_META", "1");
+    try emcc_settings.put("ENVIRONMENT", "web");
+    // try emcc_settings.put("EXPORT_NAME", "createModule");
 
     const emcc_step = emsdk.emccStep(b, raylib_artifact, wasm, .{
         .optimize = optimize,
