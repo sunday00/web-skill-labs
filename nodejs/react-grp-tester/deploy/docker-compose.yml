@@ -1,0 +1,22 @@
+version: "3.8"
+
+services:
+  app:
+    container_name: office-bet-front
+    volumes:
+      - ../out:/var/www
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV:prod
+    ports:
+      - "3686:80"
+    env_file:
+      - .env.production
+    tty: true
+
+networks:
+  default:
+    external: true
+    name: grayfield

@@ -1,0 +1,65 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type User {
+    id: String!
+    nickname: String!
+    snsId: String!
+    status: Status!
+}
+
+"""status any object"""
+enum Status {
+    ACTIVE
+    INACTIVE
+}
+
+type Bet {
+    id: String!
+    category: String
+    date: String!
+    price: Int!
+    user: User!
+}
+
+type DeleteResult {
+    acknowledged: Boolean!
+    deletedCount: Float!
+}
+
+type Query {
+    users: [User!]!
+    idBet(input: FindById!): Bet!
+    daysBetweenBets(input: BetweenDates!): [Bet!]!
+}
+
+input FindById {
+    id: String!
+}
+
+input BetweenDates {
+    sDate: String!
+    eDate: String!
+}
+
+type Mutation {
+    createBet(input: BetCreateInput!): Bet!
+    updateBet(input: BetUpdateInput!): Bet!
+    deleteBet(input: FindById!): DeleteResult!
+}
+
+input BetCreateInput {
+    category: String!
+    date: String!
+    price: Float!
+    userId: String!
+}
+
+input BetUpdateInput {
+    id: String!
+    category: String!
+    date: String!
+    price: Float!
+    userId: String!
+}
