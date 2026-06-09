@@ -1,0 +1,1794 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type SignProvider {
+  provider: AuthProvider!
+  providerId: String!
+}
+
+enum AuthProvider {
+  NAVER
+  KAKAO
+  GOOGLE
+  APPLE
+}
+
+type NiceVerification {
+  name: String
+  phone: String
+  phoneCo: Int
+  birthdate: String
+  gender: String
+  isForeigner: Boolean
+  ci: String
+  di: String
+}
+
+type AgreementConsent {
+  agreementId: String!
+  agreedAt: DateTime!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type User {
+  id: String!
+  sid: Int!
+  nickname: String!
+  nice: NiceVerification
+  roles: [UserRole!]!
+  sign: [SignProvider!]!
+  status: Status!
+  agreementConsents: [AgreementConsent!]
+  profileImageUrl: String
+}
+
+enum UserRole {
+  GUEST
+  ADMIN
+  MEMBER
+  PRO
+}
+
+"""status any object"""
+enum Status {
+  ACTIVE
+  INACTIVE
+}
+
+type IdResult {
+  id: String!
+}
+
+type IdResultResponse {
+  success: Int!
+  item: IdResult!
+  message: String
+}
+
+type BooleanResponse {
+  success: Int!
+  item: Boolean!
+  message: String
+}
+
+type UserQryNamespace {
+  me: UserResponse!
+}
+
+type UserMutNamespace {
+  "\n회원 탈퇴. 호출자 본인의 계정을 즉시 hard delete 한다.\n\n- 계정 정보(NICE 본인인증 PII 포함)는 `users` 컬렉션에서 즉시 파기한다.\n- 작성 콘텐츠(피드/댓글 등)는 그대로 보존되며, 작성자 자리에는 \"탈퇴한 회원\"이 표시된다.\n- 동일인 재가입 차단을 위해 `withdrawnUsers` 컬렉션에 NICE `di` 암호문과 메타데이터를 보관한다.\n- 탈퇴 후 7일간은 동일 `di` 암호문으로 재가입할 수 없다.\n"
+  withdrawMe: BooleanResponse!
+}
+
+type UserResponse {
+  success: Int!
+  item: User!
+  message: String
+}
+
+"""약관 사용처별 노출 및 필수 동의 설정."""
+type AgreementUsageConfig {
+  """약관 사용처."""
+  usage: AgreementUsage!
+
+  """해당 사용처에서 필수 동의가 필요한지 여부."""
+  required: Boolean!
+
+  """해당 사용처 안에서 노출 순서."""
+  sort: Int
+}
+
+"""약관이 사용되는 화면 또는 업무 흐름 구분."""
+enum AgreementUsage {
+  """회원가입 시 동의를 받는 약관."""
+  REGISTER
+
+  """설정 화면에서 노출하거나 다시 동의를 받는 약관."""
+  SETTING
+
+  """이벤트 참여 시 동의를 받는 약관."""
+  EVENT
+
+  """운영 정책처럼 읽기 목적으로 노출하는 문서."""
+  POLICY
+}
+
+"""서비스 약관 문서."""
+type Agreement {
+  """약관 문서 ID."""
+  id: String!
+
+  """약관 종류. 같은 usage 안에서 버전 비교 단위로 사용된다."""
+  type: String!
+
+  """약관이 노출되는 사용처별 설정. required와 sort를 함께 가진다."""
+  usages: [AgreementUsageConfig!]!
+
+  """사용자에게 노출되는 약관 제목."""
+  title: String!
+
+  """사용자에게 노출되는 약관 본문."""
+  content: String!
+
+  """관리상 숨김 여부. true이면 목록 조회에서 제외된다."""
+  isHidden: Boolean!
+
+  """약관 시행 시작 시각. 현재 시각 이전인 문서만 조회된다."""
+  effectiveAt: DateTime!
+
+  """약관 문서 생성 시각."""
+  createdAt: DateTime
+}
+
+"""로그인/가입 완료 시 발급되는 JWT 쌍."""
+type AuthSignupTokenPayload {
+  """API 호출용 access token (JWT)."""
+  accessToken: String!
+
+  """access token 재발급용 refresh token (JWT)."""
+  refreshToken: String!
+}
+
+"""신규 회원이 NICE 본인인증으로 진입하기 위한 정보 묶음."""
+type AuthSignupPreparePayload {
+  """소셜 로그인 제공자."""
+  provider: AuthProvider!
+
+  """소셜 로그인 제공자가 발급한 사용자 식별자."""
+  providerId: String!
+
+  """클라이언트가 리다이렉트해야 할 NICE 본인인증 URL."""
+  authUrl: String!
+
+  """NICE 인증 세션 식별자. completeSignup 호출 시 그대로 전달해야 한다."""
+  requestNo: String!
+}
+
+"""prepareSignup 응답. `mode`에 따라 `tokens` 또는 `signupPrepare` 중 하나만 채워진다."""
+type AuthSignupPrepareResult {
+  """응답 분기 모드. TOKEN이면 즉시 로그인, SIGNUP_PREPARE이면 가입 흐름 진입."""
+  mode: AuthSignupPrepareMode!
+
+  """`mode = TOKEN`일 때만 채워지는 JWT 쌍. 그 외에는 null."""
+  tokens: AuthSignupTokenPayload
+
+  """`mode = SIGNUP_PREPARE`일 때만 채워지는 NICE 인증 진입 정보. 그 외에는 null."""
+  signupPrepare: AuthSignupPreparePayload
+}
+
+"""prepareSignup 응답의 분기 모드. 어떤 필드가 채워지는지를 결정한다."""
+enum AuthSignupPrepareMode {
+  """기존 회원. `tokens`가 채워지고 `signupPrepare`는 null."""
+  TOKEN
+
+  """
+  신규 회원이라 가입 흐름 진입 필요. `signupPrepare`(NICE 인증 URL 등)가 채워지고 `tokens`는 null.
+  """
+  SIGNUP_PREPARE
+}
+
+"""completeSignup 응답. 가입이 끝난 사용자의 JWT를 반환한다."""
+type AuthSignupCompleteResult {
+  """신규 가입자의 access/refresh JWT 쌍."""
+  tokens: AuthSignupTokenPayload!
+}
+
+"""NICE 인증 후 가입 상태 확인 결과. 기존 전화번호 회원이면 토큰을, 신규 전화번호면 약관 목록을 반환한다."""
+type AuthSignupStatusResult {
+  """응답 분기 모드. TOKEN이면 즉시 로그인, SIGNUP_REQUIRED이면 가입 계속 진행."""
+  mode: AuthSignupStatusMode!
+
+  """`mode = TOKEN`일 때만 채워지는 JWT 쌍. 그 외에는 null."""
+  tokens: AuthSignupTokenPayload
+
+  """`mode = SIGNUP_REQUIRED`일 때만 채워지는 가입 약관 목록. 그 외에는 null."""
+  documents: [Agreement!]
+}
+
+"""checkSignupStatus 응답의 분기 모드. 가입 계속 진행 여부를 결정한다."""
+enum AuthSignupStatusMode {
+  """기존 전화번호 회원. `tokens`가 채워지고 가입 절차를 종료한다."""
+  TOKEN
+
+  """신규 전화번호. `documents`가 채워지고 가입 절차를 계속 진행한다."""
+  SIGNUP_REQUIRED
+}
+
+type AuthMutNamespace {
+  "\n소셜 로그인 직후 호출. (provider, providerId)로 기존 회원을 조회한 뒤 두 갈래로 분기한다.\n\n- 기존 회원: `mode = TOKEN`. `tokens`에 access/refresh JWT가 채워져 반환된다.\n- 신규 회원: `mode = SIGNUP_PREPARE`. `signupPrepare`에 NICE 본인인증 URL/요청번호가 채워져 반환된다. 이때 `returnUrl`은 필수이며, 누락 시 `returnUrlRequiredForSignupPrepare` 에러가 발생한다.\n"
+  prepareSignup(input: AuthSignupPrepareInput!): AuthSignupPrepareResultResponse!
+
+  "\nNICE 본인인증을 마친 뒤 호출. `requestNo`와 `webTransactionId`로 본인인증 결과를 검증하고, 전화번호 기준 기존 회원이면 access/refresh JWT를 반환한다. 미가입 전화번호이면 가입에 필요한 약관 목록을 반환한다.\n"
+  checkSignupStatus(input: AuthSignupStatusInput!): AuthSignupStatusResultResponse!
+
+  "\nNICE 본인인증을 마친 뒤 호출. `prepareSignup`에서 받은 `requestNo`와 NICE 콜백에서 받은 `webTransactionId`로 본인인증 결과를 검증하고, 닉네임·약관 동의 정보를 함께 받아 사용자 계정을 생성한 뒤 access/refresh JWT를 반환한다.\n"
+  completeSignup(input: AuthSignupCompleteInput!): AuthSignupCompleteResultResponse!
+}
+
+"""prepareSignup 입력. 소셜 로그인 결과를 그대로 넘긴다."""
+input AuthSignupPrepareInput {
+  """소셜 로그인 제공자 (KAKAO/NAVER/GOOGLE/APPLE)."""
+  provider: AuthProvider!
+
+  """소셜 로그인 제공자가 발급한 사용자 식별자."""
+  providerId: String!
+
+  """신규 회원일 때(SIGNUP_PREPARE 모드) NICE 인증을 마친 뒤 돌아올 클라이언트 URL. 신규 회원이라면 필수."""
+  returnUrl: String
+
+  """NICE 인증 창에서 사용자가 닫기를 눌렀을 때 이동할 URL (선택)."""
+  closeUrl: String
+
+  """NICE 인증 창의 선택 옵션 키 목록. 예: `closeButtonOn`."""
+  expMods: [String!]
+}
+
+"""checkSignupStatus 입력. NICE 인증 완료 후 전화번호 기준으로 기존 회원 여부를 확인한다."""
+input AuthSignupStatusInput {
+  """소셜 로그인 제공자."""
+  provider: AuthProvider!
+
+  """소셜 로그인 제공자가 발급한 사용자 식별자."""
+  providerId: String!
+
+  """prepareSignup 응답의 `signupPrepare.requestNo` 값을 그대로 넘긴다."""
+  requestNo: String!
+
+  """NICE 인증 콜백에서 전달받은 거래 식별자."""
+  webTransactionId: String!
+}
+
+"""
+completeSignup 입력. prepareSignup에서 받은 `requestNo`와 NICE 콜백에서 받은 값들을 함께 전달한다.
+"""
+input AuthSignupCompleteInput {
+  """소셜 로그인 제공자."""
+  provider: AuthProvider!
+
+  """소셜 로그인 제공자가 발급한 사용자 식별자."""
+  providerId: String!
+
+  """prepareSignup 응답의 `signupPrepare.requestNo` 값을 그대로 넘긴다."""
+  requestNo: String!
+
+  """NICE 인증 콜백에서 전달받은 거래 식별자."""
+  webTransactionId: String!
+
+  """사용자가 입력한 닉네임."""
+  nickname: String!
+
+  """사용자가 동의한 약관 ID 목록 (`signupPrepare.documents[].id` 중 동의한 것들)."""
+  agreementIds: [String!]!
+}
+
+type AuthSignupPrepareResultResponse {
+  success: Int!
+  item: AuthSignupPrepareResult!
+  message: String
+}
+
+type AuthSignupCompleteResultResponse {
+  success: Int!
+  item: AuthSignupCompleteResult!
+  message: String
+}
+
+type AuthSignupStatusResultResponse {
+  success: Int!
+  item: AuthSignupStatusResult!
+  message: String
+}
+
+type AgreementQryNamespace {
+  """사용처별로 현재 노출 가능한 최신 약관 목록을 반환한다."""
+  agreements(
+    """조회할 약관 사용처."""
+    usage: AgreementUsage!
+  ): AgreementListResponse!
+}
+
+type AgreementListResponse {
+  "\n- 1: Ok, successfully mutated, no problem \n- 4: no content. this means NotFound or DeletedAlready.\n"
+  success: Int!
+  items: [Agreement!]!
+  hasNext: Boolean
+  nextCursor: String
+
+  "\n- text comment used to describe more information to user or frontend developer. \n"
+  message: String
+}
+
+"""클럽을 개설할 수 있는 프로 사용자 프로필."""
+type Pro implements IUser {
+  user: User!
+
+  """프로 프로필 ID."""
+  id: String!
+
+  """앱에 노출되는 프로 표시 이름."""
+  displayName: String!
+
+  """프로 소개 문구."""
+  intro: String
+
+  """프로 프로필 운영 상태."""
+  status: Status!
+}
+
+interface IUser {
+  user: User!
+}
+
+type AttachSizes {
+  name: String!
+  wh: [Int!]!
+}
+
+type AttachMetadata {
+  originalName: String!
+  originalExt: String!
+  sizes: [AttachSizes!]!
+}
+
+"""첨부파일객체"""
+type Attach implements IUser {
+  user: User!
+  id: String!
+  type: AttachType!
+  path: String!
+  status: AttachStatus!
+  metadata: AttachMetadata!
+}
+
+enum AttachType {
+  IMAGE
+  VIDEO
+}
+
+enum AttachStatus {
+  INVALID
+  PRESIGNED
+  TRANS
+  ACTIVE
+}
+
+"""클럽 소개 탭에 노출되는 외부 링크."""
+type ClubLink {
+  """링크 제목."""
+  title: String!
+
+  """링크 URL."""
+  url: String!
+}
+
+"""특정 프로를 중심으로 형성된 팬클럽 공간."""
+type Club {
+  """클럽 ID."""
+  id: String!
+
+  """이 클럽을 소유한 프로. 프로 1명당 클럽 1개가 원칙이다."""
+  pro: Pro!
+
+  """클럽 이름."""
+  name: String!
+
+  """클럽 목록과 상세 상단에 노출되는 한 줄 소개."""
+  description: String
+
+  """첨부 미디어 목록"""
+  attach: Attach
+
+  """소개 탭에 노출되는 클럽 소개 본문."""
+  introduction: String
+
+  """소개 탭에 노출되는 외부 링크 목록."""
+  links: [ClubLink!]
+
+  """어드민이 큐레이션한 클럽 추천 타입."""
+  recommendationType: ClubRecommendationType
+
+  """현재 가입 중인 활성 멤버 수."""
+  memberCount: Int!
+  status: Status!
+}
+
+"""어드민이 큐레이션한 클럽 추천 타입."""
+enum ClubRecommendationType {
+  """신규 추천 클럽."""
+  NEW
+
+  """인기 추천 클럽."""
+  POPULAR
+}
+
+"""사용자와 클럽 사이의 가입 관계."""
+type ClubMember implements IUser {
+  user: User!
+
+  """클럽 멤버십 ID."""
+  id: String!
+
+  """가입한 클럽."""
+  club: Club!
+
+  """클럽 안에서의 운영 역할."""
+  role: ClubMemberRole!
+
+  """클럽 멤버 유형."""
+  type: ClubMemberType!
+
+  """멤버십 상태."""
+  status: ClubMemberStatus!
+
+  """마지막으로 클럽에 가입한 시각."""
+  joinedAt: DateTime
+
+  """마지막으로 클럽을 탈퇴한 시각."""
+  leftAt: DateTime
+
+  """마지막으로 클럽 고정핀을 설정한 시각."""
+  pinnedAt: DateTime
+}
+
+"""클럽 안에서 사용자가 가지는 운영 역할."""
+enum ClubMemberRole {
+  """클럽을 소유하고 관리하는 프로 또는 운영자."""
+  OWNER
+
+  """클럽에 가입한 일반 멤버."""
+  MEMBER
+}
+
+"""클럽 멤버의 사용자 유형."""
+enum ClubMemberType {
+  """클럽을 대표하는 프로 멤버."""
+  PRO
+
+  """프로를 팔로우하고 클럽 활동에 참여하는 팬 멤버."""
+  FAN
+}
+
+"""클럽 멤버십의 현재 상태."""
+enum ClubMemberStatus {
+  """현재 클럽에 가입 중인 상태."""
+  ACTIVE
+
+  """사용자가 직접 클럽을 탈퇴한 상태. 24시간 재가입 제한 대상이다."""
+  LEFT
+
+  """운영자 또는 프로가 강퇴해 재가입할 수 없는 상태."""
+  BANNED
+}
+
+type ClubQryNamespace {
+  clubs(keyword: String, input: CursorGraphReq): ClubResWithMyListResponse!
+  myClubs(pinFilter: ClubMyListPinFilter, input: CursorGraphReq): ClubResWithMyListResponse!
+  recommendedClubs(type: ClubRecommendationType, input: CursorGraphReq): ClubResWithMyListResponse!
+  club(id: String!): ClubResWithMyResponse!
+  clubNotices(clubId: String!, keyword: String, input: CursorGraphReq): ClubNoticeListResponse!
+  clubNotice(id: String!): ClubNoticeResponse!
+}
+
+input CursorGraphReq {
+  size: Int = 20
+  sort: JsonType
+  after: String
+  search: JsonType
+}
+
+"""내 클럽 목록에서 고정핀 여부로 가입 클럽을 필터링하는 방식."""
+enum ClubMyListPinFilter {
+  """고정핀을 설정한 가입 클럽만 조회."""
+  PINNED
+
+  """고정핀을 설정하지 않은 가입 클럽만 조회."""
+  UNPINNED
+
+  """고정핀 여부와 관계없이 모든 가입 클럽 조회."""
+  ALL
+}
+
+type ClubMutNamespace {
+  updateClubMain(input: UpdateClubMainInput!): ClubResponse!
+  joinClub(input: JoinClubInput!): ClubMemberResponse!
+  leaveClub(input: LeaveClubInput!): ClubMemberResponse!
+  setClubPin(input: SetClubPinInput!): ClubMemberResponse!
+  createClubNotice(input: CreateClubNoticeInput!): ClubNoticeResponse!
+  updateClubNotice(input: UpdateClubNoticeInput!): ClubNoticeResponse!
+  deleteClubNotice(input: DeleteClubNoticeInput!): ClubNoticeResponse!
+  setClubNoticePin(input: SetClubNoticePinInput!): ClubNoticeResponse!
+}
+
+"""프로가 관리하는 클럽 메인 정보 수정 입력."""
+input UpdateClubMainInput {
+  """클럽 이름."""
+  name: String
+
+  """클럽 목록과 상세 상단에 노출되는 한 줄 소개."""
+  description: String
+
+  """소개 탭에 노출되는 클럽 소개 본문."""
+  introduction: String
+
+  """어드민이 큐레이션한 클럽 추천 타입."""
+  recommendationType: ClubRecommendationType
+
+  """현재 가입 중인 활성 멤버 수."""
+  memberCount: Int
+  status: Status
+
+  """소개 탭에 노출되는 링크 목록."""
+  links: [ClubLinkInput!]
+
+  """첨부 이미지, attach id"""
+  attach: String!
+
+  """수정할 클럽 ID."""
+  clubId: String!
+}
+
+"""프로가 관리하는 클럽 메인 정보 수정 입력."""
+input ClubLinkInput {
+  """링크 제목."""
+  title: String!
+
+  """링크 URL."""
+  url: String!
+}
+
+"""클럽 가입 요청 입력."""
+input JoinClubInput {
+  """가입할 클럽 ID."""
+  clubId: String!
+}
+
+"""클럽 탈퇴 요청 입력."""
+input LeaveClubInput {
+  """탈퇴할 클럽 ID."""
+  clubId: String!
+}
+
+"""내 클럽 목록 고정핀 설정 입력."""
+input SetClubPinInput {
+  """고정핀을 설정할 클럽 ID."""
+  clubId: String!
+
+  """true면 고정, false면 고정 해제."""
+  isPinned: Boolean!
+}
+
+"""클럽 공지 작성 입력."""
+input CreateClubNoticeInput {
+  """공지 제목. 최대 100자."""
+  title: String!
+
+  """공지 본문. 최대 1,000자."""
+  content: String!
+
+  """첨부 미디어 목록. 최대 5개. 1개만 쓸때는 0번 고정 사용"""
+  attaches: [ChildAttachInput!]!
+
+  """공지를 작성할 클럽 ID."""
+  clubId: String!
+}
+
+input ChildAttachInput {
+  sortKey: Float!
+  attach: String!
+}
+
+"""클럽 공지 수정 입력."""
+input UpdateClubNoticeInput {
+  """수정할 공지 제목. 최대 100자."""
+  title: String
+
+  """수정할 공지 본문. 최대 1,000자."""
+  content: String
+
+  """첨부 미디어 목록. 최대 5개. 1개만 쓸때는 0번 고정 사용"""
+  attaches: [ChildAttachInput!]!
+
+  """수정할 클럽 공지 ID."""
+  clubNoticeId: String!
+}
+
+"""클럽 공지 삭제 입력."""
+input DeleteClubNoticeInput {
+  """삭제할 클럽 공지 ID."""
+  clubNoticeId: String!
+}
+
+"""클럽 공지 고정핀 설정 입력."""
+input SetClubNoticePinInput {
+  """고정핀을 설정할 클럽 공지 ID."""
+  clubNoticeId: String!
+
+  """true면 고정, false면 고정 해제."""
+  isPinned: Boolean!
+}
+
+type ClubMemberResponse {
+  success: Int!
+  item: ClubMember!
+  message: String
+}
+
+type AttachPresignedResItem {
+  sortKey: Float!
+  id: String!
+  upload: String!
+  sig: String!
+  cdn: String!
+}
+
+type AttachPresignedRes {
+  success: Float!
+  item: AttachPresignedResItem!
+  message: String
+}
+
+"""첨부된 이미지 또는 동영상 미디어."""
+type ChildAttach {
+  attach: Attach!
+  sortKey: Float!
+}
+
+"""클럽 안에서 작성되는 프로 피드, 팬 피드."""
+type Feed implements IUser {
+  user: User!
+
+  """피드 ID."""
+  id: String!
+
+  """피드가 작성된 클럽."""
+  club: Club!
+
+  """피드 유형."""
+  type: FeedType!
+
+  """피드 본문. 최대 1,000자."""
+  content: String!
+
+  """첨부 미디어 목록. 최대 5개, 동영상은 최대 1개."""
+  attaches: [ChildAttach!]!
+
+  """댓글 작성 가능 여부."""
+  commentEnabled: Boolean!
+
+  """굿 수."""
+  goodCount: Int!
+
+  """댓글 수."""
+  commentCount: Int!
+  status: Status!
+
+  """피드 생성 시각."""
+  createdAt: DateTime
+
+  """피드 수정 시각."""
+  updatedAt: DateTime
+
+  """현재 로그인 사용자의 굿 여부."""
+  isGood: Boolean!
+
+  """현재 로그인 사용자의 피드 작성 클럽 가입 여부."""
+  isJoinedClub: Boolean!
+
+  """현재 로그인 사용자가 피드 작성 클럽에 가입할 수 있는지 여부."""
+  canJoinClub: Boolean!
+}
+
+"""클럽 피드 게시물 유형."""
+enum FeedType {
+  """클럽 소유 프로가 작성하는 프로 피드."""
+  PRO
+
+  """클럽 가입 회원이 작성하는 팬 피드."""
+  FAN
+}
+
+"""특정 클럽에 게시되는 공지."""
+type ClubNotice implements IUser {
+  user: User!
+
+  """클럽 공지 ID."""
+  id: String!
+
+  """공지 대상 클럽."""
+  club: Club!
+
+  """공지 제목. 최대 100자."""
+  title: String!
+
+  """공지 본문. 최대 1,000자."""
+  content: String!
+
+  """공지 고정핀 설정 시각."""
+  pinnedAt: DateTime
+
+  """첨부 미디어 목록. 최대 5개. 1개만 쓸때는 0번 고정 사용"""
+  attaches: [ChildAttach!]!
+  status: Status!
+
+  """공지 생성 시각."""
+  createdAt: DateTime
+
+  """공지 수정 시각."""
+  updatedAt: DateTime
+}
+
+"""클럽 정보에 현재 조회자의 가입 상태를 함께 담은 응답 타입."""
+type ClubResWithMy {
+  """클럽 ID."""
+  id: String!
+
+  """이 클럽을 소유한 프로. 프로 1명당 클럽 1개가 원칙이다."""
+  pro: Pro!
+
+  """클럽 이름."""
+  name: String!
+
+  """클럽 목록과 상세 상단에 노출되는 한 줄 소개."""
+  description: String
+
+  """첨부 미디어 목록"""
+  attach: Attach
+
+  """소개 탭에 노출되는 클럽 소개 본문."""
+  introduction: String
+
+  """소개 탭에 노출되는 외부 링크 목록."""
+  links: [ClubLink!]
+
+  """어드민이 큐레이션한 클럽 추천 타입."""
+  recommendationType: ClubRecommendationType
+
+  """현재 가입 중인 활성 멤버 수."""
+  memberCount: Int!
+  status: Status!
+
+  """현재 조회자가 이 클럽에 가입 중인지 여부."""
+  isJoined: Boolean!
+
+  """현재 조회자가 이 클럽에 가입할 수 있는지 여부."""
+  canJoin: Boolean!
+
+  """현재 조회자의 클럽 역할. 미가입 또는 비로그인 조회자는 null."""
+  membershipRole: ClubMemberRole
+
+  """현재 조회자의 클럽 멤버 유형. 미가입 또는 비로그인 조회자는 null."""
+  membershipType: ClubMemberType
+
+  """현재 조회자가 마지막으로 이 클럽 고정핀을 설정한 시각."""
+  pinnedAt: DateTime
+
+  """클럽의 마지막 활성 프로 글 작성 시각."""
+  lastProFeedCreatedAt: DateTime
+
+  """클럽의 마지막 활성 공지 작성 시각."""
+  lastNoticeCreatedAt: DateTime
+}
+
+type ClubResWithMyListResponse {
+  "\n- 1: Ok, successfully mutated, no problem \n- 4: no content. this means NotFound or DeletedAlready.\n"
+  success: Int!
+  items: [ClubResWithMy!]!
+  hasNext: Boolean
+  nextCursor: String
+
+  "\n- text comment used to describe more information to user or frontend developer. \n"
+  message: String
+}
+
+type ClubResWithMyResponse {
+  success: Int!
+  item: ClubResWithMy!
+  message: String
+}
+
+type ClubResponse {
+  success: Int!
+  item: Club!
+  message: String
+}
+
+type FeedQryNamespace {
+  feeds(clubId: String!, type: FeedType, keyword: String, input: CursorGraphReq): FeedListResponse!
+  popularFeeds(scope: PopularFeedScope!, input: CursorGraphReq): FeedListResponse!
+  feed(id: String!): FeedResponse!
+  feedComments(feedId: String!, input: CursorGraphReq): FeedCommentListResponse!
+}
+
+"""인기 피드 조회 범위."""
+enum PopularFeedScope {
+  """전체 클럽의 인기 피드."""
+  ALL
+
+  """현재 로그인 사용자가 가입한 클럽의 인기 피드."""
+  MY_CLUBS
+}
+
+type FeedMutNamespace {
+  createFeed(input: CreateFeedInput!): FeedResponse!
+  updateFeed(input: UpdateFeedInput!): FeedResponse!
+  deleteFeed(input: DeleteFeedInput!): FeedResponse!
+  setFeedGood(input: GoodFeedInput!): FeedResponse!
+  createFeedComment(input: CreateFeedCommentInput!): FeedCommentResponse!
+  deleteFeedComment(input: DeleteFeedCommentInput!): FeedCommentResponse!
+  setFeedCommentGood(input: GoodFeedCommentInput!): FeedCommentResponse!
+}
+
+"""클럽 피드 작성 입력."""
+input CreateFeedInput {
+  """작성할 피드 유형."""
+  type: FeedType!
+
+  """피드 본문. 최대 1,000자."""
+  content: String!
+
+  """첨부 미디어 목록. 최대 5개, 동영상은 최대 1개."""
+  attachInputs: [ChildAttachInput!] = []
+
+  """피드를 작성할 클럽 ID."""
+  clubId: String!
+}
+
+"""클럽 피드 수정 입력."""
+input UpdateFeedInput {
+  """작성할 피드 유형."""
+  type: FeedType
+
+  """피드 본문. 최대 1,000자."""
+  content: String
+
+  """첨부 미디어 목록. 최대 5개, 동영상은 최대 1개."""
+  attachInputs: [ChildAttachInput!] = []
+
+  """피드를 작성할 클럽 ID."""
+  clubId: String
+
+  """수정할 피드 ID."""
+  feedId: String!
+}
+
+"""클럽 피드 삭제 입력."""
+input DeleteFeedInput {
+  """삭제할 피드 ID."""
+  feedId: String!
+}
+
+"""클럽 피드 굿 설정 입력."""
+input GoodFeedInput {
+  """굿을 설정할 피드 ID."""
+  feedId: String!
+
+  """true면 굿, false면 굿 취소."""
+  isGood: Boolean!
+}
+
+"""피드 댓글 작성 입력."""
+input CreateFeedCommentInput {
+  """댓글을 작성할 피드 ID."""
+  feedId: String!
+
+  """댓글 본문. 최대 1,000자."""
+  content: String!
+}
+
+"""피드 댓글 삭제 입력."""
+input DeleteFeedCommentInput {
+  """삭제할 댓글 ID."""
+  commentId: String!
+}
+
+"""피드 댓글 굿 설정 입력."""
+input GoodFeedCommentInput {
+  """굿을 설정할 댓글 ID."""
+  commentId: String!
+
+  """true면 굿, false면 굿 취소."""
+  isGood: Boolean!
+}
+
+"""피드에 작성된 댓글. 대댓글은 지원하지 않는다."""
+type FeedComment implements IUser {
+  user: User!
+
+  """피드 댓글 ID."""
+  id: String!
+
+  """댓글 본문. 최대 1,000자."""
+  content: String!
+
+  """굿 수."""
+  goodCount: Int!
+  status: Status!
+
+  """댓글 생성 시각."""
+  createdAt: DateTime
+
+  """현재 로그인 사용자의 댓글 굿 여부."""
+  isGood: Boolean!
+}
+
+type FeedListResponse {
+  "\n- 1: Ok, successfully mutated, no problem \n- 4: no content. this means NotFound or DeletedAlready.\n"
+  success: Int!
+  items: [Feed!]!
+  hasNext: Boolean
+  nextCursor: String
+
+  "\n- text comment used to describe more information to user or frontend developer. \n"
+  message: String
+}
+
+type FeedResponse {
+  success: Int!
+  item: Feed!
+  message: String
+}
+
+type FeedCommentListResponse {
+  "\n- 1: Ok, successfully mutated, no problem \n- 4: no content. this means NotFound or DeletedAlready.\n"
+  success: Int!
+  items: [FeedComment!]!
+  hasNext: Boolean
+  nextCursor: String
+
+  "\n- text comment used to describe more information to user or frontend developer. \n"
+  message: String
+}
+
+type FeedCommentResponse {
+  success: Int!
+  item: FeedComment!
+  message: String
+}
+
+type AttachQryNamespace {
+  attachMyList(input: CursorGraphReq): AttachListResponse!
+}
+
+type AttachMutNamespace {
+  "\n## upload url\n- resJson.item[].each -> item.upload + '/' + fileName.ext + '?' + item.sig\n- ex) https://s...t/proam/dev/video/2026/05/6a...455/myfile.webp?sv=2026-02-06&spr=htt...QeAl36LRS0%3D&sdd=5\n\n## bulk example\n\n```json     \nmutation AttachPresign(\n  $input1: AttachItem!,\n  $input2: AttachItem!\n) {\n  AttachMutation {\n    c1: attachPresign(input: $input1) {\n      item {\n        sortKey\n        id\n        upload\n        sig\n        cdn\n      }\n      success\n    },\n    c2: attachPresign(input: $input2) {\n      item {\n        sortKey\n        id\n        upload\n        sig\n        cdn\n      }\n      success\n    }\n  }\n}\n\n{\n  \"input1\": {\n    \"originalExt\": \"mp4\", // please lower case\n        \"originalName\": \"hello\",\n        \"sortKey\": 1,\n        \"type\": \"VIDEO\" // please upper case\n  },\n  \"input2\": {\n    \"originalExt\": \"mp4\",\n        \"originalName\": \"hello2\",\n        \"sortKey\": 2,\n        \"type\": \"VIDEO\"\n  }\n}\n```  \n"
+  attachPresign(input: AttachItem!): AttachPresignedRes!
+
+  "\n## after uploaded file then persist data to currently ACTIVE IMAGE, TRANS VIDEO\n\n## bulk example\n\n```json     \nmutation AttachUploaded(\n  $input1: AttachUploadedInput!,\n  $input2: AttachUploadedInput!\n) {\n  AttachMutation {\n    q1: attachUploaded(input: $input1) {\n      item {\n       id\n      }\n      success\n    }\n    q2: attachUploaded(input: $input2) {\n      item {\n        id\n      }\n      success\n    }\n  }\n}\n\n{\n  \"input1\": {\n    \"id\": \"6a1e920a26255c9503a3a6ed\",\n    \"sizes\": [\n      {\n        \"name\": \"xs\",\n        \"wh\": [100, 200]\n      },\n      {\n        \"name\": \"lg\",\n        \"wh\": [800, 600]\n      },\n      {\n        \"name\": \"xl2\",\n        \"wh\": [1600, 300]\n      },\n    ]\n  },\n  \"input2\": {\n    \"id\": \"6a1e920a26255c9503a3a6ec\",\n    \"sizes\": [\n      {\n        \"name\": \"thumbnail\",\n        \"wh\": [100, 200]\n      }\n    ]\n  }\n}\n```  \n"
+  attachUploaded(input: AttachUploadedInput!): IdResultResponse!
+}
+
+input AttachItem {
+  type: AttachType!
+  originalName: String!
+  originalExt: String!
+
+  """client에서 응답된 해당 url에 재 mapping 하기 위한 키 & 순서 보장을 위한 넘버링"""
+  sortKey: Int!
+}
+
+input AttachUploadedInput {
+  id: String!
+  sizes: [AttachSizesInput!]!
+}
+
+input AttachSizesInput {
+  name: String!
+  wh: [Int!]!
+}
+
+type AttachListResponse {
+  "\n- 1: Ok, successfully mutated, no problem \n- 4: no content. this means NotFound or DeletedAlready.\n"
+  success: Int!
+  items: [Attach!]!
+  hasNext: Boolean
+  nextCursor: String
+
+  "\n- text comment used to describe more information to user or frontend developer. \n"
+  message: String
+}
+
+type ClubNoticeListResponse {
+  "\n- 1: Ok, successfully mutated, no problem \n- 4: no content. this means NotFound or DeletedAlready.\n"
+  success: Int!
+  items: [ClubNotice!]!
+  hasNext: Boolean
+  nextCursor: String
+
+  "\n- text comment used to describe more information to user or frontend developer. \n"
+  message: String
+}
+
+type ClubNoticeResponse {
+  success: Int!
+  item: ClubNotice!
+  message: String
+}
+
+"""앱 화면에 노출되는 배너."""
+type Banner {
+  """배너 ID."""
+  id: String!
+
+  """배너 제목."""
+  title: String!
+
+  """배너 태그 목록."""
+  tags: [String!]
+
+  """배너 본문."""
+  content: String
+
+  """배너가 노출되는 화면 위치 목록."""
+  positions: [BannerPosition!]!
+
+  """배너 노출 시작 시각."""
+  startedAt: DateTime!
+
+  """배너 노출 종료 시각."""
+  endedAt: DateTime
+
+  """배너 클릭 시 이동할 URL."""
+  linkUrl: String
+
+  """같은 위치 안에서 배너 노출 순서."""
+  sort: Int!
+
+  """첨부 미디어 목록"""
+  attach: Attach
+
+  """배너 운영 상태."""
+  status: Status!
+
+  """배너 생성 시각."""
+  createdAt: DateTime
+}
+
+"""배너가 노출되는 화면 위치."""
+enum BannerPosition {
+  """서비스 메인 화면."""
+  MAIN
+
+  """클럽 메인 화면."""
+  CLUB_MAIN
+}
+
+type BannerQryNamespace {
+  """노출 위치별로 현재 표시 가능한 활성 배너 목록을 반환한다."""
+  banners(
+    """조회할 배너 노출 위치."""
+    position: BannerPosition!
+  ): BannerListResponse!
+}
+
+type BannerListResponse {
+  "\n- 1: Ok, successfully mutated, no problem \n- 4: no content. this means NotFound or DeletedAlready.\n"
+  success: Int!
+  items: [Banner!]!
+  hasNext: Boolean
+  nextCursor: String
+
+  "\n- text comment used to describe more information to user or frontend developer. \n"
+  message: String
+}
+
+type CompetitionQryNamespace {
+  """조회 유형별 프로암 목록을 조회한다."""
+  events(type: CompetitionEventListType!, size: Int = 5): CompetitionEventListResponse!
+
+  """프로암 메인 행사 영상 목록을 조회한다."""
+  videos(size: Int = 5): CompetitionVideoListResponse!
+
+  """프로암 상세 화면에 필요한 행사 정보와 차수 목록을 조회한다."""
+  event(eventId: String!): CompetitionDetailResponse!
+
+  """프로암 차수별 최신 노출 가능 랭킹을 조회한다."""
+  roundRanking(roundId: String!, type: CompetitionRoundRankingType = RANKING): CompetitionRoundRankingResponse!
+
+  """프로암 행사 단위 통합 예비 당첨 결과를 조회한다."""
+  backupWinners(eventId: String!): CompetitionBackupWinnerResultResponse!
+
+  """프로암 차수별 당첨 결과를 조회한다."""
+  roundWinners(roundId: String!): CompetitionRoundWinnerResultResponse!
+
+  """현재 로그인 사용자의 프로암 차수 결과 상태를 조회한다."""
+  myRoundResultStatus(roundId: String!): CompetitionMyRoundResultStatusResponse!
+
+  """현재 로그인 사용자의 프로암 차수 응원 상태를 조회한다."""
+  myCheerStatus(roundId: String!): CompetitionMyCheerStatusResponse!
+}
+
+"""프로암 행사 목록 조회 유형."""
+enum CompetitionEventListType {
+  """진행 중인 프로암."""
+  IN_PROGRESS
+
+  """종료된 프로암."""
+  CLOSED
+}
+
+"""프로암 차수 랭킹 조회 탭 유형."""
+enum CompetitionRoundRankingType {
+  """전체 프로 랭킹."""
+  RANKING
+
+  """현재 로그인 사용자가 응원한 프로만 조회."""
+  MY_CHEER
+
+  """현재 로그인 사용자가 가입한 클럽의 프로만 조회."""
+  MY_CLUB
+}
+
+type CompetitionMutNamespace {
+  """프로암 차수에서 프로에게 응원을 보낸다."""
+  cheer(input: CreateCompetitionCheerInput!): CompetitionCheerResultResponse!
+}
+
+"""프로암 응원 생성 입력."""
+input CreateCompetitionCheerInput {
+  """응원할 차수 ID."""
+  roundId: String!
+
+  """응원할 프로 ID."""
+  proId: String!
+
+  """응원 횟수. 기본 1회."""
+  count: Int = 1
+}
+
+"""프로암 행사 이미지."""
+type CompetitionEventImage {
+  """이미지 URL."""
+  url: String!
+
+  """이미지 노출 순서."""
+  sort: Int!
+}
+
+"""프로암 응원 방법 안내 항목."""
+type CompetitionCheerGuideItem {
+  """응원 방법 제목."""
+  title: String!
+
+  """응원 방법 본문."""
+  content: String!
+
+  """응원 방법 노출 순서."""
+  sort: Int!
+}
+
+"""프로암 행사 정보 및 응원 방법 안내."""
+type CompetitionEventGuide {
+  """행사명."""
+  eventName: String
+
+  """실제 프로암 행사 시작 시각."""
+  eventStartAt: DateTime
+
+  """실제 프로암 행사 종료 시각."""
+  eventEndAt: DateTime
+
+  """행사 장소."""
+  venue: String
+
+  """선발 인원 안내 문구."""
+  participantSummary: String
+
+  """참가 비용 안내 문구."""
+  costNotice: String
+
+  """응원 방법 안내 항목 목록."""
+  cheerGuideItems: [CompetitionCheerGuideItem!]!
+
+  """행사 유의사항 본문."""
+  notice: String
+}
+
+"""프로암 스폰서 이미지."""
+type CompetitionSponsorImage {
+  """이미지 URL."""
+  url: String!
+
+  """이미지 노출 순서."""
+  sort: Int!
+}
+
+"""프로암 공식 스폰서 안내."""
+type CompetitionSponsor {
+  """스폰서명."""
+  name: String!
+
+  """스폰서 라벨."""
+  label: String
+
+  """스폰서 안내 본문."""
+  content: String
+
+  """스폰서 로고 URL."""
+  logoUrl: String
+
+  """스폰서 이미지 목록."""
+  imageItems: [CompetitionSponsorImage!]!
+
+  """스폰서 랜딩 URL."""
+  linkUrl: String
+
+  """스폰서 노출 순서."""
+  sort: Int!
+}
+
+"""모두의 프로암 행사."""
+type CompetitionEvent {
+  """프로암 행사 ID."""
+  id: String!
+
+  """행사 타이틀."""
+  title: String!
+
+  """행사 서브 타이틀."""
+  subtitle: String
+
+  """전체 행사 시작 시각. 1차 응원 시작 시각 기준."""
+  startedAt: DateTime!
+
+  """전체 행사 종료 시각. 마지막 차수 결과 발표 시각 기준."""
+  endedAt: DateTime!
+
+  """행사 이미지 목록. 콘솔에서 최대 5개까지 관리한다."""
+  imageItems: [CompetitionEventImage!]!
+
+  """행사 정보 및 응원 방법."""
+  guide: CompetitionEventGuide
+
+  """메인 스폰서 안내."""
+  mainSponsor: CompetitionSponsor
+
+  """스폰서 목록."""
+  sponsorItems: [CompetitionSponsor!]!
+
+  """행사 단위 통합 예비 당첨자 수."""
+  backupWinnerCount: Int!
+
+  """행사 운영 상태."""
+  status: Status!
+
+  """행사 생성 시각."""
+  createdAt: DateTime
+
+  """행사 수정 시각."""
+  updatedAt: DateTime
+}
+
+"""프로암 행사 단위 통합 예비 당첨자."""
+type CompetitionBackupWinner implements IUser {
+  user: User!
+
+  """프로암 통합 예비 당첨 결과 ID."""
+  id: String!
+
+  """소속 프로암 행사."""
+  event: CompetitionEvent!
+
+  """행사 단위 통합 예비 당첨 순번."""
+  order: Int!
+
+  """통합 예비 당첨 추첨 완료 시각."""
+  drawnAt: DateTime!
+
+  """통합 예비 당첨 결과 생성 시각."""
+  createdAt: DateTime
+
+  """통합 예비 당첨 결과 수정 시각."""
+  updatedAt: DateTime
+}
+
+"""프로암 차수."""
+type CompetitionRound {
+  """프로암 차수 ID."""
+  id: String!
+
+  """소속 프로암 행사."""
+  event: CompetitionEvent!
+
+  """차수 번호."""
+  roundNo: Int!
+
+  """차수 운영 상태."""
+  status: Status!
+
+  """응원 시작 시각."""
+  cheerStartAt: DateTime!
+
+  """응원 종료 시각."""
+  cheerEndAt: DateTime!
+
+  """결과 발표 시각."""
+  resultAnnounceAt: DateTime!
+
+  """운영자가 최종 랭킹을 확정한 실제 시각."""
+  rankingConfirmedAt: DateTime
+
+  """운영자가 당첨 추첨을 완료한 실제 시각."""
+  drawCompletedAt: DateTime
+
+  """차수별 회원 응원 상한선. 기본 20회."""
+  cheerLimitCount: Int!
+
+  """1회 응원에 소모되는 공 수. 기본 10개."""
+  cheerBallCount: Int!
+
+  """최종 선발 대상 랭킹 번호 목록. 1~6개까지 설정한다."""
+  selectedRankNumbers: [Int!]!
+
+  """선발 프로 1명당 당첨자 수. 기본 3명."""
+  winnerCountPerPro: Int!
+
+  """차수 생성 시각."""
+  createdAt: DateTime
+
+  """차수 수정 시각."""
+  updatedAt: DateTime
+}
+
+"""프로암 랭킹 스냅샷 항목."""
+type CompetitionRankingSnapshotItem {
+  """랭킹 대상 프로."""
+  pro: Pro!
+
+  """동점 반영 랭킹."""
+  rank: Int!
+
+  """프로가 받은 전체 응원 수."""
+  cheerCount: Int!
+
+  """마지막 응원 발생 시각. 동점 정렬에 사용한다."""
+  lastCheeredAt: DateTime
+}
+
+"""프로암 차수별 랭킹 스냅샷."""
+type CompetitionRankingSnapshot {
+  """프로암 랭킹 스냅샷 ID."""
+  id: String!
+
+  """소속 프로암 행사."""
+  event: CompetitionEvent!
+
+  """집계 대상 차수."""
+  round: CompetitionRound!
+
+  """스냅샷 유형."""
+  type: CompetitionRankingSnapshotType!
+
+  """집계 기준 시각."""
+  baseAt: DateTime!
+
+  """차수 전체 응원 수."""
+  totalCheerCount: Int!
+
+  """랭킹 항목 목록."""
+  items: [CompetitionRankingSnapshotItem!]!
+
+  """스냅샷 생성 시각."""
+  createdAt: DateTime
+}
+
+"""프로암 랭킹 스냅샷 유형."""
+enum CompetitionRankingSnapshotType {
+  """매시간 정각 기준 집계 스냅샷."""
+  HOURLY
+
+  """운영자가 확정한 최종 랭킹 스냅샷."""
+  FINAL
+}
+
+"""프로암 차수에서 최종 선발 확정된 프로."""
+type CompetitionSelectedPro {
+  """프로암 선발 프로 ID."""
+  id: String!
+
+  """소속 프로암 행사."""
+  event: CompetitionEvent!
+
+  """선발된 차수."""
+  round: CompetitionRound!
+
+  """선발 확정된 프로."""
+  pro: Pro!
+
+  """선발 기준 최종 랭킹 스냅샷."""
+  rankingSnapshot: CompetitionRankingSnapshot
+
+  """최종 랭킹 등수."""
+  rank: Int!
+
+  """최종 랭킹 확정 시점의 응원 수."""
+  cheerCount: Int!
+
+  """최종 랭킹 확정 시점의 마지막 응원 발생 시각."""
+  lastCheeredAt: DateTime
+
+  """선발 확정 시각."""
+  selectedAt: DateTime!
+
+  """선발 프로 생성 시각."""
+  createdAt: DateTime
+
+  """선발 프로 수정 시각."""
+  updatedAt: DateTime
+}
+
+"""프로암 메인 행사 영상."""
+type CompetitionVideo {
+  """프로암 영상 ID."""
+  id: String!
+
+  """영상 제목."""
+  title: String!
+
+  """유튜브 영상 URL."""
+  youtubeUrl: String!
+
+  """메인 캐러셀 노출 순서."""
+  sort: Int!
+
+  """영상 운영 상태."""
+  status: Status!
+
+  """영상 생성 시각."""
+  createdAt: DateTime
+
+  """영상 수정 시각."""
+  updatedAt: DateTime
+}
+
+"""프로암 차수 조회 요약."""
+type CompetitionRoundSummary {
+  """프로암 차수 ID."""
+  id: String!
+
+  """차수 번호."""
+  roundNo: Int!
+
+  """화면 노출용 차수 상태."""
+  viewStatus: CompetitionRoundViewStatus!
+
+  """응원 시작 시각."""
+  cheerStartAt: DateTime!
+
+  """응원 종료 시각."""
+  cheerEndAt: DateTime!
+
+  """결과 발표 시각."""
+  resultAnnounceAt: DateTime!
+
+  """운영자가 최종 랭킹을 확정한 실제 시각."""
+  rankingConfirmedAt: DateTime
+
+  """운영자가 당첨 추첨을 완료한 실제 시각."""
+  drawCompletedAt: DateTime
+
+  """차수별 회원 응원 상한선."""
+  cheerLimitCount: Int!
+
+  """1회 응원에 소모되는 공 수."""
+  cheerBallCount: Int!
+
+  """최종 선발 대상 랭킹 번호 목록."""
+  selectedRankNumbers: [Int!]!
+
+  """선발 프로 1명당 당첨자 수."""
+  winnerCountPerPro: Int!
+}
+
+"""프로암 차수 화면 노출 상태."""
+enum CompetitionRoundViewStatus {
+  """응원 시작 전."""
+  SCHEDULED
+
+  """응원 진행 중."""
+  CHEERING
+
+  """응원 종료 후 결과 발표 대기 중."""
+  WAITING_ANNOUNCEMENT
+
+  """결과 발표 완료."""
+  ENDED
+}
+
+"""프로암 상세 조회 결과."""
+type CompetitionDetail {
+  """프로암 행사."""
+  event: CompetitionEvent!
+
+  """프로암 차수 목록."""
+  rounds: [CompetitionRoundSummary!]!
+
+  """기본으로 선택할 차수."""
+  selectedRound: CompetitionRoundSummary
+}
+
+"""프로암 차수 랭킹 항목."""
+type CompetitionRankingItem {
+  """랭킹 대상 프로."""
+  pro: Pro!
+
+  """동점 반영 랭킹."""
+  rank: Int!
+
+  """프로가 받은 전체 응원 수."""
+  cheerCount: Int!
+
+  """현재 로그인 사용자가 해당 프로에게 보낸 응원 수."""
+  myCheerCount: Int!
+
+  """마지막 응원 발생 시각. 동점 정렬에 사용한다."""
+  lastCheeredAt: DateTime
+}
+
+"""프로암 차수 랭킹 조회 결과."""
+type CompetitionRoundRanking {
+  """조회한 차수."""
+  round: CompetitionRoundSummary!
+
+  """랭킹 스냅샷 유형."""
+  snapshotType: CompetitionRankingSnapshotType
+
+  """랭킹 집계 기준 시각."""
+  baseAt: DateTime
+
+  """차수 전체 응원 수."""
+  totalCheerCount: Int!
+
+  """랭킹 항목 목록."""
+  items: [CompetitionRankingItem!]!
+}
+
+"""프로암 통합 예비 당첨 결과 조회 결과."""
+type CompetitionBackupWinnerResult {
+  """프로암 행사."""
+  event: CompetitionEvent!
+
+  """통합 예비 결과 공개 기준이 되는 마지막 차수."""
+  lastRound: CompetitionRoundSummary
+
+  """통합 예비 결과 사용자 노출 가능 여부."""
+  isAnnounced: Boolean!
+
+  """통합 예비 결과 발표 기준 시각."""
+  resultAnnounceAt: DateTime
+
+  """통합 예비 추첨 완료 시각."""
+  drawnAt: DateTime
+
+  """행사 단위 통합 예비 당첨자 설정 수."""
+  backupWinnerCount: Int!
+
+  """통합 예비 당첨자 목록."""
+  items: [CompetitionBackupWinner!]!
+}
+
+"""프로암 차수 당첨자 항목."""
+type CompetitionRoundWinnerItem implements IUser {
+  user: User!
+
+  """프로암 당첨 결과 ID."""
+  id: String!
+
+  """프로별 당첨 순번."""
+  order: Int!
+
+  """추첨 시점의 회원 응원 횟수."""
+  cheerCountAtDraw: Int!
+
+  """추첨 완료 시각."""
+  drawnAt: DateTime!
+}
+
+"""프로암 차수 당첨자 프로별 묶음."""
+type CompetitionRoundWinnerGroup {
+  """당첨자 추첨 기준 프로."""
+  pro: Pro!
+
+  """해당 프로 기준 당첨자 목록."""
+  winners: [CompetitionRoundWinnerItem!]!
+}
+
+"""프로암 차수 당첨 결과 조회 결과."""
+type CompetitionRoundWinnerResult {
+  """조회한 차수."""
+  round: CompetitionRoundSummary!
+
+  """차수 당첨 결과 사용자 노출 가능 여부."""
+  isAnnounced: Boolean!
+
+  """차수 결과 발표 기준 시각."""
+  resultAnnounceAt: DateTime!
+
+  """차수 당첨 추첨 완료 시각."""
+  drawnAt: DateTime
+
+  """선발 프로 1명당 당첨자 설정 수."""
+  winnerCountPerPro: Int!
+
+  """프로별 당첨자 목록."""
+  items: [CompetitionRoundWinnerGroup!]!
+}
+
+"""프로암 차수 내 현재 로그인 사용자의 결과 상태."""
+type CompetitionMyRoundResultStatus {
+  """조회한 차수."""
+  round: CompetitionRoundSummary!
+
+  """현재 로그인 사용자의 차수 결과 상태."""
+  type: CompetitionMyRoundResultType!
+
+  """차수 당첨 정보."""
+  winner: CompetitionRoundWinnerItem
+
+  """당첨 기준 프로."""
+  winnerPro: Pro
+
+  """마지막 차수 통합 예비 당첨 정보."""
+  backupWinner: CompetitionBackupWinner
+}
+
+"""프로암 차수 내 결과 상태 유형."""
+enum CompetitionMyRoundResultType {
+  """결과 발표 대기 중."""
+  WAITING_ANNOUNCEMENT
+
+  """해당 차수 당첨자."""
+  WINNER
+
+  """해당 차수 미당첨자."""
+  NOT_WINNER
+
+  """마지막 차수 통합 예비 당첨자."""
+  BACKUP_WINNER
+}
+
+"""프로암 내 응원 상태 조회 결과."""
+type CompetitionMyCheerStatus {
+  """조회한 차수."""
+  round: CompetitionRoundSummary!
+
+  """현재 로그인 사용자가 차수에서 보낸 전체 응원 수."""
+  totalCheerCount: Int!
+
+  """현재 로그인 사용자의 차수 잔여 응원 가능 횟수."""
+  remainingCheerCount: Int!
+
+  """현재 로그인 사용자의 응원 가능 여부."""
+  canCheer: Boolean!
+
+  """현재 로그인 사용자의 회원 여부."""
+  isMember: Boolean!
+
+  """현재 로그인 사용자의 프로 여부."""
+  isPro: Boolean!
+}
+
+"""프로암 응원 생성 결과."""
+type CompetitionCheerResult {
+  """응원 생성 후 현재 로그인 사용자의 응원 상태."""
+  status: CompetitionMyCheerStatus!
+
+  """이번 요청으로 생성된 응원 횟수."""
+  count: Int!
+
+  """이번 요청으로 소모 예정인 공 수."""
+  ballCount: Int!
+}
+
+type CompetitionCheerResultResponse {
+  success: Int!
+  item: CompetitionCheerResult!
+  message: String
+}
+
+type CompetitionEventListResponse {
+  "\n- 1: Ok, successfully mutated, no problem \n- 4: no content. this means NotFound or DeletedAlready.\n"
+  success: Int!
+  items: [CompetitionEvent!]!
+  hasNext: Boolean
+  nextCursor: String
+
+  "\n- text comment used to describe more information to user or frontend developer. \n"
+  message: String
+}
+
+type CompetitionVideoListResponse {
+  "\n- 1: Ok, successfully mutated, no problem \n- 4: no content. this means NotFound or DeletedAlready.\n"
+  success: Int!
+  items: [CompetitionVideo!]!
+  hasNext: Boolean
+  nextCursor: String
+
+  "\n- text comment used to describe more information to user or frontend developer. \n"
+  message: String
+}
+
+type CompetitionDetailResponse {
+  success: Int!
+  item: CompetitionDetail!
+  message: String
+}
+
+type CompetitionRoundRankingResponse {
+  success: Int!
+  item: CompetitionRoundRanking!
+  message: String
+}
+
+type CompetitionBackupWinnerResultResponse {
+  success: Int!
+  item: CompetitionBackupWinnerResult!
+  message: String
+}
+
+type CompetitionRoundWinnerResultResponse {
+  success: Int!
+  item: CompetitionRoundWinnerResult!
+  message: String
+}
+
+type CompetitionMyCheerStatusResponse {
+  success: Int!
+  item: CompetitionMyCheerStatus!
+  message: String
+}
+
+type CompetitionMyRoundResultStatusResponse {
+  success: Int!
+  item: CompetitionMyRoundResultStatus!
+  message: String
+}
+
+"""As number type on js/ts under BIG_NUMBER"""
+scalar SafeNumber
+
+"""As number type on js/ts under BIG_NUMBER"""
+scalar JsonType
+
+type Query {
+  UserQuery: UserQryNamespace!
+  AgreementQuery: AgreementQryNamespace!
+  ClubQuery: ClubQryNamespace!
+  AttachQuery: AttachQryNamespace!
+  FeedQuery: FeedQryNamespace!
+  BannerQuery: BannerQryNamespace!
+  CompetitionQuery: CompetitionQryNamespace!
+}
+
+type Mutation {
+  AuthMutation: AuthMutNamespace!
+  UserMutation: UserMutNamespace!
+  ClubMutation: ClubMutNamespace!
+  AttachMutation: AttachMutNamespace!
+  FeedMutation: FeedMutNamespace!
+  CompetitionMutation: CompetitionMutNamespace!
+}

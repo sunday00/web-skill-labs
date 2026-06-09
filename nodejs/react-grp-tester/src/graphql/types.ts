@@ -1,23 +1,13 @@
-export type Status = 'ACTIVATE' | 'INACTIVATE'
-
-export type User = {
+export type Feed = {
   id: string
-  nickname: string
-  snsId: string
-  status: Status
+  content: string
+  attaches: any[]
 }
 
-export type Bet = {
+export type PresignedUrl = {
+  cdn: string
   id: string
-  category: string
-  date: string
-  price: number
-  user: {
-    nickname: string
-    id: string
-  }
-}
-
-export type DeleteResult = {
-  deletedCount: number
+  sig: string
+  sortKey: number
+  upload: string
 }
