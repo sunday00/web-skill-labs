@@ -98,6 +98,7 @@ const user6: z.infer<typeof UserSchema6> = {
 // console.log(UserSchema6.safeParse(user6)) // "code": "too_small", // "code": "invalid_format",
 
 // --------- default
+const hobbies = ['draw', 'guitar', 'walk'] as const
 
 const UserSchema7 = z.object({
   username: z.string(),
@@ -106,6 +107,9 @@ const UserSchema7 = z.object({
   birth: z.date().min(new Date('1950-01-01T00:00:00.000Z')),
   isMember: z.boolean().default(true).nullish(),
   task: z.literal(['dev', 'pm', 'design']),
+  hobby: z.enum(hobbies).optional(), // almost literal similar enum
+  // literal can set bool, num anything fixed value
+  // enum can set string array
 })
 
 const user7: z.infer<typeof UserSchema7> = {
