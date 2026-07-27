@@ -1,0 +1,9 @@
+{
+	"dependencies": {
+		"zod": "^4.4.3",
+		"zod-validation-error": "^5.0.0"
+	},
+	"devDependencies": {
+		"prettier": "^3.9.6"
+	}
+}
