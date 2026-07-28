@@ -1,19 +1,16 @@
 import { z } from 'zod'
 
+// prettier-ignore
 export const userDataSchema = z.object({
-  id: z.coerce // <----------------------------------------------------------------------------------------------+
+  id: z.coerce // <--------------------------------------coerce--------------------------------------------------+ // coerce : numeric to number
     .number() //                                                                                                 |
     .min(2) //                                                                                             |
     .max(100, 'do not exceed 100'), //                                                             |
   name: z.string().min(2, 'too short name').max(100, 'too long name'), //     |
   email: z.email(), //                                                                                           |
-  age: z.number().positive().max(150), //                                                                  |
-  preferences: z.object({
-    //                                                                                     |
-    //                                                                                                           |
-    theme: z.enum(['light', 'dark'], {
-      //                                                                        |
-      //                                                                                                         |
+  age: z.coerce.number().positive().max(150), // <---------------------------------------------------------+
+  preferences: z.object({ //                                                                                     |
+    theme: z.enum(['light', 'dark'], { //                                                                        |
       error: () => ({ message: 'please select an item' }), //                                                    |
     }), //                                                                                                       |
     // .default('dark'), //                                                                                      |
@@ -29,13 +26,11 @@ export const userDataSchema = z.object({
 //                                                                                                               |
 type UserData = z.infer<typeof userDataSchema> //                                                                |
 //                                                                                                               |
-export function processUserData(userData: UserData): string {
-  //                                                 |
-  //                                                                                                             |
+// prettier-ignore
+export function processUserData(userData: UserData): string { //                                                 |
   const result = userDataSchema.safeParse(userData) //                                                           |
   //                                                                                                             |
   if (!result.success) console.warn(result.error) //                                                             |
-  //                                                                                                             |
   const userSummary = `
     User: ${userData.name} (ID: ${userData.id})
     Email: ${userData.email}
@@ -49,9 +44,9 @@ export function processUserData(userData: UserData): string {
 //                                                                                                               |
 const userDataFromApi: UserData = {
   id: '7', // <---- this is not run time error occur ------------------------------------------------------------+
-  name: 'Jane doe',
-  email: 'invalid-email',
-  age: '10',
+  name: 'Jane doe', //                                                                                           |
+  email: 'invalid-email', //                                                                                     |
+  age: '10', // <---- this is not run time error occur ----------------------------------------------------------+
 }
 
 const r = processUserData(userDataFromApi)
