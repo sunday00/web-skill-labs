@@ -12,6 +12,7 @@
   "license": "ISC",
   "packageManager": "pnpm@10.28.0",
   "dependencies": {
+    "@fastify/autoload": "^6.5.0",
     "@fastify/error": "^4.2.0",
     "@fastify/static": "^10.1.3",
     "@fastify/swagger": "^9.8.1",
