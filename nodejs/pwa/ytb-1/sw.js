@@ -1,6 +1,6 @@
 // console.log('service worker inside sw.js')
 
-const cacheName = 'app-shell-rsrs-v1'
+const cacheName = 'app-shell-rsrs-v2'
 const assets = [
     'index.html', '/',
     'js/app.js',
@@ -30,6 +30,15 @@ self.addEventListener('install', evt => {
 
 self.addEventListener('activate', evt => {
     console.log('serviceWorker activated')
+
+    evt.waitUntil(
+        caches.keys().then(keys => {
+            return Promise.all(
+                keys.filter(key => key !== cacheName)
+                    .map(key => caches.delete())
+            )
+        })
+    )
 })
 
 self.addEventListener('fetch', (evt) => {
