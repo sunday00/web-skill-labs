@@ -5,6 +5,7 @@ const dynamicCacheName = 'v1'
 const assets = [
     'index.html', '/',
     'js/app.js',
+    'js/db.js',
     'js/common.js',
     'js/materialize.min.js',
     'css/styles.css',
@@ -13,7 +14,11 @@ const assets = [
     'img/favicon.svg',
     'https://fonts.googleapis.com/icon?family=Material+Icons',
     'https://fonts.gstatic.com/s/materialicons/v145/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2',
-    'pages/default.html'
+    'pages/default.html',
+    'https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js',
+    "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js",
+    "https://www.gstatic.com/firebasejs/12.18.0/firebase-analytics.js",
+    "https://firebase.googleapis.com/v1alpha/projects/-/apps/1:388225997919:web:d3ef3b10b13ec396bfcfea/webConfig"
 ]
 
 // caches.open(cacheName).then(cache => {
