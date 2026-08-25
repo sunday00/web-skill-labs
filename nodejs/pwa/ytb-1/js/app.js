@@ -1,8 +1,25 @@
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
-        .then(reg => console.log('serviceWorker registered', reg))
+const registerWorker = async () => {
+    return await navigator.serviceWorker.register('/sw.js')
+        .then(reg => {
+            console.log('serviceWorker registered', reg)
+
+            return reg
+        })
         .catch(e => console.error('failed to register serviceWorker', e))
 }
+
+const registerNotificationPermission = async () => {
+    await Notification.requestPermission()
+}
+
+if ('serviceWorker' in navigator) {
+    registerWorker().then(reg => {
+        // setTimeout(() => {
+        //     reg.showNotification('hello')
+        // }, 3000)
+    })
+}
+
 
 // function separator(strings, ...variables) {
 //     console.log({strings, variables})
@@ -20,3 +37,6 @@ if ('serviceWorker' in navigator) {
 // const age = 21
 // separator`${prefix} hello, ${name}, you are ${age}, so you can pass.`
 
+registerNotificationPermission().then(() => {
+    console.log('noti')
+})
