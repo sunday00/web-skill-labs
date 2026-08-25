@@ -52,7 +52,7 @@ self.addEventListener('activate', evt => {
         caches.keys().then(keys => {
             return Promise.all(
                 keys.filter(key => key !== cacheName)
-                    .map(key => caches.delete())
+                    .map(key => caches.delete(key))
             )
         })
     )
@@ -99,7 +99,8 @@ self.addEventListener('push', (evt) => {
             actions: [              // 알림에 버튼 추가
                 {action: 'open', title: '와우~ 함 보까?'},
                 {action: 'dismiss', title: '아 꺼져'}
-            ]
+            ],
+            // tag: 'noti-case-1'
         })
     )
 })

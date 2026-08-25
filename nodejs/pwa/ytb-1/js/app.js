@@ -40,3 +40,17 @@ if ('serviceWorker' in navigator) {
 registerNotificationPermission().then(() => {
     console.log('noti')
 })
+
+async function subscribe() {
+    let sw = await navigator.serviceWorker.ready
+
+    let push = await sw.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: 'BDjFSd46MiRJLmGOPZRCUHywBfD158bML3sYaVbJzwi80dAYlXUOkEQ6OdcR2vT7LOu1bUkOk8RoZJrWK1ipdOE'
+    })
+
+    console.log(JSON.stringify(push))
+}
+
+subscribe().then(() => {
+})

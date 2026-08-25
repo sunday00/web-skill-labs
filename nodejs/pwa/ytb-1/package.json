@@ -19,5 +19,8 @@
   "type": "module",
   "devDependencies": {
     "lighthouse": "^11"
+  },
+  "dependencies": {
+    "web-push": "^3.6.7"
   }
 }
