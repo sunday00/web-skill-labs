@@ -1,0 +1,1 @@
+cat ch01/f1.txt  | nl # show line number before data line
