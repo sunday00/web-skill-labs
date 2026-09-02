@@ -5,7 +5,13 @@
 
   <div>
     <%= form.label :name %>
+    <%= form.text_field :name %>
+
+    <%= form.label :description, style: "display: block" %>
     <%= form.rich_textarea :description %>
+
+    <%= form.label :featured_image, style: "display: block" %>
+    <%= form.file_field :featured_image, accept: "image/*" %>
   </div>
 
   <div>
