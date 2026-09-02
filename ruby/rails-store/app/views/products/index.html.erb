@@ -1,0 +1,13 @@
+<h1>Products</h1>
+
+<div id="products">
+  <% @products.each do |product| %>
+    <div>
+<!--      <a href="/products/<%#= product.id %>">-->
+        <%#= product.name %>
+<!--      </a>-->
+
+      <%= link_to product.name, "/products/#{product.id}"  %>
+    </div>
+  <% end %>
+</div>
