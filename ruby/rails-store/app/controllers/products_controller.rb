@@ -49,6 +49,6 @@ class ProductsController < ApplicationController
 
   # omit properties except name from product request
   def product_params
-    params.expect(product: [ :name ])
+    params.expect(product: [ :name, :description ])
   end
 end
