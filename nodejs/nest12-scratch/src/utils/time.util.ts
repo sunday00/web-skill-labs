@@ -8,6 +8,6 @@ export class Time {
   }
 
   diff(other: Temporal.ZonedDateTime) {
-    return this.T.until(other)
+    return this.T.since(other)
   }
 }

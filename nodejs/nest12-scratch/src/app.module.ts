@@ -16,9 +16,35 @@ import {
 } from './aop/middlewares/console.middleware.js'
 import { AnimalController } from './domains/animal/animal.controller.js'
 import { NestedController } from './domains/nested/nested.controller.js'
+import { createObserveModule } from '@nestjs/observe'
+
+export const { ObserveModule, ObserveInstrument } = createObserveModule()
 
 @Module({
-  imports: [CqrsModule.forRoot(), AnimalModule, NestedModule],
+  imports: [
+    ObserveModule.forRoot({
+      appKey: process.env.OBSERVE_APP_KEY ?? '',
+      appSecret: process.env.OBSERVE_APP_SECRET ?? '',
+      serviceId: 'n12-scratch-33159',
+      serviceVersion: 'v1.0.0',
+
+      // ----
+
+      http: {
+        getUserId: (req) => req.user?.id ?? 'anonymous',
+      },
+      runtimeMetrics: true,
+      runtimeMetricsInterval: 60000,
+      forwardLogs: true,
+      redaction: {
+        enabled: true,
+        useDefaultPatterns: true,
+      },
+    }),
+    CqrsModule.forRoot(),
+    AnimalModule,
+    NestedModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

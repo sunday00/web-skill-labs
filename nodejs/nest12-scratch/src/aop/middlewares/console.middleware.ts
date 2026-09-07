@@ -59,5 +59,5 @@ export const CheckPerformAll = (
   next()
 
   const et = new Time()
-  console.log(` ==== ${et.diff(st.T)} ms`)
+  console.log(` ==== ${et.diff(st.T).milliseconds} ms`)
 }

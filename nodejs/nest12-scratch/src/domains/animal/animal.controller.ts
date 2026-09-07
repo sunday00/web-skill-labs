@@ -1,4 +1,11 @@
-import { Body, Controller, Get, Post } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Get,
+  HttpException,
+  HttpStatus,
+  Post,
+} from '@nestjs/common'
 import { AnimalService } from './animal.service.js'
 import {
   AnimalCreateCommand,
@@ -28,5 +35,24 @@ export class AnimalController {
   @Get('/err-mid')
   public async errFromMiddleware() {
     return 1
+  }
+
+  @Get('/err-cont')
+  public async errFromThis() {
+    try {
+      return await this.animalService.errFromController()
+    } catch (error) {
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: '????',
+
+          errorCode: 'FUCKED',
+          message: 'this method fucked intended',
+        },
+        HttpStatus.FORBIDDEN,
+        { cause: error }, // for dev tracking inner error detail
+      )
+    }
   }
 }

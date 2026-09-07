@@ -9,4 +9,8 @@ export class AnimalService {
   async create(data: AnimalCreateCommand) {
     return await this.cb.execute(data)
   }
+
+  async errFromController() {
+    throw new Error('OOOOOOOPPPPPPPSSSS!!!!')
+  }
 }

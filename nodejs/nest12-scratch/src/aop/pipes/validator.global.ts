@@ -14,6 +14,8 @@ export class ValidationPipe
   async transform(value: any, metadata: ArgumentMetadata) {
     const r = await super.transform(value, metadata)
 
+    // console.log(metadata.schema)
+
     if (metadata.metatype) {
       return plainToInstance(metadata.metatype, r)
     }
