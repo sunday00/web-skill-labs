@@ -24,4 +24,9 @@ export class AnimalController {
   public async shared() {
     return this.ss.getNo()
   }
+
+  @Get('/err-mid')
+  public async errFromMiddleware() {
+    return 1
+  }
 }

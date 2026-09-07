@@ -1,10 +1,10 @@
 import { Injectable, NestMiddleware } from '@nestjs/common'
-import { NextFunction } from 'express'
+import { NextFunction, Request } from 'express'
 import { Time } from '../../utils/time.util.js'
 
 @Injectable()
 export class ConsoleMiddleware implements NestMiddleware {
-  use(req: any, res: any, next: (error?: any) => void) {
+  use(req: Request, res: any, next: (error?: any) => void) {
     process.stdout.write(`logged from middleware -----------------------\n`)
 
     return next()
@@ -31,6 +31,19 @@ export const UselessFunctionMiddlewareFactory = (name: string) => {
 
     return next()
   }
+}
+
+export const CanBeErrorLog = (
+  req: any,
+  res: any,
+  next: (error?: any) => void,
+) => {
+  console.log(req.path, req.path === '/animal/err-mid')
+  if (req.path === '/animal/err-mid') {
+    return next(new Error('OOOOOPS!'))
+  }
+
+  next()
 }
 
 // global middleware on main.ts app.use()
