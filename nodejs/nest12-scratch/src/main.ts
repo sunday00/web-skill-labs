@@ -4,6 +4,7 @@ import { NestExpressApplication } from '@nestjs/platform-express'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { apiReference } from '@scalar/nestjs-api-reference'
 import { ValidationPipe } from './aop/pipes/validator.global.js'
+import { CheckPerformAll } from './aop/middlewares/console.middleware.js'
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule)
@@ -22,6 +23,8 @@ async function bootstrap() {
   )
   app.use('/docs', apiReference({ content: document, theme: 'moon' }))
   SwaggerModule.setup('docs-classic', app, document)
+
+  app.use(CheckPerformAll)
 
   app.useGlobalPipes(
     new ValidationPipe({
