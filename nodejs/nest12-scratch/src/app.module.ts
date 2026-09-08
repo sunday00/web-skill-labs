@@ -17,6 +17,7 @@ import {
 import { AnimalController } from './domains/animal/animal.controller.js'
 import { NestedController } from './domains/nested/nested.controller.js'
 import { createObserveModule } from '@nestjs/observe'
+import { ScopedModule } from './domains/scoped/scoped.module.js'
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule()
 
@@ -44,6 +45,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule()
     CqrsModule.forRoot(),
     AnimalModule,
     NestedModule,
+    ScopedModule,
   ],
   controllers: [AppController],
   providers: [AppService],
