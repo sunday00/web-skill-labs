@@ -10,6 +10,6 @@ export class EtcUtil {
 @Injectable()
 export class EtcUtil2 {
   public async greet() {
-    return 'hello Guy'
+    return 'hello Guy from 2'
   }
 }
