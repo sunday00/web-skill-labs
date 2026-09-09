@@ -12,12 +12,16 @@ import {
   animalCreateSchema,
 } from './handlers/animal.create.c.js'
 import { SharedService } from '../shared/shared.service.js'
+import { LazyModuleLoader } from '@nestjs/core'
+import { OnDemandsModule } from '../../plugs/on-demands/on-demands.module.js'
+import { OnDemandsService } from '../../plugs/on-demands/on-demands.service.js'
 
 @Controller('animal')
 export class AnimalController {
   constructor(
     private readonly animalService: AnimalService,
     private readonly ss: SharedService,
+    private lazyModuleLoader: LazyModuleLoader,
   ) {}
 
   @Post()
@@ -54,5 +58,11 @@ export class AnimalController {
         { cause: error }, // for dev tracking inner error detail
       )
     }
+  }
+
+  @Get('/use-lazy-module')
+  public async useLazyModule() {
+    const lm = await this.lazyModuleLoader.load(() => OnDemandsModule)
+    return lm.get(OnDemandsService).txt()
   }
 }
