@@ -70,4 +70,14 @@ export class AnimalController {
   public async useDiscoverModule() {
     return await this.animalService.useDiscover()
   }
+
+  @Get('use-cache')
+  public async useCache() {
+    return await this.animalService.useCache()
+  }
+
+  @Get('burst-cache')
+  public async burstCache() {
+    return await this.animalService.burstCache()
+  }
 }

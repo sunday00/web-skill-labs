@@ -1,13 +1,16 @@
 import { Injectable } from '@nestjs/common'
-import { CommandBus } from '@nestjs/cqrs'
+import { CommandBus, QueryBus } from '@nestjs/cqrs'
 import { AnimalCreateCommand } from './handlers/animal.create.c.js'
 import { DiscoveryService } from '@nestjs/core'
 import { ListForDev } from '../../aop/decorators/discovable.decorator.js'
+import { AnimalSampleContentQ } from './handlers/animal.sample.content.q.js'
+import { AnimalCacheBurstC } from './handlers/animal.cache.burst.c.js'
 
 @Injectable()
 export class AnimalService {
   constructor(
     private readonly cb: CommandBus,
+    private readonly qb: QueryBus,
     private readonly discover: DiscoveryService,
   ) {}
 
@@ -36,5 +39,13 @@ export class AnimalService {
     console.log(providers.map((c) => c.name))
 
     return 1
+  }
+
+  async useCache() {
+    return await this.qb.execute(new AnimalSampleContentQ())
+  }
+
+  async burstCache() {
+    return await this.cb.execute(new AnimalCacheBurstC())
   }
 }
