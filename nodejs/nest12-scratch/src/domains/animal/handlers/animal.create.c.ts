@@ -1,6 +1,7 @@
 import { CommandHandler, ICommand, ICommandHandler } from '@nestjs/cqrs'
 import { z } from 'zod'
 import { createZodDto } from 'nestjs-zod'
+import { ListForDev } from '../../../aop/decorators/discovable.decorator.js'
 
 export const animalCreateSchema = z.object({
   name: z.string().default('something'),
@@ -11,6 +12,7 @@ export class AnimalCreateCommand
   extends createZodDto(animalCreateSchema)
   implements ICommand {}
 
+@ListForDev('List-CommandHandler')
 @CommandHandler(AnimalCreateCommand)
 export class AnimalCreateCommandHandler implements ICommandHandler<AnimalCreateCommand> {
   async execute(command: AnimalCreateCommand): Promise<any> {

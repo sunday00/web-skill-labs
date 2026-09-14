@@ -65,4 +65,9 @@ export class AnimalController {
     const lm = await this.lazyModuleLoader.load(() => OnDemandsModule)
     return lm.get(OnDemandsService).txt()
   }
+
+  @Get('/discover')
+  public async useDiscoverModule() {
+    return await this.animalService.useDiscover()
+  }
 }
