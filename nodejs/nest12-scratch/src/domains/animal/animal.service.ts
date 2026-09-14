@@ -5,13 +5,17 @@ import { DiscoveryService } from '@nestjs/core'
 import { ListForDev } from '../../aop/decorators/discovable.decorator.js'
 import { AnimalSampleContentQ } from './handlers/animal.sample.content.q.js'
 import { AnimalCacheBurstC } from './handlers/animal.cache.burst.c.js'
+import { SchedulerRegistry } from '@nestjs/schedule'
 
 @Injectable()
 export class AnimalService {
+  tName = 'DynamicTimeoutDelay1'
+
   constructor(
     private readonly cb: CommandBus,
     private readonly qb: QueryBus,
     private readonly discover: DiscoveryService,
+    private readonly schedulerRegistry: SchedulerRegistry,
   ) {}
 
   async create(data: AnimalCreateCommand) {
@@ -47,5 +51,16 @@ export class AnimalService {
 
   async burstCache() {
     return await this.cb.execute(new AnimalCacheBurstC())
+  }
+
+  async useDelay(seconds: number) {
+    const to = setTimeout(() => {
+      console.log('Oh~ delayed~!!')
+      this.schedulerRegistry.deleteTimeout(this.tName)
+    }, seconds * 1000)
+
+    this.schedulerRegistry.addTimeout(this.tName, to)
+
+    return true
   }
 }

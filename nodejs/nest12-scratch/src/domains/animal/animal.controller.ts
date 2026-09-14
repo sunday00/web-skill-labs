@@ -3,7 +3,7 @@ import {
   Controller,
   Get,
   HttpException,
-  HttpStatus,
+  HttpStatus, Param, ParseIntPipe,
   Post,
 } from '@nestjs/common'
 import { AnimalService } from './animal.service.js'
@@ -79,5 +79,10 @@ export class AnimalController {
   @Get('burst-cache')
   public async burstCache() {
     return await this.animalService.burstCache()
+  }
+
+  @Get('/use-delay/:seconds')
+  public async useDelay(@Param('seconds', ParseIntPipe) seconds: number ) {
+    return await this.animalService.useDelay(seconds)
   }
 }

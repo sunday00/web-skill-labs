@@ -7,9 +7,15 @@ import { DiscoveryModule } from '@nestjs/core'
 import { AnimalSampleContentHandler } from './handlers/animal.sample.content.q.js'
 import { CacheModule } from '@nestjs/cache-manager'
 import { AnimalCacheBurstHandler } from './handlers/animal.cache.burst.c.js'
+import { ScheduleModule } from '@nestjs/schedule'
 
 @Module({
-  imports: [SharedModule, DiscoveryModule, CacheModule.register()],
+  imports: [
+    SharedModule,
+    DiscoveryModule,
+    CacheModule.register(),
+    ScheduleModule.forRoot(),
+  ],
   controllers: [AnimalController],
   providers: [
     AnimalService,
