@@ -18,6 +18,8 @@ import { AnimalController } from './domains/animal/animal.controller.js'
 import { NestedController } from './domains/nested/nested.controller.js'
 import { createObserveModule } from '@nestjs/observe'
 import { ScopedModule } from './domains/scoped/scoped.module.js'
+import { QueueModule } from './domains/queue/queue.module.js'
+import { RedisModule } from './modules/redis/redis.module.js'
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule()
 
@@ -42,10 +44,12 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule()
         useDefaultPatterns: true,
       },
     }),
+    RedisModule,
     CqrsModule.forRoot(),
     AnimalModule,
     NestedModule,
     ScopedModule,
+    QueueModule,
   ],
   controllers: [AppController],
   providers: [AppService],
