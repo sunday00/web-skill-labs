@@ -11,17 +11,7 @@ export const QUEUE_PREFIX = 'nest12-scratch'
 
 @Module({
   imports: [
-    // BullModule.forRoot({
-    //   connection: {
-    //     host: 'localhost',
-    //     port: 6380,
-    //     password: 'kOmedy',
-    //     db: 5,
-    //   },
-    //   prefix: QUEUE_PREFIX,
-    // }),
-    BullModule.registerQueue({
-      name: 'Default',
+    BullModule.forRoot({
       connection: {
         host: 'localhost',
         port: 6380,
@@ -29,27 +19,37 @@ export const QUEUE_PREFIX = 'nest12-scratch'
         db: 5,
       },
       prefix: QUEUE_PREFIX,
+    }),
+    BullModule.registerQueue({
+      name: 'Default',
+      // connection: {
+      //   host: 'localhost',
+      //   port: 6380,
+      //   password: 'kOmedy',
+      //   db: 5,
+      // },
+      // prefix: QUEUE_PREFIX,
     }),
     BullModule.registerQueue({
       name: 'Normal2',
-      connection: {
-        host: 'localhost',
-        port: 6380,
-        password: 'kOmedy',
-        db: 5,
-      },
-      prefix: QUEUE_PREFIX,
+      // connection: {
+      //   host: 'localhost',
+      //   port: 6380,
+      //   password: 'kOmedy',
+      //   db: 5,
+      // },
+      // prefix: QUEUE_PREFIX,
     }),
     BullModule.registerFlowProducer({
       name: 'flows',
-      connection: {
-        host: 'localhost',
-        port: 6380,
-        password: 'kOmedy',
-        db: 5,
-      },
-      prefix: QUEUE_PREFIX,
-    } as any),
+      // connection: {
+      //   host: 'localhost',
+      //   port: 6380,
+      //   password: 'kOmedy',
+      //   db: 5,
+      // },
+      // prefix: QUEUE_PREFIX,
+    }),
   ],
   controllers: [QueueController],
   providers: [QueueEnService, QueueDefaultConsumer, QueueNormal2Consumer],
