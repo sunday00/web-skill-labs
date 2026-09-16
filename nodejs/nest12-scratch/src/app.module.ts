@@ -22,6 +22,7 @@ import { QueueModule } from './domains/queue/queue.module.js'
 import { RedisModule } from './modules/redis/redis.module.js'
 import { ConfigModule } from '@nestjs/config'
 import RedisConfig from './configs/redis.config.js'
+import { QueueBullModule } from './domains/queue/queue.bull.module.js'
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule()
 
@@ -53,6 +54,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule()
     NestedModule,
     ScopedModule,
     QueueModule,
+    QueueBullModule,
   ],
   controllers: [AppController],
   providers: [AppService],

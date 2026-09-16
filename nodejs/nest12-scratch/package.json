@@ -22,6 +22,7 @@
     "test:e2e": "vitest run --config ./vitest.config.e2e.ts"
   },
   "dependencies": {
+    "@nestjs/bull": "^12.0.0",
     "@nestjs/bullmq": "^12.0.0",
     "@nestjs/cache-manager": "^12.0.0",
     "@nestjs/common": "^12.0.1",
@@ -33,6 +34,7 @@
     "@nestjs/schedule": "^12.0.1",
     "@nestjs/swagger": "^12.0.1",
     "@scalar/nestjs-api-reference": "^1.2.17",
+    "bull": "^4.16.5",
     "bullmq": "^6.3.6",
     "cache-manager": "^7.2.9",
     "class-transformer": "^0.5.1",
