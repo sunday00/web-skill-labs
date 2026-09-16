@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { CommandBus, QueryBus } from '@nestjs/cqrs'
 import { AnimalCreateCommand } from './handlers/animal.create.c.js'
 import { DiscoveryService } from '@nestjs/core'
@@ -9,6 +9,8 @@ import { SchedulerRegistry } from '@nestjs/schedule'
 
 @Injectable()
 export class AnimalService {
+  logger: Logger = new Logger(this.constructor.name)
+
   tName = 'DynamicTimeoutDelay1'
 
   constructor(
@@ -62,5 +64,42 @@ export class AnimalService {
     this.schedulerRegistry.addTimeout(this.tName, to)
 
     return true
+  }
+
+  async log1() {
+    this.logger.log({
+      a: {
+        b: [
+          {
+            c: {
+              d: 11,
+              e: {
+                f: [
+                  {
+                    g: 'h',
+                    i: {
+                      j: {
+                        k: {},
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        ],
+      },
+    })
+
+    return 1
+  }
+
+  async log2() {
+    const item = new WeakMap()
+
+    item.set({ id: 1 }, { color: 'red', name: 'apple' })
+    item.set({ id: 2 }, { color: 'yellow', name: 'banana' })
+
+    this.logger.log(item)
   }
 }

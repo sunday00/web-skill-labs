@@ -3,7 +3,9 @@ import {
   Controller,
   Get,
   HttpException,
-  HttpStatus, Param, ParseIntPipe,
+  HttpStatus,
+  Param,
+  ParseIntPipe,
   Post,
 } from '@nestjs/common'
 import { AnimalService } from './animal.service.js'
@@ -82,7 +84,13 @@ export class AnimalController {
   }
 
   @Get('/use-delay/:seconds')
-  public async useDelay(@Param('seconds', ParseIntPipe) seconds: number ) {
+  public async useDelay(@Param('seconds', ParseIntPipe) seconds: number) {
     return await this.animalService.useDelay(seconds)
+  }
+
+  @Get('/log/obj')
+  public async logAndDepth() {
+    // return await this.animalService.log1()
+    return await this.animalService.log2()
   }
 }

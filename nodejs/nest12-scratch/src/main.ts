@@ -9,10 +9,15 @@ import {
   CheckPerformAll,
 } from './aop/middlewares/console.middleware.js'
 import { NextFunction } from 'express'
+import { ConsoleLogger } from '@nestjs/common'
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     instrument: ObserveInstrument,
+    logger: new ConsoleLogger({
+      depth: 10,
+      showHidden: true,
+    }),
   })
   app.set('query parser', 'extended')
 
