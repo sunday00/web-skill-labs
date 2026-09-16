@@ -10,14 +10,18 @@ export class QueueController {
     return await this.service.clearQueue()
   }
 
-
   @Post('/flow')
   public async flowJobs() {
     return await this.service.createBigJob()
   }
 
   @Post('/delay/:sec')
-  public async delay(@Param('sec') sec: number ) {
+  public async delay(@Param('sec') sec: number) {
     return await this.service.delay(sec)
+  }
+
+  @Post('/external-woker')
+  public async externalWorker() {
+    return await this.service.external()
   }
 }

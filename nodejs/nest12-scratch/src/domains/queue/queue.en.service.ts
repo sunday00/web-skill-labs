@@ -12,6 +12,12 @@ export class QueueEnService {
     @InjectQueue('Default')
     private defaultQ: Queue,
 
+    @InjectQueue('Normal3')
+    private subQ: Queue,
+
+    @InjectQueue('Normal4')
+    private sub4Q: Queue,
+
     private redis: RedisService,
   ) {}
 
@@ -49,5 +55,9 @@ export class QueueEnService {
 
   async delay(sec: number) {
     return this.defaultQ.add('hello', { foo: 'bar' }, { delay: sec * 1000 })
+  }
+
+  async external() {
+    return this.sub4Q.add('external', { hey: 'ho' })
   }
 }

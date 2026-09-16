@@ -6,6 +6,7 @@ import {
   QueueNormal2Consumer,
 } from './queue.consume.service.js'
 import { BullModule } from '@nestjs/bullmq'
+import path from 'node:path'
 
 export const QUEUE_PREFIX = 'nest12-scratch'
 
@@ -42,7 +43,7 @@ export const QUEUE_PREFIX = 'nest12-scratch'
     }),
     BullModule.registerQueue({
       name: 'Normal2',
-      configKey: 'subBull',
+      configKey: 'defaultBull',
       // connection: {
       //   host: 'localhost',
       //   port: 6380,
@@ -62,9 +63,25 @@ export const QUEUE_PREFIX = 'nest12-scratch'
       // },
       // prefix: QUEUE_PREFIX,
     }),
+
+    BullModule.registerQueue({
+      name: 'Normal3',
+      configKey: 'subBull',
+    }),
+
+    BullModule.registerQueue({
+      name: 'Normal4',
+      configKey: 'subBull',
+      processors: [path.join(process.cwd(), 'workers', 'worker.ts')],
+    }),
   ],
   controllers: [QueueController],
-  providers: [QueueEnService, QueueDefaultConsumer, QueueNormal2Consumer],
+  providers: [
+    QueueEnService,
+    QueueDefaultConsumer,
+    QueueNormal2Consumer,
+    // QueueNormal3Consumer,
+  ],
 })
 export class QueueModule {}
 
