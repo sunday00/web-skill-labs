@@ -11,7 +11,7 @@ export const QUEUE_PREFIX = 'nest12-scratch'
 
 @Module({
   imports: [
-    BullModule.forRoot({
+    BullModule.forRoot('defaultBull', {
       connection: {
         host: 'localhost',
         port: 6380,
@@ -20,8 +20,18 @@ export const QUEUE_PREFIX = 'nest12-scratch'
       },
       prefix: QUEUE_PREFIX,
     }),
+    BullModule.forRoot('subBull', {
+      connection: {
+        host: 'localhost',
+        port: 6380,
+        password: 'kOmedy',
+        db: 6,
+      },
+      prefix: QUEUE_PREFIX,
+    }),
     BullModule.registerQueue({
       name: 'Default',
+      configKey: 'defaultBull',
       // connection: {
       //   host: 'localhost',
       //   port: 6380,
@@ -32,6 +42,7 @@ export const QUEUE_PREFIX = 'nest12-scratch'
     }),
     BullModule.registerQueue({
       name: 'Normal2',
+      configKey: 'subBull',
       // connection: {
       //   host: 'localhost',
       //   port: 6380,
@@ -42,6 +53,7 @@ export const QUEUE_PREFIX = 'nest12-scratch'
     }),
     BullModule.registerFlowProducer({
       name: 'flows',
+      configKey: 'defaultBull',
       // connection: {
       //   host: 'localhost',
       //   port: 6380,

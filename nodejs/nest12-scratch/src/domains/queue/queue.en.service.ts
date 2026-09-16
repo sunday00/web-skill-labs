@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
-import { InjectFlowProducer } from '@nestjs/bullmq'
-import { FlowProducer } from 'bullmq'
+import { InjectFlowProducer, InjectQueue } from '@nestjs/bullmq'
+import { FlowProducer, Queue } from 'bullmq'
 import { RedisService } from '../../modules/redis/redis.service.js'
 
 @Injectable()
@@ -9,11 +9,17 @@ export class QueueEnService {
     @InjectFlowProducer('flows')
     private flows: FlowProducer,
 
+    @InjectQueue('Default')
+    private defaultQ: Queue,
+
     private redis: RedisService,
   ) {}
 
   async clearQueue() {
-    return await this.redis.client.flushdb()
+    return await Promise.all([
+      this.redis.client.flushdb(),
+      this.redis.sub.flushdb(),
+    ])
   }
 
   public async createBigJob() {
@@ -39,5 +45,9 @@ export class QueueEnService {
         },
       ],
     })
+  }
+
+  async delay(sec: number) {
+    return this.defaultQ.add('hello', { foo: 'bar' }, { delay: sec * 1000 })
   }
 }

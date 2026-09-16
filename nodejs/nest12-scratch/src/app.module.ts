@@ -20,11 +20,14 @@ import { createObserveModule } from '@nestjs/observe'
 import { ScopedModule } from './domains/scoped/scoped.module.js'
 import { QueueModule } from './domains/queue/queue.module.js'
 import { RedisModule } from './modules/redis/redis.module.js'
+import { ConfigModule } from '@nestjs/config'
+import RedisConfig from './configs/redis.config.js'
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule()
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true, load: [RedisConfig] }),
     ObserveModule.forRoot({
       appKey: process.env.OBSERVE_APP_KEY ?? '',
       appSecret: process.env.OBSERVE_APP_SECRET ?? '',

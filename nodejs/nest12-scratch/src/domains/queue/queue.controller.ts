@@ -1,4 +1,4 @@
-import { Controller, Delete, Post } from '@nestjs/common'
+import { Controller, Delete, Param, Post } from '@nestjs/common'
 import { QueueEnService } from './queue.en.service.js'
 
 @Controller('queue')
@@ -14,5 +14,10 @@ export class QueueController {
   @Post('/flow')
   public async flowJobs() {
     return await this.service.createBigJob()
+  }
+
+  @Post('/delay/:sec')
+  public async delay(@Param('sec') sec: number ) {
+    return await this.service.delay(sec)
   }
 }
