@@ -8,8 +8,9 @@ import {
   CanBeErrorLog,
   CheckPerformAll,
 } from './aop/middlewares/console.middleware.js'
-import { NextFunction } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import { ConsoleLogger } from '@nestjs/common'
+import compression from 'compression'
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -43,6 +44,32 @@ async function bootstrap() {
       transform: true,
     }),
   )
+
+  app.use(compression())
+
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    console.log('req Accept-Encoding =', req.headers['accept-encoding'])
+    res.on('finish', () => {
+      console.log('res Content-Encoding =', res.getHeader('content-encoding'))
+    })
+    next()
+
+    /**
+     * comparession 은 육안 구분 swagger ui 등에서는 browser 때문에 잘 안보임
+     *
+     * curl 로는 잘 보이고,
+     * curl -s -H 'Accept-Encoding: identity' http://localhost:8090/animal/big \
+     *     -o /dev/null \
+     *     -w 'size_download=%{size_download} bytes\n'
+     *
+     * curl -s -H 'Accept-Encoding: br, gzip' http://localhost:8090/animal/big \
+     *     -o /dev/null \
+     *     -w 'encoding=%{content_type}\nsize_download=%{size_download} bytes\n'
+     *
+     * 이렇게 하면 br, gzip 에서 잘 줄어든 거 볼 수 있음.
+     *
+     **/
+  })
 
   app.use((err: Error, req: Request, res: any, next: NextFunction) => {
     console.log('???')

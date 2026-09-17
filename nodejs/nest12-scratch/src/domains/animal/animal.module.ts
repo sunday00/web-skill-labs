@@ -10,6 +10,7 @@ import { AnimalCacheBurstHandler } from './handlers/animal.cache.burst.c.js'
 import { ScheduleModule } from '@nestjs/schedule'
 import { EventFireHandler } from './handlers/animal.event.fire.handler.js'
 import { EventWildHandler } from './handlers/animal.event.wild.handler.js'
+import { AnimalBigHandler } from './handlers/animal.big.q.js'
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { EventWildHandler } from './handlers/animal.event.wild.handler.js'
     AnimalCreateCommandHandler,
     // SharedService
     AnimalSampleContentHandler,
+    AnimalBigHandler,
     AnimalCacheBurstHandler,
     EventFireHandler,
     EventWildHandler,

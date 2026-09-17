@@ -8,6 +8,7 @@ import {
   ParseIntPipe,
   Post,
   Query,
+  UseInterceptors,
 } from '@nestjs/common'
 import { AnimalService } from './animal.service.js'
 import {
@@ -18,6 +19,7 @@ import { SharedService } from '../shared/shared.service.js'
 import { LazyModuleLoader } from '@nestjs/core'
 import { OnDemandsModule } from '../../plugs/on-demands/on-demands.module.js'
 import { OnDemandsService } from '../../plugs/on-demands/on-demands.service.js'
+import { ContentLengthInterceptor } from '../../aop/interceptors/res.length.interceptor.js'
 
 @Controller('animal')
 export class AnimalController {
@@ -103,5 +105,11 @@ export class AnimalController {
   @Get('/event/wild')
   public async eventWild(@Query('name') name: string) {
     return await this.animalService.eventWild(name)
+  }
+
+  @Get('/big')
+  @UseInterceptors(ContentLengthInterceptor)
+  public async big() {
+    return await this.animalService.big()
   }
 }

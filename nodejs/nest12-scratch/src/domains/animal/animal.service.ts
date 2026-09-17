@@ -8,6 +8,7 @@ import { AnimalCacheBurstC } from './handlers/animal.cache.burst.c.js'
 import { SchedulerRegistry } from '@nestjs/schedule'
 import { EventFireTrigger } from './handlers/animal.event.fire.handler.js'
 import { EventWildTrigger } from './handlers/animal.event.wild.handler.js'
+import { AnimalBigQ } from './handlers/animal.big.q.js'
 
 @Injectable()
 export class AnimalService {
@@ -111,5 +112,11 @@ export class AnimalService {
 
   async eventWild(name: string) {
     return await this.qb.execute(new EventWildTrigger(name))
+  }
+
+  async big() {
+    const r = await this.qb.execute(new AnimalBigQ())
+
+    return r
   }
 }
