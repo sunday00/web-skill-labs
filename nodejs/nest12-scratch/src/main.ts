@@ -11,6 +11,7 @@ import {
 import { NextFunction, Request, Response } from 'express'
 import { ConsoleLogger } from '@nestjs/common'
 import compression from 'compression'
+import path from 'node:path'
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -70,6 +71,11 @@ async function bootstrap() {
      *
      **/
   })
+
+  app.setLocal('layout', 'layouts/app')
+  app.useStaticAssets(path.join(import.meta.dirname, '..', 'public'))
+  app.setBaseViewsDir(path.join(import.meta.dirname, '..', 'views'))
+  app.setViewEngine('hbs')
 
   app.use((err: Error, req: Request, res: any, next: NextFunction) => {
     console.log('???')
