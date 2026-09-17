@@ -8,6 +8,8 @@ import { AnimalSampleContentHandler } from './handlers/animal.sample.content.q.j
 import { CacheModule } from '@nestjs/cache-manager'
 import { AnimalCacheBurstHandler } from './handlers/animal.cache.burst.c.js'
 import { ScheduleModule } from '@nestjs/schedule'
+import { EventFireHandler } from './handlers/animal.event.fire.handler.js'
+import { EventWildHandler } from './handlers/animal.event.wild.handler.js'
 
 @Module({
   imports: [
@@ -23,6 +25,8 @@ import { ScheduleModule } from '@nestjs/schedule'
     // SharedService
     AnimalSampleContentHandler,
     AnimalCacheBurstHandler,
+    EventFireHandler,
+    EventWildHandler,
   ],
 })
 export class AnimalModule {}

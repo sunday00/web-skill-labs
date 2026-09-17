@@ -6,6 +6,8 @@ import { ListForDev } from '../../aop/decorators/discovable.decorator.js'
 import { AnimalSampleContentQ } from './handlers/animal.sample.content.q.js'
 import { AnimalCacheBurstC } from './handlers/animal.cache.burst.c.js'
 import { SchedulerRegistry } from '@nestjs/schedule'
+import { EventFireTrigger } from './handlers/animal.event.fire.handler.js'
+import { EventWildTrigger } from './handlers/animal.event.wild.handler.js'
 
 @Injectable()
 export class AnimalService {
@@ -101,5 +103,13 @@ export class AnimalService {
     item.set({ id: 2 }, { color: 'yellow', name: 'banana' })
 
     this.logger.log(item)
+  }
+
+  async eventFire(name: string) {
+    return await this.qb.execute(new EventFireTrigger(name))
+  }
+
+  async eventWild(name: string) {
+    return await this.qb.execute(new EventWildTrigger(name))
   }
 }

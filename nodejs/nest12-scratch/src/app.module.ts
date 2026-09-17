@@ -23,6 +23,7 @@ import { RedisModule } from './modules/redis/redis.module.js'
 import { ConfigModule } from '@nestjs/config'
 import RedisConfig from './configs/redis.config.js'
 import { QueueBullModule } from './domains/queue/queue.bull.module.js'
+import { EventEmitterModule } from '@nestjs/event-emitter'
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule()
 
@@ -50,6 +51,14 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule()
     }),
     RedisModule,
     CqrsModule.forRoot(),
+    EventEmitterModule.forRoot({
+      wildcard: true,
+      delimiter: '.',
+      newListener: true,
+      removeListener: true,
+      maxListeners: 3,
+      verboseMemoryLeak: true,
+    }),
     AnimalModule,
     NestedModule,
     ScopedModule,

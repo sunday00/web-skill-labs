@@ -7,6 +7,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Query,
 } from '@nestjs/common'
 import { AnimalService } from './animal.service.js'
 import {
@@ -92,5 +93,15 @@ export class AnimalController {
   public async logAndDepth() {
     // return await this.animalService.log1()
     return await this.animalService.log2()
+  }
+
+  @Get('/event/fire')
+  public async eventFire(@Query('name') name: string) {
+    return await this.animalService.eventFire(name)
+  }
+
+  @Get('/event/wild')
+  public async eventWild(@Query('name') name: string) {
+    return await this.animalService.eventWild(name)
   }
 }
