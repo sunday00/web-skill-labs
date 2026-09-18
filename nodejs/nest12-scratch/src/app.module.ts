@@ -25,6 +25,7 @@ import RedisConfig from './configs/redis.config.js'
 import { QueueBullModule } from './domains/queue/queue.bull.module.js'
 import { EventEmitterModule } from '@nestjs/event-emitter'
 import { MVCModule } from './domains/mvc/mvc.module.js'
+import { FeatModule } from './domains/feat/feat.module.js'
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule()
 
@@ -66,6 +67,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule()
     QueueModule,
     QueueBullModule,
     MVCModule,
+    FeatModule,
   ],
   controllers: [AppController],
   providers: [AppService],

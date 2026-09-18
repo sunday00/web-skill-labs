@@ -1,0 +1,14 @@
+<section>
+  <h1>SSE</h1>
+
+  <div class="messages"></div>
+</section>
+
+<script type="text/javascript">
+  const eventSource = new EventSource('sse/subscribe');
+  eventSource.onmessage = ({ data }) => {
+    const message = document.createElement('li');
+    message.innerText = 'New message: ' + data;
+    document.body.querySelector('.messages').appendChild(message);
+  };
+</script>
