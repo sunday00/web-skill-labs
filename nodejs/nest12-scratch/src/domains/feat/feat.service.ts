@@ -1,6 +1,6 @@
 import { Injectable, MessageEvent } from '@nestjs/common'
 import { type Request } from 'express'
-import { Subject } from 'rxjs'
+import { finalize, Subject, tap } from 'rxjs'
 
 @Injectable()
 export class FeatService {
@@ -10,8 +10,13 @@ export class FeatService {
     return {}
   }
 
-  async subscribe() {
-    return this.observer.asObservable()
+  async subscribe(signal: AbortSignal) {
+    return this.observer.asObservable().pipe(
+      tap(() => console.log(signal)),
+      finalize(() => {
+        console.log('Client closed')
+      }),
+    )
   }
 
   async send(_req: Request, msg: string) {
@@ -22,5 +27,13 @@ export class FeatService {
       type: 'message',
       retry: 1,
     } satisfies MessageEvent)
+  }
+
+  async close() {
+    return this.observer.complete(
+      // finalize(() => {
+      //   console.log('close')
+      // }),
+    )
   }
 }
