@@ -26,6 +26,7 @@ import { QueueBullModule } from './domains/queue/queue.bull.module.js'
 import { EventEmitterModule } from '@nestjs/event-emitter'
 import { MVCModule } from './domains/mvc/mvc.module.js'
 import { FeatModule } from './domains/feat/feat.module.js'
+import { SocketModule } from './domains/socket/socket.module.js'
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule()
 
@@ -68,6 +69,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule()
     QueueBullModule,
     MVCModule,
     FeatModule,
+    SocketModule,
   ],
   controllers: [AppController],
   providers: [AppService],

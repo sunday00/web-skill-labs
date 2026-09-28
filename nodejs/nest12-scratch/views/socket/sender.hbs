@@ -1,0 +1,32 @@
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+<section>
+  <h1>Socket Sender</h1>
+
+  <div class="messages"></div>
+
+  <form name="form" class="socket-message-form">
+    <input type="text" name="hello">
+    <button>send</button>
+  </form>
+</section>
+
+<script type="text/javascript">
+  const socket = io('http://localhost:8091/events', {
+    transports: ['websocket'],
+  });
+
+  socket.on('connect', () => {
+    console.log('connected:', socket.id);
+  });
+
+  document.querySelector('.socket-message-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.target);
+
+    socket.emit('hello', { v: formData.get('hello') }, (response) => {
+      console.log('server responded:', response);
+    });
+  });
+</script>
