@@ -54,4 +54,8 @@ export class SocketGateway {
   async handleToAdmin2(@MessageBody('v') v: any): Promise<any> {
     return await this.service.handleToAdmin2(v)
   }
+
+  async emit() {
+    return await this.server.emit('serverSent', { message: 'shho' })
+  }
 }

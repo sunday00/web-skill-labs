@@ -1,0 +1,21 @@
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+<section>
+  <h1>Socket Receiver</h1>
+
+  <div class="messages"></div>
+</section>
+
+<script type="text/javascript">
+  const socket = io('http://localhost:8091/events', {
+    transports: ['websocket'],
+  });
+
+  socket.on('connect', () => {
+    console.log('connected:', socket.id);
+  });
+
+  socket.on('serverSent', (data) => {
+    document.querySelector('.messages').innerHTML = JSON.stringify(data);
+  });
+</script>
