@@ -35,7 +35,18 @@ async function bootstrap() {
     },
   )
   app.use('/docs', apiReference({ content: document, theme: 'moon' }))
-  SwaggerModule.setup('docs-classic', app, document)
+  SwaggerModule.setup('docs-classic', app, document, {
+    explorer: true,
+    jsonDocumentUrl: 'docs-classic/json',
+    swaggerOptions: {
+      urls: [
+        {
+          name: '1.A',
+          url: 'docs-classic/json',
+        },
+      ],
+    },
+  })
 
   app.use(CheckPerformAll)
   app.use(CanBeErrorLog) // <--- this way registered global throwable middleware ---+

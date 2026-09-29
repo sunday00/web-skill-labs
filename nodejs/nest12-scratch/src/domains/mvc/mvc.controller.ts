@@ -16,4 +16,14 @@ export class MvcController {
   public async dynamicView(@Res() res: Response, @Param('view') view: string) {
     return await this.service.responseWithView(res, view)
   }
+
+  @Get('/cqrs/q')
+  public async cqrsQ() {
+    return await this.service.cqrsQ()
+  }
+
+  @Get('/cqrs/e')
+  public async cqrsE() {
+    return await this.service.cqrsE()
+  }
 }
