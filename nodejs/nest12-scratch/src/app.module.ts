@@ -16,7 +16,7 @@ import {
 } from './aop/middlewares/console.middleware.js'
 import { AnimalController } from './domains/animal/animal.controller.js'
 import { NestedController } from './domains/nested/nested.controller.js'
-import { createObserveModule } from '@nestjs/observe'
+import { createObserveModule, TracerService } from '@nestjs/observe'
 import { ScopedModule } from './domains/scoped/scoped.module.js'
 import { QueueModule } from './domains/queue/queue.module.js'
 import { RedisModule } from './modules/redis/redis.module.js'
@@ -79,7 +79,10 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule()
   providers: [AppService],
 })
 export class AppModule implements NestModule {
-  constructor(private readonly als: AsyncLocalStorage<any>) {}
+  constructor(
+    private readonly als: AsyncLocalStorage<any>,
+    private readonly ts: TracerService,
+  ) {}
 
   configure(consumer: MiddlewareConsumer) {
     consumer
@@ -96,7 +99,10 @@ export class AppModule implements NestModule {
       .forRoutes({ path: 'shared', method: RequestMethod.GET })
       .apply((req: Request, res: Response, next: NextFunction) => {
         const store = new Map<string, unknown>()
-        store.set('userId', 'globalUserID')
+        store.set('reqState', {
+          user: 'globalUserID',
+          rId: this.ts.currentTraceId(),
+        })
         this.als.run(store, () => next())
       })
       .forRoutes('*path')
