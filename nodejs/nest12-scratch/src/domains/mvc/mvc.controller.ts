@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Render, Res } from '@nestjs/common'
+import { Controller, Get, Param, Post, Render, Res } from '@nestjs/common'
 import { MvcService } from './mvc.service.js'
 import { type Response } from 'express'
 
@@ -25,5 +25,10 @@ export class MvcController {
   @Get('/cqrs/e')
   public async cqrsE() {
     return await this.service.cqrsE()
+  }
+
+  @Post('/cqrs/saga')
+  public async cqrsSaga() {
+    return await this.service.saga()
   }
 }

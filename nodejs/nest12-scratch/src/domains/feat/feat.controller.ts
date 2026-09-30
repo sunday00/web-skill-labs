@@ -36,4 +36,9 @@ export class FeatController {
   public async close(@Req() req: Request) {
     return await this.service.close()
   }
+
+  @Get('state/one')
+  public async stateOne() {
+    return await this.service.stateOne()
+  }
 }

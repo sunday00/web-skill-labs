@@ -27,6 +27,9 @@ import { EventEmitterModule } from '@nestjs/event-emitter'
 import { MVCModule } from './domains/mvc/mvc.module.js'
 import { FeatModule } from './domains/feat/feat.module.js'
 import { SocketModule } from './domains/socket/socket.module.js'
+import { StateModule } from './domains/state/state.module.js'
+import { AsyncLocalStorage } from 'node:async_hooks'
+import { NextFunction } from 'express'
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule()
 
@@ -70,11 +73,14 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule()
     MVCModule,
     FeatModule,
     SocketModule,
+    StateModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule implements NestModule {
+  constructor(private readonly als: AsyncLocalStorage<any>) {}
+
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(ConsoleMiddleware)
@@ -88,5 +94,11 @@ export class AppModule implements NestModule {
         UselessFunctionMiddlewareFactory('cherry'),
       )
       .forRoutes({ path: 'shared', method: RequestMethod.GET })
+      .apply((req: Request, res: Response, next: NextFunction) => {
+        const store = new Map<string, unknown>()
+        store.set('userId', 'globalUserID')
+        this.als.run(store, () => next())
+      })
+      .forRoutes('*path')
   }
 }

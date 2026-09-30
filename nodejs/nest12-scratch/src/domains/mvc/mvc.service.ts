@@ -3,6 +3,7 @@ import { type Response } from 'express'
 import { EventBus, EventPublisher, QueryBus } from '@nestjs/cqrs'
 import { KillDragon } from './cqrs/kill.dragon.q.js'
 import { HeroQ } from './cqrs/hero.q.js'
+import { SagaTrigger } from './cqrs/saga/saga.trigger.js'
 
 @Injectable()
 export class MvcService {
@@ -40,5 +41,9 @@ export class MvcService {
     // hero2.commit()
 
     return Promise.resolve(undefined)
+  }
+
+  async saga() {
+    return this.eb.publish(new SagaTrigger('hello'))
   }
 }

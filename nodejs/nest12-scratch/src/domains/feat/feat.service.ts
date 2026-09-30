@@ -1,10 +1,13 @@
 import { Injectable, MessageEvent } from '@nestjs/common'
 import { type Request } from 'express'
 import { finalize, Subject, tap } from 'rxjs'
+import { AsyncLocalStorage } from 'node:async_hooks'
 
 @Injectable()
 export class FeatService {
   private readonly observer = new Subject<MessageEvent>()
+
+  constructor(private readonly als: AsyncLocalStorage<any>) {}
 
   async index() {
     return {}
@@ -35,5 +38,11 @@ export class FeatService {
       //   console.log('close')
       // }),
     )
+  }
+
+  async stateOne() {
+    console.log(this.als.getStore())
+
+    return 1
   }
 }
