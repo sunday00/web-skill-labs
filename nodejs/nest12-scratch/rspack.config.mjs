@@ -10,7 +10,7 @@ export default {
   entry: './src/main.ts',
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'main.mjs',
+    filename: 'main.js',
     module: true,
     chunkFormat: 'module',
     library: { type: 'module' },
