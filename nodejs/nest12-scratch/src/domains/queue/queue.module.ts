@@ -6,7 +6,6 @@ import {
   QueueNormal2Consumer,
 } from './queue.consume.service.js'
 import { BullModule } from '@nestjs/bullmq'
-import path from 'node:path'
 
 export const QUEUE_PREFIX = 'nest12-scratch'
 
@@ -69,10 +68,15 @@ export const QUEUE_PREFIX = 'nest12-scratch'
       configKey: 'subBull',
     }),
 
+    // BullModule.registerQueue({
+    //   name: 'Normal4',
+    //   configKey: 'subBull',
+    //   processors: [path.join(process.cwd(), 'workers', 'worker.ts')], // 이 방식은 dist one file 빌드에서 터짐.
+    // }),
+
     BullModule.registerQueue({
       name: 'Normal4',
       configKey: 'subBull',
-      processors: [path.join(process.cwd(), 'workers', 'worker.ts')],
     }),
   ],
   controllers: [QueueController],
